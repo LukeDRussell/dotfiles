@@ -3,8 +3,9 @@ Luke's bash settings
 
 ```
 cd ~
-git pull https://github.com/psnmc/bash.git
-cd bash
-cp .bashrc ~/.bashrc
-sudo cp .bashrc ~/.bashrc
+git clone https://github.com/lukerussell/bash_settings.gt
+cd bash_settings
+cp .bashrc ~
+cp .tmux.conf ~
+cp .vimrc ~
 ```
