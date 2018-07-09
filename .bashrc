@@ -20,7 +20,7 @@ parse_git_branch() {
 # exports
 
 export PS1="\w\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
-export PATH=/home/4032956/.fwd/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/4032956/.local/bin:/home/4032956/bin
+#export PATH=/home/4032956/.fwd/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/4032956/.local/bin:/home/4032956/bin
 
 
 # terminal.app colouring
