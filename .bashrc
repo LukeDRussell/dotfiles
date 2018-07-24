@@ -22,13 +22,9 @@ alias mv='mv -i'
 # create directories recursively
 alias mkdir='mkdir -p'
 
-# Git branch in prompt.
-parse_git_branch() {
-    git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
-}
+# shell prompt
+export PS1="\W \\$ \[$(tput sgr0)\]"
 
-
-export PS1="\w\[\033[32m\]\$(parse_git_branch)\[\033[00m\] $ "
 # terminal.app colouring
 export CLICOLOR=1
 export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
