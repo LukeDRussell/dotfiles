@@ -13,6 +13,7 @@ alias .1='cd ../'
 alias .2='cd ../../'
 alias .3='cd ../../../'
 alias context='date ; whoami ; hostname ; pwd'
+alias play='ansible-playbook --extra-vars "@~/.ansible-vault.yml" --vault-password-file ~/.ansible-vault-password'
 
 # get confirmation before deleting things
 alias rm='rm -i'
