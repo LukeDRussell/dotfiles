@@ -13,7 +13,7 @@ alias .1='cd ../'
 alias .2='cd ../../'
 alias .3='cd ../../../'
 alias context='date ; whoami ; hostname ; pwd'
-alias play='ansible-playbook -k'
+alias play='ansible-playbook'
 alias gitlog='git log --oneline --decorate --all'
 
 # get confirmation before deleting things
