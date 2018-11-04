@@ -25,10 +25,8 @@ alias mv='mv -i'
 alias mkdir='mkdir -p'
 
 # shell prompt
-# export PS1="\W \\$ \[$(tput sgr0)\]"
-export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\]\[\033[38;5;15m\] on \[$(tput sgr0)\]\[\033[38;5;3m\]\h\[$(tput sgr0)\]\[\033[38;5;15m\] at \[$(tput sgr0)\]\[\033[38;5;2m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\n\\$ \[$(tput sgr0)\]"
 
-# terminal.app colouring
+# MacOS colouring
 export CLICOLOR=1
 export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 
@@ -36,3 +34,7 @@ export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 
+powerline-daemon -q
+POWERLINE_BASH_CONTINUATION=1
+POWERLINE_BASH_SELECT=1
+. /usr/local/lib/python3.7/site-packages/powerline/bindings/bash/powerline.sh

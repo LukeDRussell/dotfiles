@@ -5,22 +5,41 @@
 :imap jj <Esc>
 
 
-
 "
 " FileType indent custom files
 "
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 
+"
+let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'yaml']
+
+"
+" Built in Editor settings
+"
+set number
+highlight Comment cterm=italic
+
+
+"
+" Plugin settings
+"
+let g:indentLine_enabled = 1
+let g:indentLine_char = '▏'
+let g:ansible_unindent_after_newline = 1
 
 "
 " Plugins
 "
 call plug#begin()
-Plug 'tpope/vim-fugitive'
 Plug 'scrooloose/nerdtree'
-Plug 'vim-airline/vim-airline'
 Plug 'w0rp/ale'
-Plug 'nathanaelkane/vim-indent-guides'
+Plug 'yggdroot/indentline'
+Plug 'pearofducks/ansible-vim'
+Plug 'airblade/vim-gitgutter'
 call plug#end()
 
+"
+" Help
+"
+" :set ft=yaml.ansible
 
