@@ -27,14 +27,26 @@ alias mkdir='mkdir -p'
 # shell prompt
 
 # MacOS colouring
-export CLICOLOR=1
-export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
+if [[ $(uname -s) == Darwin ]]; then
+        export CLICOLOR=1
+        export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
+fi
 
 # default editor
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 
-powerline-daemon -q
-POWERLINE_BASH_CONTINUATION=1
-POWERLINE_BASH_SELECT=1
-. /usr/local/lib/python3.7/site-packages/powerline/bindings/bash/powerline.sh
+
+# Powerline prompt
+#if [ -f `which powerline-daemon` ]; then
+#        powerline-daemon -q
+#        POWERLINE_BASH_CONTINUATION=1
+#        POWERLINE_BASH_SELECT=1
+#        if [[ $(uname -s) == Linux ]]; then
+#                . /usr/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh
+#        elif [[ $(uname -s) == Darwin ]]; then
+#                . /usr/local/lib/python3.7/site-packages/powerline/bindings/bash/powerline.sh
+#        fi
+#fi
+# Normal bash prompt
+export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\]\[\033[38;5;15m\] on \[$(tput sgr0)\]\[\033[38;5;3m\]\h\[$(tput sgr0)\]\[\033[38;5;15m\] at \[$(tput sgr0)\]\[\033[38;5;2m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\n\\$ \[$(tput sgr0)\]"
