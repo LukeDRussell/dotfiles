@@ -15,20 +15,17 @@ set expandtab
 set scrolloff=5
 
 "
-" FileType indent custom files
+" Filetypes and syntax highlighting
 "
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 autocmd FileType yml setlocal ts=2 sts=2 sw=2 expandtab
-
-"
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'yaml']
 
 "
 " Built in Editor settings
 "
-set number
+" set number
 highlight Comment cterm=italic
-
 
 "
 " Plugin settings
