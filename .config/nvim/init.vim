@@ -13,6 +13,7 @@ set expandtab
 " Visual
 "
 set scrolloff=5
+set linebreak
 
 "
 " Filetypes and syntax highlighting
@@ -33,6 +34,7 @@ highlight Comment cterm=italic
 let g:indentLine_enabled = 1
 let g:indentLine_char = '▏'
 let g:ansible_unindent_after_newline = 1
+let g:wiki_root = '~/wiki'
 
 "
 " Plugins
@@ -44,9 +46,4 @@ Plug 'yggdroot/indentline'
 Plug 'pearofducks/ansible-vim'
 Plug 'airblade/vim-gitgutter'
 call plug#end()
-
-"
-" Help
-"
-" :set ft=yaml.ansible
 
