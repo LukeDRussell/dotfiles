@@ -3,7 +3,7 @@
 /*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */ 
 
 .markdown-preview.markdown-preview {
-/* Reset all */
+    /* Reset all */
     html, body, div, span, applet, object, iframe,
     h1, h2, h3, h4, h5, h6, p, blockquote, pre,
     a, abbr, acronym, address, big, cite, code,
@@ -17,23 +17,28 @@
     figure, figcaption, footer, header, hgroup, 
     menu, nav, output, ruby, section, summary,
     time, mark, audio, video {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
     }
 
     background-color: white;
     color: black;
     font-size: 12px;
     font-family: Georgia, 'Times New Roman', Times, serif;
+    text-align: justify;
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 
+    /* Bulletted lists */
+    ol, ul {
+        margin-left: 1.5em;
+    }
+
+    /* Headers */
     h1, h2, h3, h4, h5, h6 {
         font-family: Arial, Helvetica, sans-serif
-    }
-    body {
-        -webkit-font-smoothing: antialiased;
     }
     h1 {
         font-size: 2em;
@@ -70,4 +75,9 @@
         margin-top: 0.4em;
         margin-bottom: 0.1em;
     }
+}
+
+html, body {
+    margin-left: 1.5em;
+    margin-right: 1.5em;
 }
