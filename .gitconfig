@@ -1,6 +1,6 @@
 [user]
         name = Luke Russell\n
-        email = luke.russell@psba.qld.gov.au
+        email = lukedrussell+git@outlook.com
 [credential]
         helper = cache --timeout 86400
 [url "https://"]
