@@ -19,7 +19,9 @@ set linebreak
 " Filetypes and syntax highlighting
 "
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
-autocmd FileType yml setlocal ts=2 sts=2 sw=2 expandtab
+autocmd FileType markdown setlocal conceallevel=0
+autocmd FileType markdown let g:indentLine_enabled=0
+
 let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'yaml']
 
 "
@@ -34,7 +36,6 @@ highlight Comment cterm=italic
 let g:indentLine_enabled = 1
 let g:indentLine_char = '▏'
 let g:ansible_unindent_after_newline = 1
-let g:wiki_root = '~/wiki'
 
 "
 " Plugins
@@ -45,5 +46,6 @@ Plug 'w0rp/ale'
 Plug 'yggdroot/indentline'
 Plug 'pearofducks/ansible-vim'
 Plug 'airblade/vim-gitgutter'
+Plug 'junegunn/goyo.vim'
 call plug#end()
 

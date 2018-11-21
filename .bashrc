@@ -3,7 +3,7 @@
 # vim mode bindings
 set -o vi
 
-# User specific aliases and functions
+# Aliases
 
 alias vim='nvim'
 alias vi='nvim'
@@ -15,6 +15,14 @@ alias .3='cd ../../../'
 alias context='date ; whoami ; hostname ; pwd'
 alias play='ansible-playbook'
 alias gitlog='git log --oneline --decorate --all'
+alias jekserve='bundle exec jekyll serve -wIo'
+alias fif='findinfile'
+
+# Functions
+findinfile() {
+    #do things with parameters like $1 such as
+    grep -lir --exclude-dir=.git "$1" .
+}
 
 # get confirmation before deleting things
 alias rm='rm -i'
@@ -23,7 +31,6 @@ alias mv='mv -i'
 
 # create directories recursively
 alias mkdir='mkdir -p'
-
 
 # MacOS shell colouring
 if [[ $(uname -s) == Darwin ]]; then
