@@ -20,7 +20,6 @@ alias fif='findinfile'
 
 # Functions
 findinfile() {
-    #do things with parameters like $1 such as
     grep -lir --exclude-dir=.git "$1" .
 }
 
@@ -32,10 +31,11 @@ alias mv='mv -i'
 # create directories recursively
 alias mkdir='mkdir -p'
 
-# MacOS shell colouring
+# MacOS settings
 if [[ $(uname -s) == Darwin ]]; then
         export CLICOLOR=1
         export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
+        [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 fi
 
 # default editor
