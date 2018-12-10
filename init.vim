@@ -47,5 +47,6 @@ Plug 'yggdroot/indentline'
 Plug 'pearofducks/ansible-vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/goyo.vim'
+Plug 'chmp/mdnav'
 call plug#end()
 
