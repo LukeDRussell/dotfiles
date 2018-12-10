@@ -17,10 +17,15 @@ alias play='ansible-playbook'
 alias gitlog='git log --oneline --decorate --all'
 alias jekserve='bundle exec jekyll serve -wIo'
 alias fif='findinfile'
+alias fifl='findinfileline'
 
 # Functions
 findinfile() {
-    grep -lir --exclude-dir=.git "$1" .
+    grep -lir --color --exclude-dir=.git "$1" .
+}
+
+findinfileline() {
+    grep -ir --color --exclude-dir=.git "$1" .
 }
 
 # get confirmation before deleting things
