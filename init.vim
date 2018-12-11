@@ -1,4 +1,4 @@
-"
+j"
 " Key Bindings
 "
 
@@ -12,8 +12,10 @@ set expandtab
 "
 " Visual
 "
-set scrolloff=5
+set scrolloff=10
 set linebreak
+set laststatus=2
+set noshowmode
 
 "
 " Filetypes and syntax highlighting
@@ -48,5 +50,6 @@ Plug 'pearofducks/ansible-vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/goyo.vim'
 Plug 'chmp/mdnav'
+Plug 'itchyny/lightline.vim'
 call plug#end()
 
