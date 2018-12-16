@@ -1,7 +1,8 @@
-j"
-" Key Bindings
+"
+" Control
 "
 
+set mouse=a
 :imap jj <Esc>
 
 "
