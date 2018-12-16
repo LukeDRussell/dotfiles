@@ -50,19 +50,17 @@ echo "Copying settings files from dotfiles to ~"
 echo ""
 
 echo "Copying bash settings..."
-cp ~/repos/dotfiles/bashrc ~/.bashrc 
+cp ~/repos/dotfiles/.bashrc ~/.bashrc 
+cp ~/repos/dotfiles/.inputrc ~/.inputrc
 
 echo "Copying neovim settings..."
-cp ~/repos/dotfiles/init.vim ~/.config/nvim/init.vim
+cp ~/repos/dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim
 
 echo "Copying tmux settings..."
-cp ~/repos/dotfiles/tmux.conf ~/.tmux.conf
+cp ~/repos/dotfiles/.tmux.conf ~/.tmux.conf
 
 echo "Copying global git settings..."
-cp ~/repos/dotfiles/gitconfig ~/.gitconfig
+cp ~/repos/dotfiles/.gitconfig ~/.gitconfig
 
 echo "Copying powerline status bar settings..."
-cp -r ~/repos/dotfiles/powerline ~/.config/
-
-echo "Copy markdown to pdf styles..."
-cp -r ~/repos/dotfiles/mume ~/.mume/
+cp -r ~/repos/dotfiles/.config/powerline ~/.config/
