@@ -39,7 +39,7 @@ ask() {
     done
 }
 
-if ask "This script will overwrite files. Are you sure?" Y; then
+if ask "This script will overwrite your dotfiles. Are you sure?" Y; then
     echo "Yes"
 else
     echo "No"
@@ -52,15 +52,14 @@ echo ""
 echo "Copying bash settings..."
 cp ~/repos/dotfiles/.bashrc ~/.bashrc 
 cp ~/repos/dotfiles/.inputrc ~/.inputrc
+cp ~/repos/dotfiles/.promptline.sh ~/.promptline.sh
 
 echo "Copying neovim settings..."
 cp ~/repos/dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim
 
 echo "Copying tmux settings..."
 cp ~/repos/dotfiles/.tmux.conf ~/.tmux.conf
+cp ~/repos/dotfiles/.tmuxline.conf ~/.tmuxline.conf
 
 echo "Copying global git settings..."
 cp ~/repos/dotfiles/.gitconfig ~/.gitconfig
-
-echo "Copying powerline status bar settings..."
-cp -r ~/repos/dotfiles/.config/powerline ~/.config/
