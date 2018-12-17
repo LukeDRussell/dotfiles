@@ -30,7 +30,6 @@ let g:markdown_fenced_languages = ['html', 'python', 'bash=sh', 'yaml']
 "
 " Built in Editor settings
 "
-" set number
 highlight Comment cterm=italic
 
 "
@@ -39,18 +38,21 @@ highlight Comment cterm=italic
 let g:indentLine_enabled = 1
 let g:indentLine_char = '▏'
 let g:ansible_unindent_after_newline = 1
+let g:airline_powerline_fonts = 1
+let g:airline_theme='solarized'
+let g:airline_solarized_bg='dark'
 
 "
 " Plugins
 "
 call plug#begin()
-Plug 'scrooloose/nerdtree'
-Plug 'w0rp/ale'
+Plug 'junegunn/goyo.vim'
 Plug 'yggdroot/indentline'
+Plug 'w0rp/ale'
 Plug 'pearofducks/ansible-vim'
 Plug 'airblade/vim-gitgutter'
-Plug 'junegunn/goyo.vim'
-Plug 'chmp/mdnav'
-Plug 'itchyny/lightline.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'edkolev/promptline.vim'
+Plug 'edkolev/tmuxline.vim'
 call plug#end()
-
