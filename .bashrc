@@ -54,4 +54,4 @@ export VISUAL=nvim
 export EDITOR="$VISUAL"
 
 # prompt
-source .promptline.sh
+source ~/.promptline.sh
