@@ -55,4 +55,5 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'edkolev/promptline.vim'
 Plug 'edkolev/tmuxline.vim'
+Plug 'cespare/vim-toml'
 call plug#end()
