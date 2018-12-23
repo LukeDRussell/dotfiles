@@ -24,6 +24,7 @@ alias gitlog='git log --oneline --decorate --all'
 alias jekserve='bundle exec jekyll serve -wIo'
 alias fif='findinfile'
 alias fifl='findinfileline'
+alias poetry_shell='. "$(dirname $(poetry run which python))/activate"'
 
 # Functions
 findinfile() {
