@@ -63,3 +63,6 @@ cp ~/repos/dotfiles/.tmuxline.conf ~/.tmuxline.conf
 
 echo "Copying global git settings..."
 cp ~/repos/dotfiles/.gitconfig ~/.gitconfig
+
+source ~/.bashrc
+
