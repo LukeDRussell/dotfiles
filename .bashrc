@@ -59,23 +59,23 @@ export EDITOR="$VISUAL"
 
 # Functions
 
-COLOUR_DEFAULT="\e[39m"
-COLOUR_BLACK="\e[30m"
-COLOUR_RED="\e[31m"
-COLOUR_GREEN="\e[32m"
-COLOUR_YELLOW="\e[33m"
-COLOUR_BLUE="\e[34m"
-COLOUR_MAGENTA="\e[35m"
-COLOUR_CYAN="\e[36m"
-COLOUR_LIGHTGRAY="\e[37m"
-COLOUR_DARKGRAY="\e[90m"
-COLOUR_LIGHTRED="\e[91m"
-COLOUR_LIGHTGREEN="\e[92m"
-COLOUR_LIGHTYELLOW="\e[93m"
-COLOUR_LIGHTBLUE="\e[94m"
-COLOUR_LIGHTMAGENTA="\e[95m"
-COLOUR_LIGHTCYAN="\e[96m"
-COLOUR_WHITE="\e[97m"
+COLOR_DEFAULT="\e[39m"
+COLOR_BLACK="\e[30m"
+COLOR_RED="\e[31m"
+COLOR_GREEN="\e[32m"
+COLOR_YELLOW="\e[33m"
+COLOR_BLUE="\e[34m"
+COLOR_MAGENTA="\e[35m"
+COLOR_CYAN="\e[36m"
+COLOR_LIGHTGRAY="\e[37m"
+COLOR_DARKGRAY="\e[90m"
+COLOR_LIGHTRED="\e[91m"
+COLOR_LIGHTGREEN="\e[92m"
+COLOR_LIGHTYELLOW="\e[93m"
+COLOR_LIGHTBLUE="\e[94m"
+COLOR_LIGHTMAGENTA="\e[95m"
+COLOR_LIGHTCYAN="\e[96m"
+COLOR_WHITE="\e[97m"
 
 function git_color {
   local git_status="$(git status 2> /dev/null)"
@@ -86,8 +86,6 @@ function git_color {
     echo -e $COLOR_YELLOW
   elif [[ $git_status =~ "nothing to commit" ]]; then
     echo -e $COLOR_GREEN
-  else
-    echo -e $COLOR_OCHRE
   fi
 }
 
@@ -106,5 +104,5 @@ function git_branch {
 }
 
 # Normal bash prompt
-export PS1="$COLOUR_LIGHTRED\u$COLOUR_DEFAULT@$COLOUR_YELLOW\h$COLOUR_DEFAULT in $COLOUR_GREEN\w \[\$(git_color)\]\$(git_branch)$COLOUR_DEFAULT\n$ "
+export PS1="$COLOR_LIGHTRED\u$COLOR_DEFAULT@$COLOR_YELLOW\h$COLOR_DEFAULT in $COLOR_GREEN\w \[\$(git_color)\]\$(git_branch)$COLOR_DEFAULT\n$ "
 
