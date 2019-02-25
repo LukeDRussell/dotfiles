@@ -1,7 +1,12 @@
 [user]
-        name = Luke Russell\n
+        name = Luke Russell
         email = lukedrussell+git@outlook.com
 [credential]
         helper = cache --timeout 86400
 [url "https://"]
         insteadOf = git://
+[core]
+        excludesfile = /Users/4032956/.gitignore_global
+[commit]
+        template = /Users/4032956/.stCommitMsg
+
