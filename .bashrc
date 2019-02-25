@@ -20,7 +20,7 @@ alias .2='cd ../../'
 alias .3='cd ../../../'
 alias context='date ; whoami ; hostname ; pwd'
 alias play='ansible-playbook'
-alias gitlog='git log --oneline --decorate --all'
+alias gitlog='git log --oneline --decorate --all --graph'
 alias jekserve='bundle exec jekyll serve -wIo'
 alias fif='findinfile'
 alias fifl='findinfileline'
@@ -106,3 +106,5 @@ function git_branch {
 # Normal bash prompt
 export PS1="$COLOR_LIGHTRED\u$COLOR_DEFAULT@$COLOR_YELLOW\h$COLOR_DEFAULT in $COLOR_GREEN\w \[\$(git_color)\]\$(git_branch)$COLOR_DEFAULT\n$ "
 
+
+complete -C /usr/local/bin/vault vault
