@@ -50,6 +50,16 @@ inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 " Plugins
 "
 call plug#begin()
+
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+let g:deoplete#enable_at_startup = 1
+
 Plug 'junegunn/goyo.vim'
 Plug 'yggdroot/indentline'
 Plug 'w0rp/ale'
@@ -58,7 +68,6 @@ Plug 'airblade/vim-gitgutter'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'davidhalter/jedi-vim'
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-jedi'
 Plug 'edkolev/promptline.vim'
 Plug 'edkolev/tmuxline.vim'
