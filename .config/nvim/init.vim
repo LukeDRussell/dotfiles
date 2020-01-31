@@ -70,6 +70,5 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'davidhalter/jedi-vim'
 Plug 'zchee/deoplete-jedi'
 Plug 'edkolev/promptline.vim'
-Plug 'edkolev/tmuxline.vim'
 Plug 'cespare/vim-toml'
 call plug#end()
