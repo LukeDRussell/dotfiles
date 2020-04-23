@@ -17,6 +17,7 @@ set scrolloff=10
 set linebreak
 set laststatus=2
 set noshowmode
+set termguicolors
 
 "
 " Filetypes and syntax highlighting
@@ -71,4 +72,5 @@ Plug 'davidhalter/jedi-vim'
 Plug 'zchee/deoplete-jedi'
 Plug 'edkolev/promptline.vim'
 Plug 'cespare/vim-toml'
+Plug 'lifepillar/vim-solarized8'
 call plug#end()
