@@ -1,5 +1,5 @@
 [user]
-        name = Luke D Russell\n
+        name = Luke D Russell
         email = lukedrussell+git@outlook.com
 [credential]
         helper = cache --timeout 86400
