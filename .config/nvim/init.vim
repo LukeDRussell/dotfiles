@@ -42,7 +42,7 @@ let g:ansible_unindent_after_newline = 1
 let g:airline_powerline_fonts = 1
 let g:airline_theme='solarized'
 let g:airline_solarized_bg='dark'
-let g:python3_host_prog = '/Users/luke/.pyenv/versions/neovim3/bin/python'
+"let g:python3_host_prog = '/Users/luke/.pyenv/versions/neovim3/bin/python'
 let g:deoplete#enable_at_startup = 1
 " deoplete tab-complete
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"

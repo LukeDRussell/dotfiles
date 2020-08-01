@@ -1,6 +1,7 @@
-# dot_files
+# dotfiles
 
+
+Test terminal is working:
 ```
-git pull
-./dotfiles-to-system.sh
+echo -e "\e[3m foo \e[23m"
 ```
