@@ -1,3 +1,6 @@
+# Start Tmux
+tmux attach-session || tmux new-session
+
 # Alias
 
 alias vi=nvim

@@ -15,6 +15,7 @@
         - fish
         - jq
         - exa
+        - neovim
         state: latest
 
     - name: Update packages
