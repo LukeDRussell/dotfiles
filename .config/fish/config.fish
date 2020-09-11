@@ -1,8 +1,5 @@
-# Start Tmux
-tmux attach-session || tmux new-session
-register-python-argcomplete --shell fish pipx | .
 # Register pipx completions
-
+register-python-argcomplete --shell fish pipx | .
 
 # Alias
 
@@ -14,5 +11,7 @@ alias ll="exa -l"
 # Settings
 fish_vi_key_bindings
 
-# Created by `userpath` on 2020-08-20 21:12:17
-set PATH $PATH /home/luke/.local/bin
+# Pyenv
+set -Ux PYENV_ROOT $HOME/.pyenv
+set -Ux fish_user_paths $PYENV_ROOT/bin $fish_user_paths
+status --is-interactive; and source (pyenv init -|psub)
