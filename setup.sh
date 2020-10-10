@@ -7,5 +7,9 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.
 # Install PyEnv
 curl https://pyenv.run | bash
 
+# Install Poetry
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+
+
 # Install Oh My Fish
 curl -L https://get.oh-my.fish | fish
