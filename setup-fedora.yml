@@ -71,13 +71,6 @@
         src: ~/Repos/LukeDRussell/dotfiles/.gitconfig
         state: link
 
-    - name: Install pipx
-      pip: 
-        name: pipx
-
-    - name: Install Python Poetry
-      command: pipx install poetry
-    
     - name: Manual installs
       debug:
         msg:
@@ -86,6 +79,7 @@
           - 'curl -L https://get.oh-my.fish | fish'
           - 'curl https://pyenv.run | bash'
           - 'pyenv update'
+          - pip install poetry
           - dnf copr enable dawid/better_fonts
           - dnf install fontconfig-enhanced-defaults fontconfig-font-replacements
 
