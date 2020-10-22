@@ -39,7 +39,7 @@
     - name: Set my default shell
       become: true
       user:
-        name: luke
+        name: Luke
         shell: /bin/fish
 
     - name: Neovim directory
