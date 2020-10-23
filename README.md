@@ -36,3 +36,10 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.
 ```sh
 echo -e "\e[3m foo \e[23m"
 ```
+
+## Remap CAPS to CTRL
+`gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"`
+
+## Terminal Always use TMUX command
+`tmux new -A`
+
