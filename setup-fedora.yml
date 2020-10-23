@@ -9,14 +9,12 @@
       become: true
       package:
         name:
-        - ansible
         - tldr
         - tmux
         - fish
         - jq
         - exa
         - neovim
-        - glances
         - make
         - gcc 
         - zlib-devel
@@ -39,8 +37,8 @@
     - name: Set my default shell
       become: true
       user:
-        name: Luke
-        shell: /bin/fish
+        name: luke
+        shell: /usr/bin/fish
 
     - name: Neovim directory
       file:
