@@ -9,6 +9,9 @@
       become: true
       package:
         name:
+        - ansible
+        - poetry
+        - glances
         - tldr
         - tmux
         - fish
@@ -69,15 +72,19 @@
         src: ~/Repos/LukeDRussell/dotfiles/.gitconfig
         state: link
 
+
     - name: Manual installs
       debug:
         msg:
           These commands need to be run manually:
-          - 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-          - 'curl -L https://get.oh-my.fish | fish'
-          - 'curl https://pyenv.run | bash'
-          - 'pyenv update'
-          - pip install poetry
-          - dnf copr enable dawid/better_fonts
-          - dnf install fontconfig-enhanced-defaults fontconfig-font-replacements
+          - sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+          - sudo dnf copr enable dawid/better_fonts
+          - sudo dnf install fontconfig-enhanced-defaults fontconfig-font-replacements
+          - sudo dnf copr enable samuelig/better_fonts
+          - sudo dnf install fontconfig-enhanced-defaultshanced-defaults fontconfig-font-replacements -y
+          - sudo wget https://yum.enpass.io/enpass-yum.repo
+          - sudo yum install enpass -y
+          - gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
+          - Set Terminal to open with command `tmux new -A`
+          - Test italics work with `echo -e "\e[3m foo \e[23m"`
 
