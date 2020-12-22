@@ -16,3 +16,6 @@ ln -s ~/dotfiles/.tmux.conf ~/.tmux.conf
 # Disable silly keyboard shortcuts
 defaults write -g ApplePressAndHoldEnabled -bool false
 
+# Change the default shell to fish
+# build the latest version of python using pyenv
+# set latest version of python to global with pyenv
