@@ -1,0 +1,66 @@
+#!/usr/bin/env ansible-playbook
+
+---
+- name: Configure Fedora workstation
+  hosts: localhost
+  tasks:
+
+    - name: Update packages
+      become: true
+      package:
+        state: latest
+
+    - name: Install Fedora packages
+      become: true
+      package:
+        name:
+        - ansible
+        - exa
+        - fish
+        - git
+        - glances
+        - jq
+        - neovim
+        - poetry
+        - tldr
+        - tmux
+        state: latest
+
+    - name: Enable copr repos
+      become: true
+      community.general.copr:
+        name: dawid/better_fonts
+
+    - name: Install 3rd party packages
+      become: true
+      package:
+        name:
+        - fontconfig-font-replacements
+        - fontconfig-enhanced-defaults
+
+    - name: Set my default shell
+      become: true
+      user:
+        name: luke
+        shell: /bin/fish
+
+    - name: Map Tmux settings
+      file:
+        dest: ~/.tmux.conf
+        src: ~/Repos/dotfiles/.tmux.conf
+        state: link
+          
+    - name: Map Fish settings
+      file:
+        dest: ~/.config/fish
+        src: ~/Repos/dotfiles/.config/fish
+        state: link
+
+    - name: Map Neovim settings
+      file:
+        dest: ~/.config/nvim
+        src: ~/Repos/dotfiles/.config/nvim
+        state: link
+        force: True
+
+
