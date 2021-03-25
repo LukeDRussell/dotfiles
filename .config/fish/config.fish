@@ -1,10 +1,16 @@
 # Alias
 
-alias vi=nvim
-alias vim=nvim
-alias ls=exa
-alias ll="exa -l"
-alias tree="exa --tree"
+if command -sq nvim 
+  alias vi=nvim
+  alias vim=nvim
+end
+
+if command -sq exa
+  alias ls=exa
+  alias ll="exa -l"
+  alias tree="exa --tree"
+end
+
 
 # Settings
 fish_vi_key_bindings
