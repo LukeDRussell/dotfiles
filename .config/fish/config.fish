@@ -4,6 +4,7 @@
 fish_add_path ~/.pyenv/bin/
 if command -sq pyenv
   pyenv init - | source
+  pyenv virtualenv-init - | source
 end
 
 # pipx
