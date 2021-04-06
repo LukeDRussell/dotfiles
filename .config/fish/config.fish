@@ -1,15 +1,23 @@
-# Use pyenv shim if it exists
-if command -v pyenv 1>/dev/null 2>&1
+# fish_add_path requires fish 3.2.1
+
+# PyEnv
+fish_add_path ~/.pyenv/bin/
+if command -sq pyenv
   pyenv init - | source
 end
 
-# Use neovim if it exists
-if command -sq nvim 
+# pipx
+if command -sq pipx
+  fish_add_path ~/.local/bin/
+end
+
+# neovim
+if command -sq nvim
   alias vi=nvim
   alias vim=nvim
 end
 
-# Use exa if it exists
+# exa exa over ls if it exists
 if command -sq exa
   alias ls=exa
   alias ll="exa -l"
@@ -22,3 +30,8 @@ set -U fish_greeting
 # Use vim bindings
 fish_vi_key_bindings
 
+# Ansible
+if command -sq ansible
+  alias play_askpass="ansible-playbook -k"
+  alias play_vaultpass="ansible-playbook -e @~/.vault.yml --vault-password-file ~/.vault-pw"
+end
