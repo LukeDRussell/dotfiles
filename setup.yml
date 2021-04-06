@@ -25,4 +25,10 @@
         state: link
         force: True
 
+    - name: Map Git Config settings
+      file:
+        dest: ~/.gitconfig
+        src: ~/Repos/dotfiles/.gitconfig
+        state: link
+        force: True
 
