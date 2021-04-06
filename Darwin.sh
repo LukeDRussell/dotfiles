@@ -1,21 +1,25 @@
-# Homebrew (requires clicking confirmation for xcode CLI tools)
+# Bootstrap HomeBrew
+xcode-select —install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# CLI Apps
-brew install fish pyenv pyenv-virtualenv exa tmux jq git ansible fish tldr neovim
+# Bootstrap Ansible
+brew install ansible
 
-# GUI Apps
-brew install --cask visual-studio-code iterm2 drawio
+#############################################
+# Move everything below to ansible playbook #
+#############################################
 
+#brew install fish pyenv pyenv-virtualenv exa tmux jq git ansible fish tldr neovim
+
+# brew install --cask visual-studio-code iterm2 drawio
 # Link Fish config
-mkdir ~/.config
-ln -sf ~/OneDrive/Repos ~/Repos
-ln -sf ~/Repos/dotfiles/.config/fish ~/.config/fish
-ln -sf ~/Repos/dotfiles/.gitconfig ~/.gitconfig
-ln -sf ~/Repos/dotfiles/.tmux.conf ~/.tmux.conf
+#mkdir ~/.config
+#ln -sf ~/Repos/dotfiles/.config/fish ~/.config/fish
+#ln -sf ~/Repos/dotfiles/.gitconfig ~/.gitconfig
+#ln -sf ~/Repos/dotfiles/.tmux.conf ~/.tmux.conf
 
 # Disable silly keyboard shortcuts
-defaults write -g ApplePressAndHoldEnabled -bool false
+#defaults write -g ApplePressAndHoldEnabled -bool false
 
 # Change the default shell to fish
 # build the latest version of python using pyenv
