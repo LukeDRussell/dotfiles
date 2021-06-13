@@ -1,8 +1,8 @@
 # fish_add_path requires fish 3.2.1
 
 # PyEnv
-fish_add_path ~/.pyenv/bin/
 if command -sq pyenv
+  status is-login; and pyenv init --path | source
   pyenv init - | source
   pyenv virtualenv-init - | source
 end
@@ -18,7 +18,7 @@ if command -sq nvim
   alias vim=nvim
 end
 
-# exa exa over ls if it exists
+# exa over ls if it exists
 if command -sq exa
   alias ls=exa
   alias ll="exa -l"
