@@ -1,5 +1,4 @@
 # Bootstrap HomeBrew
-xcode-select —install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Bootstrap Ansible
@@ -14,7 +13,8 @@ brew install ansible
 # brew install --cask visual-studio-code iterm2 drawio
 # Link Fish config
 #mkdir ~/.config
-#ln -sf ~/Repos/dotfiles/.config/fish ~/.config/fish
+#ln -sf ~/Onedrive/Repos/ ~/Repos
+#ln -sf ~/Repos/dotfiles/.config/fish/ ~/.config/fish
 #ln -sf ~/Repos/dotfiles/.gitconfig ~/.gitconfig
 #ln -sf ~/Repos/dotfiles/.tmux.conf ~/.tmux.conf
 
