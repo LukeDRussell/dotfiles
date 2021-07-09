@@ -3,7 +3,8 @@
 SETUVAR --export PYENV_ROOT:/Users/lrussell/\x2epyenv
 SETUVAR __fish_initialized:3100
 SETUVAR _fisher_jorgebucaran_2F_fisher_files:/Users/lrussell/\x2econfig/fish/functions/fisher\x2efish\x1e/Users/lrussell/\x2econfig/fish/completions/fisher\x2efish
-SETUVAR _fisher_plugins:jorgebucaran/fisher
+SETUVAR _fisher_joseluisq_2F_gitnow_40_32_2E_38_2E_30__files:/Users/lrussell/\x2econfig/fish/functions/__gitnow_config_file\x2efish\x1e/Users/lrussell/\x2econfig/fish/functions/__gitnow_functions\x2efish\x1e/Users/lrussell/\x2econfig/fish/functions/__gitnow_manual\x2efish\x1e/Users/lrussell/\x2econfig/fish/conf\x2ed/gitnow\x2efish\x1e/Users/lrussell/\x2econfig/fish/conf\x2ed/gitnow_config\x2efish\x1e/Users/lrussell/\x2econfig/fish/completions/__gitnow_completions\x2efish
+SETUVAR _fisher_plugins:jorgebucaran/fisher\x1ejoseluisq/gitnow\x402\x2e8\x2e0
 SETUVAR fish_color_autosuggestion:586e75
 SETUVAR fish_color_cancel:\x2dr
 SETUVAR fish_color_command:93a1a1
