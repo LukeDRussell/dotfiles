@@ -17,6 +17,7 @@ brew install ansible
 #ln -sf ~/Repos/dotfiles/.config/fish/ ~/.config/fish
 #ln -sf ~/Repos/dotfiles/.gitconfig ~/.gitconfig
 #ln -sf ~/Repos/dotfiles/.tmux.conf ~/.tmux.conf
+#ln -sf ~/Repos/dotfiles/.config/nvim/ ~/.config/nvim
 
 # Disable silly keyboard shortcuts
 #defaults write -g ApplePressAndHoldEnabled -bool false
