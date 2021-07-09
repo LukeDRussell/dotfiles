@@ -43,7 +43,7 @@ let g:airline_powerline_fonts = 1
 let g:airline_theme='solarized'
 let g:airline_solarized_bg='dark'
 
-let g:python3_host_prog = '~/.pyenv/versions/neovim3/bin/python'
+let g:python3_host_prog = '~/.pyenv/versions/neovim/bin/python'
 
 " deoplete tab-complete
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
@@ -53,22 +53,10 @@ inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 "
 call plug#begin()
 
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-else
-  Plug 'Shougo/deoplete.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
-
-let g:deoplete#enable_at_startup = 1
-
 Plug 'junegunn/goyo.vim'
 Plug 'yggdroot/indentline'
 
 Plug 'w0rp/ale'
-Plug 'shuogo/deoplete'
-Plug 'deoplete-plugins/deoplete-jedi'
 
 Plug 'airblade/vim-gitgutter'
 Plug 'vim-airline/vim-airline'
