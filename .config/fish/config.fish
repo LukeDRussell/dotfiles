@@ -1,4 +1,13 @@
-# fish_add_path requires fish 3.2.1
+# Disable welcome
+set -U fish_greeting
+
+# Enable vim-like
+fish_vi_key_bindings
+set fish_cursor_default block
+set fish_cursor_insert line
+set fish_cursor_replace_one underscore
+set fish_cursor_visual block
+set fish_vi_force_cursor
 
 # Pyenv
 if command -sq pyenv
@@ -21,18 +30,14 @@ end
 
 # exa over ls if it exists
 if command -sq exa
-  alias ls=exa
-  alias ll="exa -l"
-  alias tree="exa --tree"
+  alias ls="exa"
+  alias ll="exa --long --header --git"
+  alias la="exa --long --header --git --all"
+  alias lt="exa --long --header --git --sort=accessed"
+  alias tree="exa --long --header --git --tree --level 3 --ignore-glob=.git/* --color=always | less -R"
 else
   alias ll="ls -l"
 end
-
-# Disable welcome
-set -U fish_greeting
-
-# Use vim bindings
-fish_vi_key_bindings
 
 # Ansible
 if command -sq ansible
