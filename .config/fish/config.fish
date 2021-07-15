@@ -1,4 +1,13 @@
-# fish_add_path requires fish 3.2.1
+# Disable welcome
+set -U fish_greeting
+
+# Enable vim-like
+fish_vi_key_bindings
+set fish_cursor_default block
+set fish_cursor_insert line
+set fish_cursor_replace_one underscore
+set fish_cursor_visual block
+set fish_vi_force_cursor
 
 # Pyenv
 if command -sq pyenv
@@ -19,20 +28,19 @@ if command -sq nvim
   alias vim=nvim
 end
 
-# exa over ls if it exists
+# exa
 if command -sq exa
-  alias ls=exa
-  alias ll="exa -l"
-  alias tree="exa --tree"
+  alias ls="exa"
+  alias ll="ls --long --header --git --classify --tree --level 1"
+  alias la="ll --all"
+  abbr lla ll --sort=accessed
+  abbr llm ll --sort=modified
+  abbr llc ll --sort=created
+  abbr lls ll --sort=size
+  alias tree="ll --level 3 --ignore-glob=.git/ --color=always"
 else
   alias ll="ls -l"
 end
-
-# Disable welcome
-set -U fish_greeting
-
-# Use vim bindings
-fish_vi_key_bindings
 
 # Ansible
 if command -sq ansible
@@ -40,4 +48,11 @@ if command -sq ansible
   alias play_askpass="ansible-playbook -k"
   alias play_vaultpass="ansible-playbook -e @~/.vault.yml --vault-password-file ~/.vault-pw"
 end
+
+# Git Abbreviations
+abbr -a gco git checkout
+abbr -a ga git add
+abbr -a ga. git add .
+abbr -a gca git commit-all
+
 
