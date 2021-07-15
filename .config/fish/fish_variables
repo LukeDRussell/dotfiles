@@ -8,6 +8,15 @@ SETUVAR Z_DATA:/Users/lrussell/\x2elocal/share/z/data
 SETUVAR Z_DATA_DIR:/Users/lrussell/\x2elocal/share/z
 SETUVAR Z_EXCLUDE:\x5e/Users/lrussell\x24
 SETUVAR __fish_initialized:3100
+SETUVAR _fish_abbr_ga:git\x20add
+SETUVAR _fish_abbr_ga_2E_:git\x20add\x20\x2e
+SETUVAR _fish_abbr_gca:git\x20commit\x2dall
+SETUVAR _fish_abbr_gco:git\x20checkout
+SETUVAR _fish_abbr_lla:ll\x20\x2d\x2dsort\x3daccessed
+SETUVAR _fish_abbr_llc:ll\x20\x2d\x2dsort\x3dcreated
+SETUVAR _fish_abbr_lld:ll\x20\x2d\x2dsort\x3dsize
+SETUVAR _fish_abbr_llm:ll\x20\x2d\x2dsort\x3dmodified
+SETUVAR _fish_abbr_lls:ll\x20\x2d\x2dsort\x3dsize
 SETUVAR _fisher_jethrokuan_2F_z_files:/Users/lrussell/\x2econfig/fish/functions/__z\x2efish\x1e/Users/lrussell/\x2econfig/fish/functions/__z_add\x2efish\x1e/Users/lrussell/\x2econfig/fish/functions/__z_clean\x2efish\x1e/Users/lrussell/\x2econfig/fish/functions/__z_complete\x2efish\x1e/Users/lrussell/\x2econfig/fish/conf\x2ed/z\x2efish
 SETUVAR _fisher_jorgebucaran_2F_fisher_files:/Users/lrussell/\x2econfig/fish/functions/fisher\x2efish\x1e/Users/lrussell/\x2econfig/fish/completions/fisher\x2efish
 SETUVAR _fisher_joseluisq_2F_gitnow_40_32_2E_38_2E_30__files:/Users/lrussell/\x2econfig/fish/functions/__gitnow_config_file\x2efish\x1e/Users/lrussell/\x2econfig/fish/functions/__gitnow_functions\x2efish\x1e/Users/lrussell/\x2econfig/fish/functions/__gitnow_manual\x2efish\x1e/Users/lrussell/\x2econfig/fish/conf\x2ed/gitnow\x2efish\x1e/Users/lrussell/\x2econfig/fish/conf\x2ed/gitnow_config\x2efish\x1e/Users/lrussell/\x2econfig/fish/completions/__gitnow_completions\x2efish
