@@ -12,3 +12,5 @@
 	smudge = git-lfs smudge -- %f
 [init]
 	defaultBranch = Development
+[pull]
+	ff = only
