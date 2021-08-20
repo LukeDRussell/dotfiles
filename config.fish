@@ -1,7 +1,7 @@
 # Disable welcome
 set -U fish_greeting
 
-# Enable vim-like
+# Enable vim-like 
 fish_vi_key_bindings
 set fish_cursor_default block
 set fish_cursor_insert line
@@ -32,12 +32,10 @@ end
 if command -sq exa
   alias ls="exa"
   alias ll="ls --long --header --git --classify --tree --level 1"
-  alias la="ll --all"
-  abbr lla ll --sort=accessed
-  abbr llm ll --sort=modified
-  abbr llc ll --sort=created
-  abbr lls ll --sort=size
   alias tree="ll --level 3 --ignore-glob=.git/ --color=always"
+  abbr lla "ll --all"
+  abbr llm "ll --sort=modified"
+  abbr lls "ll --sort=size"
 else
   alias ll="ls -l"
 end
@@ -52,7 +50,7 @@ end
 # Git Abbreviations
 abbr -a gco git checkout
 abbr -a ga git add
-abbr -a ga. git add .
+abbr -a gaa git add .
 abbr -a gca git commit-all
 
 
