@@ -2,9 +2,12 @@
 
 ---
 - name: Configure RHEL8 workstation
-  hosts: localhost
-  tasks:
+  hosts: 
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: auto
 
+  tasks:
 
     - name: Map Tmux settings
       file:
