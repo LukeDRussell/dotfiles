@@ -1,22 +1,30 @@
 # Bootstrap Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-brew install fish exa tmux jq git ansible fish tldr neovim
+brew install fish exa tmux jq git ansible tldr neovim python
 
 brew install --cask visual-studio-code iterm2 drawio
 
-# Symlink config files
+# Symlink config files, run from this dir
 
-ln -sf gitconfig ~/.gitconfig
-ln -sf tmux.conf ~/.tmux.conf
-ln -sf config.fish ~/.config/fish/config.fish
-ln -sf init.lua ~/.config/nvim/init.lua
+ln -sf ~/Repos/dotfiles/gitconfig ~/.gitconfig
+ln -sf ~/Repos/dotfiles/tmux.conf ~/.config/tmux/tmux.conf
+ln -sf ~/Repos/dotfiles/config.fish ~/.config/fish/config.fish
+ln -sf ~/Repos/dotfiles/init.lua ~/.config/nvim/init.lua
 
-# Disable silly keyboard shortcuts
+# Disable silly keyboard settings
 defaults write -g ApplePressAndHoldEnabled -bool false
 
-# Some MacOS built apps use the ancient built-in ncurses, which is missing tmux-256 terminal profile.
-/usr/bin/tic -x tmux-256color
+# disable automatic text changes as it’s annoying when typing code
+defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+
+# Let me quit Finder		
+defaults write com.apple.finder QuitMenuItem -bool true; killall Finder
+
 
 # Change the default shell to fish
 # build the latest version of python using pyenv
