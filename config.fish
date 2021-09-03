@@ -9,6 +9,9 @@ set fish_cursor_replace_one underscore
 set fish_cursor_visual block
 set fish_vi_force_cursor
 
+# Add user installed binaries to path
+fish_add_path ~/.local/bin/
+
 # Pyenv
 if command -sq pyenv
   status is-interactive; and pyenv init --path | source
@@ -17,10 +20,6 @@ if command -sq pyenv
   pyenv-virtualenv-init - | source
 end
 
-# pipx
-if command -sq pipx
-  fish_add_path ~/.local/bin/
-end
 
 # neovim
 if command -sq nvim
