@@ -1,37 +1,62 @@
 #!/usr/bin/env ansible-playbook
 
 ---
-- name: Configure RHEL8 workstation
-  hosts: 
-    localhost:
-      ansible_connection: local
-      ansible_python_interpreter: auto
+- name: Configure a Red Hat based workstation
+  hosts: localhost
 
   tasks:
-
-    - name: Map Tmux settings
-      file:
-        dest: ~/.tmux.conf
-        src: ~/Repos/dotfiles/.tmux.conf
-        state: link
-          
-    - name: Map Fish settings
-      file:
-        dest: ~/.config/fish
-        src: ~/Repos/dotfiles/.config/fish
-        state: link
-
-    - name: Map Neovim settings
-      file:
-        dest: ~/.config/nvim
-        src: ~/Repos/dotfiles/.config/nvim
-        state: link
-        force: True
 
     - name: Map Git Config settings
       file:
         dest: ~/.gitconfig
-        src: ~/Repos/dotfiles/.gitconfig
+        src: ~/Repos/dotfiles/gitconfig
         state: link
         force: True
+
+    - name: map tmux settings
+      file:
+        dest: ~/.tmux.conf
+        src: ~/Repos/dotfiles/tmux.conf
+        state: link
+        force: True
+
+    - name: Create config folders
+      file:
+        dest: "{{ item }}"
+        recurse: yes
+        state: directory
+      loop:
+        - ~/.config/nvim/
+        - ~/.config/fish/
+        - ~/bin/
+          
+    - name: Map Fish settings
+      file:
+        dest: ~/.config/fish/config.fish
+        src: ~/Repos/dotfiles/config.fish
+        state: link
+
+    - name: Map Neovim settings
+      file:
+        dest: ~/.config/nvim/init.lua
+        src: ~/Repos/dotfiles/init.lua
+        state: link
+        force: True
+
+    - name: Install neovim AppImage
+      get_url:
+        url: https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+        dest: ~/bin/nvim.appimage
+        mode: u+x
+
+    - name: Install CLI packages
+      yum:
+        name:
+          - jq
+          - fish
+          - tmux
+          - tldr
+          - exa
+      become: true
+
 
