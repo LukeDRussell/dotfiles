@@ -1,6 +1,6 @@
 [user]
-        name = Luke D Russell
-        email = lukedrussell+git@outlook.com
+        name = Luke Russell
+        email = lrussell@integral.com.au
 [credential]
         helper = cache --timeout 86400
 [url "https://"]
@@ -11,6 +11,8 @@
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 [init]
-	defaultBranch = Development
+	defaultBranch = main
 [pull]
 	ff = only
+[push]
+	default = simple
