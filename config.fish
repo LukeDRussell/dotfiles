@@ -47,10 +47,11 @@ if command -sq ansible
 end
 
 # Git Abbreviations
-abbr -a gco git checkout
-abbr -a ga git add
-abbr -a gaa git add .
-abbr -a gca git commit -a -m \"
-abbr -a gs git status
+abbr -a gitco git checkout
+abbr -a gita git add
+abbr -a gitaa git add .
+abbr -a gitca git commit -a -m \"
+abbr -a gits git status
 
+abbr -a gitl git log --oneline --decorate --all --graph
 
