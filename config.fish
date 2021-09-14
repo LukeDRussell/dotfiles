@@ -50,6 +50,7 @@ end
 abbr -a gco git checkout
 abbr -a ga git add
 abbr -a gaa git add .
-abbr -a gca git commit-all
+abbr -a gca git commit -a -m \"
+abbr -a gs git status
 
 
