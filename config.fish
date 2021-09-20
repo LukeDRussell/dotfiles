@@ -16,8 +16,6 @@ fish_add_path ~/.local/bin/
 if command -sq pyenv
   status is-interactive; and pyenv init --path | source
   pyenv init - | source
-  status is-interactive; and pyenv-virtualenv-init - | source
-  pyenv-virtualenv-init - | source
 end
 
 
@@ -26,6 +24,7 @@ if command -sq nvim
   alias vi=nvim
   alias vim=nvim
 end
+
 
 # exa
 if command -sq exa
@@ -37,14 +36,13 @@ if command -sq exa
   abbr lls "ll --sort=size"
 else
   alias ll="ls -l"
+  alias lla="ls la"
+  alias llm="ls --sort=modified"
+  alias lls="ls --sort=size"
 end
 
-# Ansible
-if command -sq ansible
-  alias play="ansible-playbook"
-  alias play_askpass="ansible-playbook -k"
-  alias play_vaultpass="ansible-playbook -e @~/.vault.yml --vault-password-file ~/.vault-pw"
-end
+# Use "play" to pull credentials from ~
+alias play="ansible-playbook -e @~/.secrets.yml"
 
 # Git Abbreviations
 abbr -a gitco git checkout
@@ -52,6 +50,5 @@ abbr -a gita git add
 abbr -a gitaa git add .
 abbr -a gitca git commit -a -m \"
 abbr -a gits git status
-
 abbr -a gitl git log --oneline --decorate --all --graph
 
