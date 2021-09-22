@@ -27,4 +27,4 @@ require('hardline').setup {
 
 -- My Settings
 vim.o.scrolloff = 5
-
+vim.o.number = true
