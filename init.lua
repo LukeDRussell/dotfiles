@@ -11,12 +11,6 @@ require "paq" {
 	"lukas-reineke/indent-blankline.nvim"
 }
 
--- tree-sitter 
-local ts = require 'nvim-treesitter.configs'
-ts.setup {
-	ensure_installed = 'maintained',
-	highlight = {enable = true}
-}
 
 -- hardline status and tab line
 require('hardline').setup {
@@ -26,5 +20,12 @@ require('hardline').setup {
 -- Org-mode vim
 
 -- My Settings
-vim.o.scrolloff = 5
-vim.o.number = true
+vim.opt.scrolloff = 5
+vim.opt.number = true
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.softtabstop = 2
+
+-- yaml
+-- expandtab indentkeys-=0# indentkeys-=<:>
+
