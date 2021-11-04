@@ -1,0 +1,75 @@
+#!/usr/bin/env ansible-playbook
+
+---
+- name: Configure RHEL8 workstation
+  hosts: 
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: auto
+
+  tasks:
+
+    - name: Map Tmux settings
+      file:
+        dest: ~/.tmux.conf
+        src: ~/Repos/dotfiles/.tmux.conf
+        state: link
+          
+    - name: Map Fish settings
+      file:
+        dest: ~/.config/fish
+        src: ~/Repos/dotfiles/.config/fish
+        state: link
+
+    - name: Map Neovim settings
+      file:
+        dest: ~/.config/nvim
+        src: ~/Repos/dotfiles/.config/nvim
+        state: link
+        force: True
+
+    - name: Map Git Config settings
+      file:
+        dest: ~/.gitconfig
+        src: ~/Repos/dotfiles/.gitconfig
+        state: link
+        force: True
+
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+
+# Bootstrap Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew install fish exa tmux jq git ansible tldr neovim python
+
+brew install --cask visual-studio-code iterm2 drawio
+
+# Symlink config files, run from this dir
+
+ln -sf ~/Repos/dotfiles/gitconfig ~/.gitconfig
+ln -sf ~/Repos/dotfiles/tmux.conf ~/.config/tmux/tmux.conf
+ln -sf ~/Repos/dotfiles/config.fish ~/.config/fish/config.fish
+ln -sf ~/Repos/dotfiles/init.lua ~/.config/nvim/init.lua
+
+# Disable silly keyboard settings
+defaults write -g ApplePressAndHoldEnabled -bool false
+
+# disable automatic text changes as it’s annoying when typing code
+defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+
+# Let me quit Finder		
+defaults write com.apple.finder QuitMenuItem -bool true; killall Finder
+
+
+# Change the default shell to fish
+# build the latest version of python using pyenv
+# set latest version of python to global with pyenv
+
+# ITerm2 profiles to use Tmux (if session exists attach, otherwise create and attach)
+# /usr/local/bin/tmux new -A
+
