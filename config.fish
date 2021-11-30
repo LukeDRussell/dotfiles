@@ -11,13 +11,13 @@ set fish_vi_force_cursor
 
 # Add user installed binaries to path
 fish_add_path ~/.local/bin/
+fish_add_path ~/.pyenv/bin/
 
 # Pyenv
 if command -sq pyenv
   status is-interactive; and pyenv init --path | source
   pyenv init - | source
 end
-
 
 # neovim
 if command -sq nvim
@@ -35,14 +35,16 @@ if command -sq exa
   abbr llm "ll --sort=modified"
   abbr lls "ll --sort=size"
 else
-  alias ll="ls -l"
-  alias lla="ls la"
+  alias ll="ls -lh"
+  alias lla="ls -lha"
   alias llm="ls --sort=modified"
   alias lls="ls --sort=size"
 end
 
 # Use "play" to pull credentials from ~
-alias play="ansible-playbook -e @~/.secrets.yml"
+if command -sq ansible
+  alias play="ansible-playbook -e @~/.secrets.yml"
+end
 
 # Git Abbreviations
 abbr -a gitco git checkout
@@ -52,6 +54,7 @@ abbr -a gitca git commit -a -m \"
 abbr -a gits git status
 abbr -a gitl git log --oneline --decorate --all --graph
 
+# Prompt
 function fish_prompt
     if not set -q VIRTUAL_ENV_DISABLE_PROMPT
         set -g VIRTUAL_ENV_DISABLE_PROMPT true
