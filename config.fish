@@ -13,14 +13,12 @@ set fish_vi_force_cursor
 if command -sq pyenv
   status is-interactive; and pyenv init --path | source
   pyenv init - | source
-  status is-interactive; and pyenv-virtualenv-init - | source
-  pyenv-virtualenv-init - | source
 end
 
-# pipx
-if command -sq pipx
-  fish_add_path ~/.local/bin/
-end
+# Pipx (& manual) binary path
+fish_add_path ~/.local/bin/
+# Pyenv path
+fish_add_path ~/.pyenv/bin
 
 # neovim
 if command -sq nvim
@@ -42,9 +40,7 @@ end
 
 # Ansible
 if command -sq ansible
-  alias play="ansible-playbook"
-  alias play_askpass="ansible-playbook -k"
-  alias play_vaultpass="ansible-playbook -e @~/.vault.yml --vault-password-file ~/.vault-pw"
+  alias play="ansible-playbook -e @~/.secrets.yml"
 end
 
 # Git Abbreviations
@@ -53,4 +49,30 @@ abbr -a ga git add
 abbr -a gaa git add .
 abbr -a gca git commit-all
 
+# Prompt
+function fish_prompt
+    if not set -q VIRTUAL_ENV_DISABLE_PROMPT
+        set -g VIRTUAL_ENV_DISABLE_PROMPT true
+    end
+    set_color yellow
+    printf '%s' $USER
+    set_color normal
+    printf ' at '
 
+    set_color magenta
+    echo -n (prompt_hostname)
+    set_color normal
+    printf ' in '
+
+    set_color $fish_color_cwd
+    printf '%s' (prompt_pwd)
+    set_color normal
+
+    # Line 2
+    echo
+    if test -n "$VIRTUAL_ENV"
+        printf "(%s) " (set_color blue)(basename $VIRTUAL_ENV)(set_color normal)
+    end
+    printf '↪ '
+    set_color normal
+end

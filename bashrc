@@ -11,13 +11,12 @@ fi
 # User specific aliases and functions
 
 alias play='ansible-playbook -e @~/.secrets.yml'
-alias ll='ls -lht'
-alias lla='ls -laht'
+alias ll='ls -lh'
+alias lla='ls -lah'
 alias df='df -h'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
-
 alias ..='cd ..'
 alias ...='cd ../../../'
 alias ....='cd ../../../../'
@@ -69,6 +68,5 @@ function parse_git_dirty {
 		echo ""
 	fi
 }
-
 
 export PS1="\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[m\] \[\e[36m\]\`parse_git_branch\`\[\e[m\] \[\e[37m\]\\$\[\e[m\] "
