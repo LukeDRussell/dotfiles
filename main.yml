@@ -7,7 +7,7 @@
 
     - name: Create config folders
       file:
-        dest: "/home/luke/.config/{{ item }}/"
+        dest: "~/.config/{{ item }}/"
         state: directory
         recurse: true
       loop:
@@ -39,7 +39,7 @@
 
     - name: Link Global Git Config settings
       file:
-        dest: ~/.config/git/gitconfig
+        dest: ~/.gitconfig
         src: "{{ playbook_dir }}/gitconfig"
         state: link
         force: true
@@ -49,7 +49,7 @@
         repo: https://github.com/tmux-plugins/tpm
         dest: ~/.config/tmux/plugins/tpm
 
-    - name: Change MacOS settings
+    - name: MacOS tasks
       when: ansible_facts.os_family == "Darwin"
       block:
 
@@ -71,10 +71,45 @@
       - name: Disable some silly settings
         ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false"
 
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true; killall Finder"
+      - name: Allow quiting Finder
+        ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true"
 
-    - name: Install Apps for Fedora WSL2
+      - name: CLI Apps
+        community.general.homebrew:
+          update_homebrew: true
+          name:
+            - git
+            - ansible
+            - fish
+            - exa
+            - tmux
+            - jq
+            - tldr
+            - bat
+            - neovim
+            - python
+            - pipx
+            - poetry
+            - git-filter-repo
+
+      - name: GUI Apps
+        community.general.homebrew_cask:
+          name:
+            - drawio
+            - firefox
+            - iterm2
+            - microsoft-edge
+            - bitwarden
+            - visual-studio-code
+            - inkscape
+            - font-hack
+            - calibre
+
+    - name: Fedora WSL2 Tasks
+      when: 
+        - ansible_facts.distribution_file_variety is defined
+        - ansible_facts.distribution_file_variety == "RedHat"
+        - ansible_facts.distribution == "Generic" # Dunno why they used this
       become: True
       ansible.builtin.dnf:
         name:
@@ -92,9 +127,6 @@
           - poetry
           - git-filter-repo
         state: latest
-      when: 
-        - ansible_facts.distribution_file_variety == "RedHat"
-        - ansible_facts.distribution == "Generic" # Dunno why they used this
 
     - name: Other stuff to change manually
       debug:

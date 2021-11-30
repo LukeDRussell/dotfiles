@@ -18,7 +18,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 		SUDO=""
 	fi
 
-elif [[ "$OSTYPE" == "darwin"* ]]; then
+elif [[ "$OSTYPE" == "darwin".* ]]; then
 	CMD_PKG_INSTALL="brew"
 	# Makes sure Homebrew is ready to go
 	if [[ ! "command -v brew" ]]; then
