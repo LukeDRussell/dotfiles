@@ -74,10 +74,9 @@ function fish_prompt
     set_color normal
 
     # Line 2
-    echo
     if test -n "$VIRTUAL_ENV"
         printf "(%s) " (set_color blue)(basename $VIRTUAL_ENV)(set_color normal)
     end
-    printf '↪ '
+    printf ' ↪ '
     set_color normal
 end
