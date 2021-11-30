@@ -1,2 +1,2 @@
 # dotfiles
-My settings for bash, tmux, neovim, etc.
+My settings for fish, tmux, neovim, etc.
