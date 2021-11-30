@@ -1,0 +1,140 @@
+#!/usr/bin/env ansible-playbook
+
+---
+- name: Configure workstation
+  hosts: localhost
+  tasks:
+
+    - name: Create config folders
+      file:
+        dest: "~/.config/{{ item }}/"
+        state: directory
+        recurse: true
+      loop:
+        - tmux
+        - fish
+        - neovim
+        - git
+
+    - name: Link Tmux settings
+      file:
+        dest: ~/.config/tmux/tmux.conf
+        src: "{{ playbook_dir }}/tmux.conf"
+        state: link
+        force: true
+          
+    - name: Link Fish settings
+      file:
+        dest: ~/.config/fish/config.fish
+        src: "{{ playbook_dir }}/config.fish"
+        state: link
+        force: true
+
+    - name: Link Neovim settings
+      file:
+        dest: ~/.config/neovim/init.lua
+        src: "{{ playbook_dir }}/init.lua"
+        state: link
+        force: true
+
+    - name: Link Global Git Config settings
+      file:
+        dest: ~/.gitconfig
+        src: "{{ playbook_dir }}/gitconfig"
+        state: link
+        force: true
+
+    - name: Install tmux plugin manager
+      ansible.builtin.git:
+        repo: https://github.com/tmux-plugins/tpm
+        dest: ~/.config/tmux/plugins/tpm
+
+    - name: MacOS tasks
+      when: ansible_facts.os_family == "Darwin"
+      block:
+
+      - name: Disable some silly settings
+        ansible.builtin.command: "defaults write -g ApplePressAndHoldEnabled -bool false"
+
+      - name: Disable some silly settings
+        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false"
+
+      - name: Disable some silly settings
+        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false"
+
+      - name: Disable some silly settings
+        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false"
+
+      - name: Disable some silly settings
+        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false"
+
+      - name: Disable some silly settings
+        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false"
+
+      - name: Allow quiting Finder
+        ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true"
+
+      - name: CLI Apps
+        community.general.homebrew:
+          update_homebrew: true
+          name:
+            - git
+            - ansible
+            - fish
+            - exa
+            - tmux
+            - jq
+            - tldr
+            - bat
+            - neovim
+            - python
+            - pipx
+            - poetry
+            - git-filter-repo
+
+      - name: GUI Apps
+        community.general.homebrew_cask:
+          name:
+            - drawio
+            - firefox
+            - iterm2
+            - microsoft-edge
+            - bitwarden
+            - visual-studio-code
+            - inkscape
+            - font-hack
+            - calibre
+
+    - name: Fedora WSL2 Tasks
+      when: 
+        - ansible_facts.distribution_file_variety is defined
+        - ansible_facts.distribution_file_variety == "RedHat"
+        - ansible_facts.distribution == "Generic" # Dunno why they used this
+      become: True
+      ansible.builtin.dnf:
+        name:
+          - git
+          - ansible
+          - fish
+          - exa
+          - tmux
+          - jq
+          - tldr
+          - bat
+          - neovim
+          - python
+          - pipx
+          - poetry
+          - git-filter-repo
+        state: latest
+
+    - name: Other stuff to change manually
+      debug:
+        msg:
+          - "Other changes that either have to be done manually or I haven't been bothered to script:"
+          - "Change the default shell to fish"
+          - "Build the latest version of python using pyenv"
+          - "Set latest version of python to global with pyenv"
+          - "Set the default ITerm2 profile to use Tmux with `tmux new -A`"
+          - 'Test italics are woring in console with `echo -e "\e[3mitalic?\e[23m"`'
+
