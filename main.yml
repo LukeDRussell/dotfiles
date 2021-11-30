@@ -32,7 +32,7 @@
 
     - name: Link Neovim settings
       file:
-        dest: ~/.config/neovim/init.lua
+        dest: ~/.config/nvim/init.lua
         src: "{{ playbook_dir }}/init.lua"
         state: link
         force: true
