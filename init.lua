@@ -24,7 +24,7 @@ require'lspconfig'.pylsp.setup{}
 
 -- hardline status and tab line
 require'hardline'.setup {
-	theme = 'default'
+	theme = 'default';
 }
 
 require'marks'.setup {
@@ -48,11 +48,29 @@ require'orgmode'.setup {
 vim.opt.scrolloff = 5
 vim.opt.sidescroll= 1
 vim.opt.number = true
+
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
+vim.opt.expandtab = true
+
 vim.o.bg = 'dark'
 vim.opt.undofile = true
+
+vim.opt.wrap = true
+vim.opt.linebreak = true
+
+-- Key maps
+vim.g.mapleader = ' '
+
+local map = vim.api.nvim_set_keymap
+
+map('n', 'j', 'gj', {noremap=true})
+map('n', 'k', 'gk', {noremap=true})
+map('n', '<Down>', 'gj', {noremap=true})
+map('n', '<Up>', 'gk', {noremap=true})
+
+
 
 -- File type settings
 -- yaml
