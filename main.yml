@@ -15,6 +15,7 @@
         - fish
         - nvim
         - git
+        - wezterm
 
     - name: Link Tmux settings
       file:
@@ -34,6 +35,13 @@
       file:
         dest: ~/.config/nvim/init.lua
         src: "{{ playbook_dir }}/init.lua"
+        state: link
+        force: true
+
+    - name: Link WezTerm settings
+      file:
+        dest: ~/.config/wezterm/wezterm.lua
+        src: "{{ playbook_dir }}/wezterm.lua"
         state: link
         force: true
 
@@ -71,6 +79,6 @@
           - "Change the default shell to fish"
           - "Build the latest version of python using pyenv"
           - "Set latest version of python to global with pyenv"
-          - "Set the default ITerm2 profile to use Tmux with `tmux new -A`"
+          - "Set the terminal app to open Tmux by default with `tmux new -A`"
           - 'Test italics are woring in console with `echo -e "\e[3mitalic?\e[23m"`'
 

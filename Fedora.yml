@@ -9,10 +9,33 @@
     - tmux
     - jq
     - tldr
+    - python3-pip
+    - pipx
     - bat
     - neovim
     - python
     - poetry
     - git-filter-repo
+    - bpytop
+    - util-linux-user
     state: latest
 
+- name: Enable Copr repos
+  become: True
+  community.general.copr:
+    name: dawid/better_fonts
+    state: enabled
+
+- name: Install Copr packages
+  become: True
+  dnf:
+    name: 
+    - fontconfig-font-replacements
+    - fontconfig-enhanced-defaults
+    state: latest
+
+- debug: 
+    msg: "Install WezTerm manually: https://github.com/wez/wezterm/releases/download/20220101-133340-7edc5b5a/wezterm-20220101_133340_7edc5b5a-1.fc35.x86_64.rpm"
+
+- name: Set default shell
+  command: chsh -s /usr/bin/fish
