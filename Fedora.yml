@@ -1,0 +1,18 @@
+- name: Install Fedora packages
+  become: True
+  ansible.builtin.dnf:
+    name:
+    - git
+    - ansible
+    - fish
+    - exa
+    - tmux
+    - jq
+    - tldr
+    - bat
+    - neovim
+    - python
+    - poetry
+    - git-filter-repo
+    state: latest
+

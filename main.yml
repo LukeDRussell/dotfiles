@@ -13,7 +13,7 @@
       loop:
         - tmux
         - fish
-        - neovim
+        - nvim
         - git
 
     - name: Link Tmux settings
@@ -44,89 +44,25 @@
         state: link
         force: true
 
-    - name: Install tmux plugin manager
-      ansible.builtin.git:
-        repo: https://github.com/tmux-plugins/tpm
-        dest: ~/.config/tmux/plugins/tpm
+    - name: Fedora tasks
+      when: 
+      - ansible_facts.os_family == "RedHat"
+      - ansible_facts.distribution == "Fedora"
+      include_tasks:
+        file: "Fedora.yml"
 
     - name: MacOS tasks
       when: ansible_facts.os_family == "Darwin"
-      block:
-
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write -g ApplePressAndHoldEnabled -bool false"
-
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false"
-
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false"
-
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false"
-
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false"
-
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false"
-
-      - name: Allow quiting Finder
-        ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true"
-
-      - name: CLI Apps
-        community.general.homebrew:
-          update_homebrew: true
-          name:
-            - git
-            - ansible
-            - fish
-            - exa
-            - tmux
-            - jq
-            - tldr
-            - bat
-            - neovim
-            - python
-            - pipx
-            - poetry
-            - git-filter-repo
-
-      - name: GUI Apps
-        community.general.homebrew_cask:
-          name:
-            - drawio
-            - firefox
-            - iterm2
-            - microsoft-edge
-            - bitwarden
-            - visual-studio-code
-            - inkscape
-            - font-hack
-            - calibre
+      include_tasks:
+        file: "Darwin.yml"
 
     - name: Fedora WSL2 Tasks
       when: 
-        - ansible_facts.distribution_file_variety is defined
-        - ansible_facts.distribution_file_variety == "RedHat"
-        - ansible_facts.distribution == "Generic" # Dunno why they used this
-      become: True
-      ansible.builtin.dnf:
-        name:
-          - git
-          - ansible
-          - fish
-          - exa
-          - tmux
-          - jq
-          - tldr
-          - bat
-          - neovim
-          - python
-          - pipx
-          - poetry
-          - git-filter-repo
-        state: latest
+      - ansible_facts.distribution_file_variety is defined
+      - ansible_facts.distribution_file_variety == "RedHat"
+      - ansible_facts.distribution == "Generic" # Dunno why they used this
+      include_tasks:
+        file: "Fedora.yml"
 
     - name: Other stuff to change manually
       debug:
