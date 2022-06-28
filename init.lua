@@ -1,5 +1,8 @@
--- Make sure paq is installed
+-- Make sure paq is installed (Linux & MacOS)
 -- git clone --depth=1 https://github.com/savq/paq-nvim.git ~/.local/share/nvim/site/pack/paqs/start/paq-nvim
+
+-- Make sure paq is installed (Windows)
+-- git clone https://github.com/savq/paq-nvim.git "$env:LOCALAPPDATA\nvim-data\site\pack\paqs\start\paq-nvim"
 
 -- Use paq to install plugins
 require "paq" {
@@ -22,6 +25,25 @@ require "paq" {
 require'lspconfig'.pylsp.setup{}
 
 
+-- Treesitter
+require('orgmode').setup_ts_grammar()
+
+require'nvim-treesitter.configs'.setup {
+  -- If TS highlights are not enabled at all, or disabled via `disable` prop, highlighting will fallback to default Vim syntax highlighting
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
+  },
+  -- One of "all", "maintained" (parsers with maintainers), or a list of languages
+  ensure_installed = "maintained",
+}
+
+-- orgmode.nvim
+require'orgmode'.setup {
+	org_agenda_files = '~/Org/*';
+	org_default_notes_file = '~/Org/notes.org'
+}
+
 -- hardline status and tab line
 require'hardline'.setup {
 	theme = 'default';
@@ -34,12 +56,6 @@ require'marks'.setup {
 		next = "m<down>";
 		prev = "m<up>"
 	}
-}
-
--- orgmode.nvim
-require'orgmode'.setup {
-	org_agenda_files = '~/Notes/org/*';
-	org_default_notes_file = '~/Notes/org/notes.org'
 }
 
 

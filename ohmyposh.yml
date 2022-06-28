@@ -1,0 +1,62 @@
+---
+"$schema": https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
+blocks:
+- alignment: left
+  segments:
+  - type: root
+    style: plain
+    foreground: red
+    properties:
+      template: "  "
+  - foreground: green
+    properties:
+      template: "{{ .UserName }}"
+    style: powerline
+    type: session
+  - foreground: white
+    properties:
+      template: " @ "
+    style: powerline
+    type: session
+  - foreground: blue
+    properties:
+      template: "{{ .HostName }}"
+    style: powerline
+    type: session
+  - foreground: white
+    properties:
+      template: " in "
+    style: powerline
+    type: session
+  - foreground: "#56B6C2"
+    properties:
+      style: full
+      template: "{{ .Path }}"
+    style: plain
+    type: path
+  - background: "#95ffa4"
+    foreground: "#193549"
+    powerline_symbol: ""
+    properties:
+      template: " {{ .HEAD }} "
+    style: powerline
+    type: git
+  - background: "#906cff"
+    foreground: "#100e23"
+    powerline_symbol: ""
+    properties:
+      template: "  {{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}{{ .Venv }}
+        {{ end }}{{ .Full }}{{ end }} "
+    style: powerline
+    type: python
+  - background: "#ff8080"
+    foreground: "#ffffff"
+    powerline_symbol: ""
+    properties:
+      template: " {{ .Meaning }} "
+    style: powerline
+    type: exit
+  type: prompt
+final_space: true
+version: 1
+
