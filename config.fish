@@ -77,11 +77,11 @@ function fish_prompt
 
 		printf '%s' (fish_git_prompt)
 
-		# Line 2
     if fish_is_root_user
         set_color red
 		end
-    printf '\n ↪ '
+
+    printf ' ↪ '
     set_color normal
 end
 
