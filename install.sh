@@ -31,8 +31,7 @@ fi
 # Makes sure Ansible is ready to go
 if ! command -v ansible &> /dev/null ; then
 	echo "Installing Ansible..."
-	$SUDO $CMD_PKG_INSTALL install ansible ansible-collection-community-general -y
-	ansible-galaxy collection install community.general
+	$SUDO $CMD_PKG_INSTALL install ansible -y
 fi
 
 ansible-playbook main.yml -K

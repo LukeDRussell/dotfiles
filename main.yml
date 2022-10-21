@@ -15,7 +15,6 @@
         - fish
         - nvim
         - git
-        - wezterm
 
     - name: Link Tmux settings
       file:
@@ -38,13 +37,6 @@
         state: link
         force: true
 
-    - name: Link WezTerm settings
-      file:
-        dest: ~/.config/wezterm/wezterm.lua
-        src: "{{ playbook_dir }}/wezterm.lua"
-        state: link
-        force: true
-
     - name: Link Global Git Config settings
       file:
         dest: ~/.gitconfig
@@ -59,26 +51,24 @@
       include_tasks:
         file: "Fedora.yml"
 
-    - name: MacOS tasks
-      when: ansible_facts.os_family == "Darwin"
-      include_tasks:
-        file: "Darwin.yml"
-
     - name: Fedora WSL2 Tasks
       when: 
       - ansible_facts.distribution_file_variety is defined
       - ansible_facts.distribution_file_variety == "RedHat"
       - ansible_facts.distribution == "Generic" # Dunno why they used this
       include_tasks:
-        file: "Fedora.yml"
+        file: "Fedora-WSL.yml"
+
+    - name: MacOS tasks
+      when: ansible_facts.os_family == "Darwin"
+      include_tasks:
+        file: "Darwin.yml"
 
     - name: Other stuff to change manually
       debug:
         msg:
           - "Other changes that either have to be done manually or I haven't been bothered to script:"
           - "Change the default shell to fish"
-          - "Build the latest version of python using pyenv"
-          - "Set latest version of python to global with pyenv"
           - "Set the terminal app to open Tmux by default with `tmux new -A`"
           - 'Test italics are woring in console with `echo -e "\e[3mitalic?\e[23m"`'
 
