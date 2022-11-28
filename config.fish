@@ -29,7 +29,7 @@ end
 # exa
 if command -sq exa
   alias ls="exa"
-  alias ll="ls --long --header --git --classify --tree --level 1"
+  alias ll="ls --long --header --git --classify --tree --level 1 --group-directories-first"
   alias tree="ll --level 3 --ignore-glob=.git/ --color=always"
   abbr lla "ll --all"
   abbr llm "ll --sort=modified"
