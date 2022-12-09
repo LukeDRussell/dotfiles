@@ -30,13 +30,6 @@
         state: link
         force: true
 
-    - name: Link Neovim settings
-      file:
-        dest: ~/.config/nvim/init.lua
-        src: "{{ playbook_dir }}/init.lua"
-        state: link
-        force: true
-
     - name: Link Global Git Config settings
       file:
         dest: ~/.gitconfig

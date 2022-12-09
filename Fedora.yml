@@ -1,41 +1,33 @@
 - name: Install Fedora packages
-  become: True
+  become: yes
+  become_method: sudo
   ansible.builtin.dnf:
     name:
     - git
+    - git-filter-repo
     - ansible
     - fish
+    - util-linux-user
+    - neovim
+    - gcc-c++
+    - ripgrep
     - exa
     - tmux
     - jq
+    - bat
     - tldr
     - python3-pip
     - pipx
-    - bat
-    - neovim
-    - python
-    - poetry
-    - git-filter-repo
+    - python3-poetry
     - bpytop
-    - util-linux-user
     state: latest
 
-- name: Enable Copr repos
-  become: True
-  community.general.copr:
-    name: dawid/better_fonts
-    state: enabled
+- name: Install NvChad
+  ansible.builtin.shell:
+    cmd: "git clone https://github.com/NvChad/NvChad ~/.config/nvim --depth 1"
 
-- name: Install Copr packages
-  become: True
-  dnf:
-    name: 
-    - fontconfig-font-replacements
-    - fontconfig-enhanced-defaults
-    state: latest
+- name: Install PDM
+  ansible.builtin.shell:
+    cmd: "curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -"
 
-- debug: 
-    msg: "Install WezTerm manually: https://github.com/wez/wezterm/releases/download/20220101-133340-7edc5b5a/wezterm-20220101_133340_7edc5b5a-1.fc35.x86_64.rpm"
 
-- name: Set default shell
-  command: chsh -s /usr/bin/fish
