@@ -5,10 +5,47 @@
   hosts: localhost
   tasks:
 
-    - name: test sudo
-      become: true
-      debug: 
-        msg: "Message!"
+  - name: Fedora tasks
+    when: ansible_facts.distribution == "Fedora"
+    block:
+
+    - name: Update & Install packages with dnf
+      become: yes
+      become_method: sudo
+      when: ansible_become_password is defined
+      block:
+
+      - name: Update packages
+        package:
+          name: "*"
+          state: latest
+          update_cache: yes
+
+      - name: Install Fedora packages
+        package:
+          name:
+          - git
+          - git-filter-repo
+          - ansible
+          - fish
+          - util-linux-user
+          - neovim
+          - emacs
+          - gcc-c++
+          - ripgrep
+          - fd-find
+          - exa
+          - tmux
+          - jq
+          - bat
+          - tldr
+          - python3-pip
+          - pipx
+          - bpytop
+          state: present
+
+    - name: Add full Flathub repo
+      command: "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo"
 
     - name: Create config folders
       file:
@@ -40,184 +77,163 @@
         state: link
         force: true
 
-    - name: Fedora tasks
-      when: 
-      - ansible_facts.os_family == "RedHat"
-      - ansible_facts.distribution == "Fedora"
+    - name: Link Spacemacs settings
+      file:
+        dest: ~/.spacemacs
+        src: "{{ playbook_dir }}/.spacemacs"
+        state: link
+        force: true
+
+    - name: Python Development Manager (pdm)
       block:
-      - name: Update packages
-        become: yes
-        ansible.builtin.dnf:
-          name: "*"
-          state: latest
+      - name: Check if pdm is available
+        command: "which pdm"
+        register: check_pdm
+        ignore_errors: True
+        changed_when: False
 
-      - name: Install Fedora packages
-        become: yes
-        ansible.builtin.dnf:
-          name:
-          - git
-          - git-filter-repo
-          - ansible
-          - fish
-          - util-linux-user
-          - neovim
-          - gcc-c++
-          - ripgrep
-          - fd-find
-          - exa
-          - tmux
-          - jq
-          - bat
-          - tldr
-          - python3-pip
-          - pipx
-          - bpytop
+      - name: Install pdm
+        when: check_pdm.failed == true
+        ansible.builtin.shell:
+          cmd: "curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -"
+
+    - name: Install 1Password
+      when: ansible_become_password is defined
+      become: yes
+      become_method: sudo
+      block:
+      - name: Add 1Password repo key
+        rpm_key:
           state: present
+          key: https://downloads.1password.com/linux/keys/1password.asc
 
-      - name: Python Development Manager (pdm)
-        block:
-        - name: Check if pdm is available
-          command: "which pdm"
-          register: check_pdm
-          ignore_errors: True
-          changed_when: False
-
-        - name: Install pdm
-          when: check_pdm.failed == true
-          ansible.builtin.shell:
-            cmd: "curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -"
+      - name: Add 1Password repo
+        yum_repository:
+          name: 1password
+          description: 1password Stable Channel
+          baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
+          gpgcheck: yes
+          gpgkey: 
+          - https://downloads.1password.com/linux/keys/1password.asc 
 
       - name: Install 1Password
-        become: yes
-        become_method: sudo
-        block:
-        - name: Add 1Password repo key
-          rpm_key:
-            state: present
-            key: https://downloads.1password.com/linux/keys/1password.asc
-
-        - name: Add 1Password repo
-          yum_repository:
-            name: 1password
-            description: 1password Stable Channel
-            baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
-            gpgcheck: yes
-            gpgkey: 
-            - https://downloads.1password.com/linux/keys/1password.asc 
-
-        - name: Install 1Password
-          dnf:
-            name: 1password
-            state: latest
-
-      - name: Install Fonts
-        block:
-
-        - name: Ensure fonts directory exists
-          file:
-            path: "~/.fonts"
-            state: directory
-
-        - name: Check if Hack NF exists
-          stat:
-            path: "~/.fonts/Hack Regular Nerd Font Complete Mono.ttf"
-          register: font_hack_exists
-
-        - name: Download Hack
-          when: font_hack_exists.stat.exists == false
-          ansible.builtin.unarchive:
-            src: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.zip
-            dest: "{{ lookup('env', 'HOME') }}/.fonts/"
-            remote_src: yes
-
-    - name: Fedora WSL2 Tasks
-      when: 
-      - ansible_facts.distribution_file_variety is defined
-      - ansible_facts.distribution_file_variety == "RedHat"
-      - ansible_facts.distribution == "Generic" # Dunno why they used this
-      block:
-      - name: Install Fedora packages
-        become: True
-        ansible.builtin.dnf:
-          name:
-          - git
-          - git-filter-repo
-          - ansible
-          - python
-          - fish
-          - exa
-          - tmux
-          - jq
-          - tldr
-          - pipx
-          - bat
-          - neovim
-          - bpytop
-          - util-linux-user
+        dnf:
+          name: 1password
           state: latest
 
+    - name: Install Spacemacs
+      git:
+        repo: https://github.com/syl20bnr/spacemacs
+        dest: ~/.emacs.d
 
-    - name: MacOS tasks
-      when: ansible_facts.os_family == "Darwin"
+    - name: Install Fonts
       block:
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write -g ApplePressAndHoldEnabled -bool false"
 
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false"
+      - name: Ensure fonts directory exists
+        file:
+          path: "~/.fonts"
+          state: directory
 
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false"
+      - name: Check if Hack NF exists
+        stat:
+          path: "~/.fonts/Hack Regular Nerd Font Complete Mono.ttf"
+        register: font_hack_exists
 
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false"
+      - name: Download Hack
+        when: font_hack_exists.stat.exists == false
+        ansible.builtin.unarchive:
+          src: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.zip
+          dest: "{{ lookup('env', 'HOME') }}/.fonts/"
+          remote_src: yes
 
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false"
-
-      - name: Disable some silly settings
-        ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false"
-
-      - name: Allow quiting Finder
-        ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true"
-
-      - name: CLI Apps
-        community.general.homebrew:
-          update_homebrew: true
-          name:
-          - git
-          - ansible
-          - fish
-          - exa
-          - tmux
-          - jq
-          - tldr
-          - bat
-          - neovim
-          - python
-          - pipx
-          - poetry
-          - git-filter-repo
-
-      - name: GUI Apps
-        community.general.homebrew_cask:
-          name:
-          - drawio
-          - firefox
-          - iterm2
-          - microsoft-edge
-          - bitwarden
-          - visual-studio-code
-          - inkscape
-          - font-hack
-          - calibre
+  - name: Fedora WSL2 Tasks
+    when: 
+    - ansible_facts.distribution_file_variety is defined
+    - ansible_facts.distribution_file_variety == "RedHat"
+    - ansible_facts.distribution == "Generic" # Dunno why they used this
+    block:
+    - name: Install Fedora packages
+      become: True
+      ansible.builtin.dnf:
+        name:
+        - git
+        - git-filter-repo
+        - ansible
+        - python
+        - fish
+        - exa
+        - tmux
+        - jq
+        - tldr
+        - pipx
+        - bat
+        - neovim
+        - bpytop
+        - util-linux-user
+        state: latest
 
 
-    - name: Other stuff to change manually
-      debug:
-        msg:
-          - "Other changes that either have to be done manually or I haven't been bothered to script:"
-          - "Change the default shell to fish"
-          - "Set the terminal app to open Tmux by default with `tmux new -A`"
-          - 'Test italics are woring in console with `echo -e "\e[3mitalic?\e[23m"`'
+  - name: MacOS tasks
+    when: ansible_facts.os_family == "Darwin"
+    block:
+    - name: Disable some silly settings
+      ansible.builtin.command: "defaults write -g ApplePressAndHoldEnabled -bool false"
+
+    - name: Disable some silly settings
+      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false"
+
+    - name: Disable some silly settings
+      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false"
+
+    - name: Disable some silly settings
+      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false"
+
+    - name: Disable some silly settings
+      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false"
+
+    - name: Disable some silly settings
+      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false"
+
+    - name: Allow quiting Finder
+      ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true"
+
+    - name: CLI Apps
+      community.general.homebrew:
+        update_homebrew: true
+        name:
+        - git
+        - ansible
+        - fish
+        - exa
+        - tmux
+        - jq
+        - tldr
+        - bat
+        - neovim
+        - python
+        - pipx
+        - poetry
+        - git-filter-repo
+
+    - name: GUI Apps
+      community.general.homebrew_cask:
+        name:
+        - drawio
+        - firefox
+        - iterm2
+        - microsoft-edge
+        - bitwarden
+        - visual-studio-code
+        - inkscape
+        - font-hack
+        - calibre
+
+
+  - name: Other stuff to change manually
+    debug:
+      msg:
+        - "Other changes that either have to be done manually or I haven't been bothered to script:"
+        - "Change the default shell to fish"
+        - "Set the terminal app to open Tmux by default with `tmux new -A`"
+        - 'Test italics are woring in console with `echo -e "\e[3mitalic?\e[23m"`'
 
