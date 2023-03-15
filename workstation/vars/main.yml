@@ -1,0 +1,27 @@
+apps:
+    all:
+    - python
+    - pipx
+    - git
+    - git-filter-repo
+    - bat
+    - lsd
+    - tealdeer
+    - ripgrep
+    - fd-find
+    - microsoft-teams
+    - emacs
+    - neovim
+    posix:
+    - ansible
+    - tmux
+    - jq
+    - fish
+    linux:
+    - util-linux-user
+    - gcc-c++
+    macos:
+    - microsoft-office
+    windows:
+    - microsoft-office
+

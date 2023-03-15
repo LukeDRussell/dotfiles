@@ -1,0 +1,30 @@
+#!/usr/bin/env ansible-playbook
+
+---
+- name: Configure workstation
+  hosts: localhost
+  tasks:
+
+  - name: Fedora tasks
+    when: ansible_facts.distribution == "Fedora"
+    import_tasks: Fedora.yml
+
+  - name: Fedora WSL2 Tasks
+    when: 
+    - ansible_facts.distribution_file_variety is defined
+    - ansible_facts.distribution_file_variety == "RedHat"
+    - ansible_facts.distribution == "Generic" # Dunno why they used this
+    import_tasks: Fedora-WSL.yml
+
+  - name: MacOS tasks
+    when: ansible_facts.os_family == "Darwin"
+    import_tasks: MacOS.yml
+
+  - name: Other stuff to change manually
+    debug:
+      msg:
+        - "Other changes that either have to be done manually or I haven't been bothered to script:"
+        - "On MacOS change the default shell to fish"
+        - "Set the terminal app to open Tmux by default with `tmux new -A`"
+        - 'Test italics are woring in console with `echo -e "\e[3mitalic?\e[23m"`'
+

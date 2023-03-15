@@ -1,0 +1,122 @@
+- name: Update & Install packages with dnf
+  become: yes
+  become_method: sudo
+  when: ansible_become_password is defined
+  block:
+
+  - name: Update packages
+    package:
+      name: "*"
+      state: latest
+      update_cache: yes
+
+  - name: Install Fedora packages
+    package:
+      name: "{{ item }}"
+      state: present
+    loop:
+
+
+  - name: Add full Flathub repo
+    command: "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo"
+
+- name: Create config folders
+  file:
+    dest: "~/.config/{{ item }}/"
+    state: directory
+    recurse: true
+  loop:
+    - tmux
+    - fish
+
+- name: Link Tmux settings
+  file:
+    dest: ~/.config/tmux/tmux.conf
+    src: "{{ playbook_dir }}/tmux.conf"
+    state: link
+    force: true
+      
+- name: Link Fish settings
+  file:
+    dest: ~/.config/fish/config.fish
+    src: "{{ playbook_dir }}/config.fish"
+    state: link
+    force: true
+
+- name: Link Global Git Config settings
+  file:
+    dest: ~/.gitconfig
+    src: "{{ playbook_dir }}/gitconfig"
+    state: link
+    force: true
+
+- name: Link Spacemacs settings
+  file:
+    dest: ~/.spacemacs
+    src: "{{ playbook_dir }}/.spacemacs"
+    state: link
+    force: true
+
+- name: Python Development Manager (pdm)
+  block:
+  - name: Check if pdm is available
+    command: "which pdm"
+    register: check_pdm
+    ignore_errors: True
+    changed_when: False
+
+  - name: Install pdm
+    when: check_pdm.failed == true
+    ansible.builtin.shell:
+      cmd: "curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -"
+
+- name: Install 1Password
+  when: ansible_become_password is defined
+  become: yes
+  become_method: sudo
+  block:
+  - name: Add 1Password repo key
+    rpm_key:
+      state: present
+      key: https://downloads.1password.com/linux/keys/1password.asc
+
+  - name: Add 1Password repo
+    yum_repository:
+      name: 1password
+      description: 1password Stable Channel
+      baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
+      gpgcheck: yes
+      gpgkey: 
+      - https://downloads.1password.com/linux/keys/1password.asc 
+
+  - name: Install 1Password
+    dnf:
+      name: 1password
+      state: latest
+
+- name: Install Spacemacs
+  git:
+    repo: https://github.com/syl20bnr/spacemacs
+    dest: ~/.emacs.d
+
+- name: Install Fonts
+  block:
+
+  - name: Ensure fonts directory exists
+    file:
+      path: "~/.fonts"
+      state: directory
+
+  - name: Check if Hack NF exists
+    stat:
+      path: "~/.fonts/Hack Regular Nerd Font Complete Mono.ttf"
+    register: font_hack_exists
+
+  - name: Download Hack
+    when: font_hack_exists.stat.exists == false
+    ansible.builtin.unarchive:
+      src: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.zip
+      dest: "{{ lookup('env', 'HOME') }}/.fonts/"
+      remote_src: yes
+
+
