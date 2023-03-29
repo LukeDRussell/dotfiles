@@ -34,15 +34,23 @@
           - gcc-c++
           - ripgrep
           - fd-find
-          - exa
           - tmux
           - jq
           - bat
-          - tldr
           - python3-pip
           - pipx
           - bpytop
+          - lsd
+          - tealdeer
           state: present
+
+      - name: Remove retired Fedora packages
+        package:
+          name:
+          - exa
+          - tldr
+          - bpytop
+          state: absent
 
     - name: Add full Flathub repo
       command: "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo"
