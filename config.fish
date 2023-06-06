@@ -1,6 +1,7 @@
 # Disable welcome
 set -U fish_greeting
 
+
 # Enable vim-like 
 fish_vi_key_bindings
 set fish_cursor_default block
@@ -45,6 +46,8 @@ end
 if command -sq ansible
   alias play="ansible-playbook -e @~/.secrets.yml"
 end
+  
+alias python=python3
 
 # Git Abbreviations
 abbr -a gitco git checkout
@@ -85,3 +88,6 @@ function fish_prompt
     set_color normal
 end
 
+
+# Created by `pipx` on 2023-02-18 08:14:41
+set PATH $PATH /Users/Luke/.local/bin

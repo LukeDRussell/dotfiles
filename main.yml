@@ -184,6 +184,38 @@
   - name: MacOS tasks
     when: ansible_facts.os_family == "Darwin"
     block:
+    - name: Insall CLI Apps
+      community.general.homebrew:
+        update_homebrew: true
+        name:
+        - git
+        - git-filter-repo
+        - gitui
+        - python
+        - pipx
+        - ansible
+        - fish
+        - tmux
+        - neovim
+        - jq
+        - ripgrep
+        - fd
+        - exa
+        - bottom
+        - bat
+        - zoxide
+        - tldr
+
+    - name: Install GUI Apps
+      community.general.homebrew_cask:
+        name:
+        - drawio
+        - iterm2
+        - firefox
+        - microsoft-edge
+        - inkscape
+        - calibre
+
     - name: Disable some silly settings
       ansible.builtin.command: "defaults write -g ApplePressAndHoldEnabled -bool false"
 
@@ -204,37 +236,6 @@
 
     - name: Allow quiting Finder
       ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true"
-
-    - name: CLI Apps
-      community.general.homebrew:
-        update_homebrew: true
-        name:
-        - git
-        - ansible
-        - fish
-        - exa
-        - tmux
-        - jq
-        - tldr
-        - bat
-        - neovim
-        - python
-        - pipx
-        - poetry
-        - git-filter-repo
-
-    - name: GUI Apps
-      community.general.homebrew_cask:
-        name:
-        - drawio
-        - firefox
-        - iterm2
-        - microsoft-edge
-        - bitwarden
-        - visual-studio-code
-        - inkscape
-        - font-hack
-        - calibre
 
 
   - name: Other stuff to change manually
