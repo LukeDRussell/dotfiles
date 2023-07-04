@@ -12,7 +12,7 @@
     - name: Update & Install packages with dnf
       become: yes
       become_method: sudo
-      when: ansible_become_password is defined
+#      when: ansible_become_password is defined
       block:
 
       - name: Update packages
@@ -82,13 +82,6 @@
       file:
         dest: ~/.gitconfig
         src: "{{ playbook_dir }}/gitconfig"
-        state: link
-        force: true
-
-    - name: Link Spacemacs settings
-      file:
-        dest: ~/.spacemacs
-        src: "{{ playbook_dir }}/.spacemacs"
         state: link
         force: true
 
