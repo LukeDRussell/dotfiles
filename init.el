@@ -1,3 +1,6 @@
+;; Package Management - Elpaca
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defvar elpaca-installer-version 0.5)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -45,14 +48,48 @@
 ;; Block until current queue processed.
 (elpaca-wait)
 
-;;When installing a package which modifies a form used at the top-level
-;;(e.g. a package which adds a use-package key word),
-;;use `elpaca-wait' to block until that package has been installed/configured.
-;;For example:
-;;(use-package general :demand t)
-;;(elpaca-wait)
+;; Customizations - Built-ins
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(setq visible-bell t)
+(setq ring-bell-function 'ignore)
 
+(toggle-frame-fullscreen)
+(menu-bar-mode 1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(global-display-line-numbers-mode 1)
+
+;; Visuals
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq custom-safe-themes t)
+
+(use-package modus-themes)
+(use-package ef-themes)
+(use-package standard-themes)
+
+(use-package solarized-theme
+  :init
+  (setq solarized-use-more-italic t)
+  :config
+  (load-theme 'solarized-dark :no-confirm))
+
+;; Modal editing - Evil
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package evil
+  :init
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1))
+(elpaca-wait)
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+;; Keybinds
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package general
   :config
   (general-evil-setup)
@@ -73,38 +110,22 @@
     "bp" '(previous-buffer :wk "Previous buffer")
     )
 )
-  
-(use-package evil
-  :init
-  (setq evil-want-keybinding nil)
-  :config
-  (evil-mode 1)
-)
-(elpaca-wait)
-
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init)
-)
-
 (use-package which-key
   :init
   (which-key-mode)
-)
+  )
+
+;; Dired
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package dirvish
   :config
   (dirvish-override-dired-mode)
 )
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(inhibit-startup-screen t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
+;; Org-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (use-package toc-org
+      :commands toc-org-enable
+      :init (add-hook 'org-mode-hook 'toc-org-enable))
+  (use-package org-modern
+      :init (add-hook 'org-mode-hook 'global-org-modern-mode))
