@@ -48,6 +48,19 @@
 ;; Block until current queue processed.
 (elpaca-wait)
 
+
+;; My Functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun lr/toggle-line-numbering ()
+  "Cycle line style."
+  (interactive)
+  (cond
+   ((eq display-line-numbers nil) (setq display-line-numbers t))
+   ((eq display-line-numbers t) (setq display-line-numbers 'relative))
+   ((eq display-line-numbers 'relative) (setq display-line-numbers nil))))
+
+
 ;; Customizations - Built-ins
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -55,7 +68,7 @@
 (setq ring-bell-function 'ignore)
 
 (toggle-frame-fullscreen)
-(menu-bar-mode 1)
+(menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode 1)
@@ -95,37 +108,65 @@
   (general-evil-setup)
 
   ;; set up 'SPC' as the global leader key
-  (general-create-definer lr/leader-keys
+  (general-create-definer leader-def
     :states '(normal insert visual emacs)
     :keymaps 'override
     :prefix "SPC" ;; set leader
     :global-prefix "M-SPC" ;; access leader in insert mode
     )
 
-  (lr/leader-keys
-    "b" '(:ignore t :wk "buffer")
-    "bb" '(switch-to-buffer :wk "Switch buffer")
-    "bd" '(kill-this-buffer :wk "Kill this buffer")
-    "bn" '(next-buffer :wk "Next buffer")
-    "bp" '(previous-buffer :wk "Previous buffer")
-    )
-)
+    (leader-def
+    "b" '(:ignore t :wk "Buffers")
+	"b b" '(switch-to-buffer :wk "Switch buffer")
+	"b d" '(kill-this-buffer :wk "Kill this buffer")
+	"b n" '(next-buffer :wk "Next buffer")
+	"b p" '(previous-buffer :wk "Previous buffer")
+
+    "w" '(:ignore t :wk "Windows")
+
+    "o" '(:ignore t :wk "Open")
+
+    "t" '(:ignore t :wk "Toggle")
+	"t m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
+	"t f" '(toggle-frame-fullscreen :wk "Fullscreen")
+	"t l" '(lr/toggle-line-numbering :wk "Line numbers")
+
+    "h" '(:ignore t :wk "(h)elp")
+	"h a" '(apropos :wk "(a)propos")
+	"h f" '(describe-function :wk "(f)unction")
+	"h v" '(describe-variable :wk "(v)ariable")
+	"h m" '(info-emacs-manual :wk "(m)anual emacs")
+    ))
+
+(global-set-key (kbd "C-=") 'text-scale-increase)
+(global-set-key (kbd "C--") 'text-scale-decrease)
+
 (use-package which-key
   :init
   (which-key-mode)
-  )
-
+  :config
+  (setq which-key-allow-evil-operators t
+        which-key-idle-delay 0.7)
+)
 ;; Dired
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package dirvish
   :config
-  (dirvish-override-dired-mode)
-)
+  (dirvish-override-dired-mode))
 
 ;; Org-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (use-package toc-org
-      :commands toc-org-enable
-      :init (add-hook 'org-mode-hook 'toc-org-enable))
-  (use-package org-modern
-      :init (add-hook 'org-mode-hook 'global-org-modern-mode))
+(use-package toc-org
+    :commands toc-org-enable
+    :init (add-hook 'org-mode-hook 'toc-org-enable))
+(use-package org-modern
+  :init (add-hook 'org-mode-hook 'global-org-modern-mode)
+)
+;; Completion
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package corfu
+  :custom
+  (corfu-auto t)  
+  :init
+  (global-corfu-mode)
+)
