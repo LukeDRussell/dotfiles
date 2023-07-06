@@ -1,0 +1,50 @@
+- ansible.builtin.command: "defaults write -g ApplePressAndHoldEnabled -bool false"
+
+- name: Disable some silly settings
+  ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false"
+
+- name: Disable some silly settings
+  ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false"
+
+- name: Disable some silly settings
+  ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false"
+
+- name: Disable some silly settings
+  ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false"
+
+- name: Disable some silly settings
+  ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false"
+
+- name: Allow quiting Finder
+  ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true"
+
+- name: CLI Apps
+  community.general.homebrew:
+    update_homebrew: true
+    name:
+    - git
+    - ansible
+    - fish
+    - exa
+    - tmux
+    - jq
+    - tldr
+    - bat
+    - neovim
+    - python
+    - pipx
+    - poetry
+    - git-filter-repo
+
+- name: GUI Apps
+  community.general.homebrew_cask:
+    name:
+    - drawio
+    - firefox
+    - iterm2
+    - microsoft-edge
+    - bitwarden
+    - visual-studio-code
+    - inkscape
+    - font-hack
+    - calibre
