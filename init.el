@@ -60,41 +60,80 @@
    ((eq display-line-numbers t) (setq display-line-numbers 'relative))
    ((eq display-line-numbers 'relative) (setq display-line-numbers nil))))
 
-
 ;; Customizations - Built-ins
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setq visible-bell t)
 (setq ring-bell-function 'ignore)
 
+(setq inhibit-startup-screen t)
+
 (toggle-frame-fullscreen)
-(menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode 1)
 
-;; Visuals
+;; Fonts
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(set-frame-font "Hack Nerd Font 12" nil t)
+
+;; Themes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq custom-safe-themes t)
 
 (use-package modus-themes)
 (use-package ef-themes)
 (use-package standard-themes)
-
 (use-package solarized-theme
   :init
   (setq solarized-use-more-italic t)
   :config
   (load-theme 'solarized-dark :no-confirm))
 
+
+;; Mode line
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;(use-package telephone-line
+;;    :init (telephone-line-mode 1))
+
+(use-package doom-modeline
+    :custom
+    (setq doom-modeline-hud t
+	doom-modeline-height 50
+	doom-modeline-icon t
+	doom-modeline-major-mode-icon nil
+	doom-modeline-buffer-encoding nil
+	doom-modeline-percent-position '(-3 "")
+	doom-modeline-window-width-limit nil
+	doom-modeline-vcs-max-length 50)
+    (custom-set-faces
+    '(mode-line-active ((t (:family "Hack Nerd Font Propo"))))
+    '(mode-line-inactive ((t (:family "Hack Nerd Font Propo")))))
+  :init (doom-modeline-mode 1)
+)
+
+(use-package nerd-icons)
+
+(use-package dashboard
+  :config
+  (dashboard-setup-startup-hook))
+  (setq dashboard-startup-banner 'official
+	dashboard-center-content t
+	dashboard-display-icons-p t
+	dashboard-icon-type 'nerd-icons
+	dashboard-set-heading-icons t
+	dashboard-set-file-icons t
+	dashboard-set-footer nil
+	)
+
+
+
 ;; Modal editing - Evil
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package evil
-  :init
-  (setq evil-want-keybinding nil)
-  :config
-  (evil-mode 1))
-(elpaca-wait)
+  :init (setq evil-want-keybinding nil)
+  :config (evil-mode 1))
 
 (use-package evil-collection
   :after evil
@@ -170,3 +209,8 @@
   :init
   (global-corfu-mode)
 )
+
+(use-package projectile
+  :init (projectile-mode +1))
+(use-package page-break-lines
+  :init (global-page-break-lines-mode))
