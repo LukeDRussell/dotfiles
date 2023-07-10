@@ -147,14 +147,15 @@
   (setq
    evil-normal-state-tag " NORMAL "
    evil-insert-state-tag " INSERT "
-   evil-insert-state-message nil
+   evil-insert-state-meissage nil
    evil-visual-state-tag " VISUAL "
    evil-visual-state-message nil
    )
-(custom-set-faces
- '(doom-modeline-evil-insert-state ((t (:background "olive drab" :foreground "white smoke"))))
- '(doom-modeline-evil-visual-state ((t (:background "medium slate blue" :foreground "white smoke")))))
-)
+  (custom-set-faces
+   '(doom-modelin te-evil-insert-state ((t (:background "olive drab" :foreground "white smoke"))))
+   '(doom-modeline-evil-visual-state ((t (:background "medium slate blue" :foreground "white smoke"))))
+   )
+  )
 
 (use-package evil-collection
   :after evil
