@@ -1,0 +1,37 @@
+- name: Install common packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ common_packaged_apps }}"
+    state: present
+
+- name: Update packages
+  become: true
+  ansible.builtin.package:
+    name: "*"
+    state: latest
+    update_only: true
+    update_cache: true
+
+- name: Ensure fish is in the allowed shells
+  become: true
+  when:
+    - common_packaged_apps contains "fish"
+    - ansible_facts.distribution != "Windows"
+  block:
+
+    - name: Allow fish on MacOS
+      when: ansible_facts.distribution == "Darwin"
+      ansible.builtin.lineinfile:
+        path: /etc/shells
+        line: "/opt/homebrew/bin/fish"
+
+    - name: Tell user feature not yet implemented
+      when: ansible_facts.distribution not in ["Darwin"]
+      ansible.builtin.debug:
+        msg: "Not yet implemented. Supply a path to fish binary"
+
+- name: Install emacs plus
+  when: ansible_facts.distribution == "Darwin"
+  ansible.builtin.package:
+    name: "emacs-plus@29"
+    state: present

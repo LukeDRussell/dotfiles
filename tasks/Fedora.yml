@@ -1,0 +1,69 @@
+- name: Install | Update pdm as not available in Fedora packages
+  when:
+    - update_install is "yes"
+    - common_packaged_apps contains "pdm"
+  block:
+
+    - name: Check if pdm is already installed
+      ansible.builtin.command: "which pdm"
+      register: check_pdm
+      ignore_errors: true
+      changed_when: false
+
+    - name: Install pdm
+      when: check_pdm.failed
+      ansible.builtin.shell:
+        cmd: "curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -"
+
+    - name: Update pdm
+      when: check_pdm.failed == false
+      ansible.builtin.shell: "pdm self update"
+
+- name: Install | Update 1Password as not available in Fedora pacakges
+  when:
+    - update_install == "yes"
+    - common_gui_apps contains "1password"
+    - ansible_facts.distribution == "Fedora"
+  become: true
+  block:
+    - name: Add 1Password repo key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://downloads.1password.com/linux/keys/1password.asc
+
+    - name: Add 1Password repo
+      ansible.builtin.yum_repository:
+        name: 1password
+        description: 1password Stable Channel
+        baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
+        gpgcheck: true
+        gpgkey:
+          - https://downloads.1password.com/linux/keys/1password.asc
+
+    - name: Update & Install 1Password
+      ansible.builtin.package:
+        name: 1password
+        state: present
+
+- name: Install Nerd Fonts
+  when:
+    - ansible_facts.distribution == "Fedora"
+  block:
+
+    - name: Ensure fonts directory exists
+      ansible.builtin.file:
+        path: "~/.fonts"
+        state: directory
+        mode: "0600"
+
+    - name: Check if Hack NF exists
+      ansible.builtin.stat:
+        path: "~/.fonts/Hack Regular Nerd Font Complete Mono.ttf"
+      register: font_hack_exists
+
+    - name: Download Hack
+      when: not font_hack_exists.stat.exists
+      ansible.builtin.unarchive:
+        src: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.zip
+        dest: "{{ lookup('env', 'HOME') }}/.fonts/"
+        remote_src: true

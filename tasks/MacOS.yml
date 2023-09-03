@@ -1,0 +1,16 @@
+- name: Remove press and hold on keyboard
+  community.general.osx_defaults:
+    key: ApplePressAndHoldEnabled
+    type: bool
+    value: false
+  loop:
+    - NSAutomaticDashSubstitutionEnabled
+    - NSAutomaticCapitalizationEnabled
+    - NSAutomaticQuoteSubstitutionEnabled
+    - NSAutomaticSpellingCorrectionEnabled
+    - QuitMenuItem
+
+- name: Change default shell
+  ansible.builtin.user:
+    user: "{{ ansible_user_id }}"
+    shell: "/opt/homebrew/bin/fish"
