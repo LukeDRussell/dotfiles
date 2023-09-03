@@ -3,239 +3,76 @@
 ---
 - name: Configure workstation
   hosts: localhost
+  vars:
+    common_packaged_apps:
+      - ansible
+      - bat
+      - bottom
+      - calibre
+      - drawio
+      - fd
+      - fish
+      - firefox
+      - git
+      - gitui
+      - git-filter-repo
+      - inkscape
+      - jq
+      - lsd
+      - neovim
+      - pdm
+      - pipx
+      - python
+      - ripgrep
+      - tmux
+      - tealdeer
+      - zoxide
+    different_apps:
+      - 1password
+      - emacs
+      - fd
+      - iterm2
+      - onedrive
+      - util-linux-user
+      - font-hack-nerd-font
+
+  vars_prompt:
+
+    - name: update_install
+      prompt: "Update & Install packages (requires -K flag)? [yes | no]"
+      default: "no"
+
+    - name: global_git
+      prompt: "Link global git settings with personal email address? [yes | no]"
+      default: "no"
+
   tasks:
+    - name: Update & Install packages
+      when:
+        - update_install == "true"
+        - ansible_become_password
+      ansible.builtin.include_tasks:
+        file: "tasks/update_install.yml"
 
-  - name: Fedora tasks
-    when: ansible_facts.distribution == "Fedora"
-    block:
+    - name: Tasks for unix-like operating systems
+      when: ansible_facts.distribution != "Windows"
+      ansible.builtin.include_tasks:
+        file: "tasks/Unix_likes.yml"
 
-    - name: Update & Install packages with dnf
-      become: yes
-      become_method: sudo
-#      when: ansible_become_password is defined
-      block:
+    - name: Fedora tasks
+      when: ansible_facts.distribution == "Fedora"
+      ansible.builtin.include_tasks:
+        file: "tasks/Fedora.yml"
 
-      - name: Update packages
-        package:
-          name: "*"
-          state: latest
-          update_cache: yes
+    - name: WSL2 Fedora tasks
+      when:
+        - ansible_facts.distribution_file_variety is defined
+        - ansible_facts.distribution_file_variety == "RedHat"
+        - ansible_facts.distribution == "Generic" # Dunno why they used this
+      ansible.builtin.include_tasks:
+        file: "tasks/Fedora.yml"
 
-      - name: Install Fedora packages
-        package:
-          name:
-          - git
-          - git-filter-repo
-          - ansible
-          - fish
-          - util-linux-user
-          - neovim
-          - emacs
-          - gcc-c++
-          - ripgrep
-          - fd-find
-          - tmux
-          - jq
-          - bat
-          - python3-pip
-          - pipx
-          - bpytop
-          - lsd
-          - tealdeer
-          state: present
-
-      - name: Remove retired Fedora packages
-        package:
-          name:
-          - exa
-          - tldr
-          - bpytop
-          state: absent
-
-    - name: Add full Flathub repo
-      command: "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo"
-
-    - name: Create config folders
-      file:
-        dest: "~/.config/{{ item }}/"
-        state: directory
-        recurse: true
-      loop:
-        - tmux
-        - fish
-
-    - name: Link Tmux settings
-      file:
-        dest: ~/.config/tmux/tmux.conf
-        src: "{{ playbook_dir }}/tmux.conf"
-        state: link
-        force: true
-          
-    - name: Link Fish settings
-      file:
-        dest: ~/.config/fish/config.fish
-        src: "{{ playbook_dir }}/config.fish"
-        state: link
-        force: true
-
-    - name: Link Global Git Config settings
-      file:
-        dest: ~/.gitconfig
-        src: "{{ playbook_dir }}/gitconfig"
-        state: link
-        force: true
-
-    - name: Python Development Manager (pdm)
-      block:
-      - name: Check if pdm is available
-        command: "which pdm"
-        register: check_pdm
-        ignore_errors: True
-        changed_when: False
-
-      - name: Install pdm
-        when: check_pdm.failed == true
-        ansible.builtin.shell:
-          cmd: "curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -"
-
-    - name: Install 1Password
-      when: ansible_become_password is defined
-      become: yes
-      become_method: sudo
-      block:
-      - name: Add 1Password repo key
-        rpm_key:
-          state: present
-          key: https://downloads.1password.com/linux/keys/1password.asc
-
-      - name: Add 1Password repo
-        yum_repository:
-          name: 1password
-          description: 1password Stable Channel
-          baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
-          gpgcheck: yes
-          gpgkey: 
-          - https://downloads.1password.com/linux/keys/1password.asc 
-
-      - name: Install 1Password
-        dnf:
-          name: 1password
-          state: latest
-
-    - name: Install Spacemacs
-      git:
-        repo: https://github.com/syl20bnr/spacemacs
-        dest: ~/.emacs.d
-
-    - name: Install Fonts
-      block:
-
-      - name: Ensure fonts directory exists
-        file:
-          path: "~/.fonts"
-          state: directory
-
-      - name: Check if Hack NF exists
-        stat:
-          path: "~/.fonts/Hack Regular Nerd Font Complete Mono.ttf"
-        register: font_hack_exists
-
-      - name: Download Hack
-        when: font_hack_exists.stat.exists == false
-        ansible.builtin.unarchive:
-          src: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.zip
-          dest: "{{ lookup('env', 'HOME') }}/.fonts/"
-          remote_src: yes
-
-  - name: Fedora WSL2 Tasks
-    when: 
-    - ansible_facts.distribution_file_variety is defined
-    - ansible_facts.distribution_file_variety == "RedHat"
-    - ansible_facts.distribution == "Generic" # Dunno why they used this
-    block:
-    - name: Install Fedora packages
-      become: True
-      ansible.builtin.dnf:
-        name:
-        - git
-        - git-filter-repo
-        - ansible
-        - python
-        - fish
-        - exa
-        - tmux
-        - jq
-        - tldr
-        - pipx
-        - bat
-        - neovim
-        - bpytop
-        - util-linux-user
-        state: latest
-
-
-  - name: MacOS tasks
-    when: ansible_facts.os_family == "Darwin"
-    block:
-    - name: Insall CLI Apps
-      community.general.homebrew:
-        update_homebrew: true
-        name:
-        - git
-        - git-filter-repo
-        - gitui
-        - python
-        - pipx
-        - ansible
-        - fish
-        - tmux
-        - neovim
-        - jq
-        - ripgrep
-        - fd
-        - exa
-        - bottom
-        - bat
-        - zoxide
-        - tldr
-
-    - name: Install GUI Apps
-      community.general.homebrew_cask:
-        name:
-        - drawio
-        - iterm2
-        - firefox
-        - microsoft-edge
-        - inkscape
-        - calibre
-
-    - name: Disable some silly settings
-      ansible.builtin.command: "defaults write -g ApplePressAndHoldEnabled -bool false"
-
-    - name: Disable some silly settings
-      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false"
-
-    - name: Disable some silly settings
-      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false"
-
-    - name: Disable some silly settings
-      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false"
-
-    - name: Disable some silly settings
-      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false"
-
-    - name: Disable some silly settings
-      ansible.builtin.command: "defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false"
-
-    - name: Allow quiting Finder
-      ansible.builtin.command: "defaults write com.apple.finder QuitMenuItem -bool true"
-
-
-  - name: Other stuff to change manually
-    debug:
-      msg:
-        - "Other changes that either have to be done manually or I haven't been bothered to script:"
-        - "Change the default shell to fish"
-        - "Set the terminal app to open Tmux by default with `tmux new -A`"
-        - 'Test italics are woring in console with `echo -e "\e[3mitalic?\e[23m"`'
-
+    - name: MacOS tasks
+      when: ansible_facts.distribution == "MacOSX"
+      ansible.builtin.include_tasks:
+        file: "tasks/MacOS.yml"

@@ -1,0 +1,36 @@
+- name: Create .config folders
+  ansible.builtin.file:
+    dest: "~/.config/{{ item }}/"
+    state: directory
+    recurse: true
+  loop:
+    - tmux
+    - fish
+    - emacs
+
+- name: Link Tmux settings
+  ansible.builtin.file:
+    dest: ~/.config/tmux/tmux.conf
+    src: "{{ playbook_dir }}/tmux.conf"
+    state: link
+    force: true
+
+- name: Link Fish settings
+  ansible.builtin.file:
+    dest: ~/.config/fish/config.fish
+    src: "{{ playbook_dir }}/config.fish"
+    state: link
+    force: true
+
+- name: Link emacs settings
+  ansible.builtin.file:
+    dest: ~/.config/emacs
+    src: "{{ playbook_dir }}/emacs"
+
+- name: Link Global Git Config settings
+  when: global_git == "yes"
+  ansible.builtin.file:
+    dest: ~/.gitconfig
+    src: "{{ playbook_dir }}/gitconfig"
+    state: link
+    force: true
