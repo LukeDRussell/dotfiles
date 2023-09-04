@@ -10,7 +10,6 @@
       - bottom
       - calibre
       - drawio
-      - fd
       - fish
       - firefox
       - git
@@ -27,14 +26,20 @@
       - tmux
       - tealdeer
       - zoxide
-    different_apps:
-      - 1password
-      - emacs
+    brew_apps:
+      - emacs-plus@29
       - fd
+      - font-hack-nerd-font
+      - cmake
+    brew_casks:
+      - 1password
       - iterm2
       - onedrive
+    fedora_apps:
+      - 1password
+      - fd-find
+      - emacs
       - util-linux-user
-      - font-hack-nerd-font
 
   vars_prompt:
 
@@ -47,17 +52,6 @@
       default: "no"
 
   tasks:
-    - name: Update & Install packages
-      when:
-        - update_install == "true"
-        - ansible_become_password
-      ansible.builtin.include_tasks:
-        file: "tasks/update_install.yml"
-
-    - name: Tasks for unix-like operating systems
-      when: ansible_facts.distribution != "Windows"
-      ansible.builtin.include_tasks:
-        file: "tasks/Unix_likes.yml"
 
     - name: Fedora tasks
       when: ansible_facts.distribution == "Fedora"
@@ -76,3 +70,8 @@
       when: ansible_facts.distribution == "MacOSX"
       ansible.builtin.include_tasks:
         file: "tasks/MacOS.yml"
+
+    - name: Configs for all unix-like OSs
+      when: ansible_facts.distribution != "Windows"
+      ansible.builtin.include_tasks:
+        file: "tasks/Unix_likes.yml"

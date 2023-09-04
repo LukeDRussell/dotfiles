@@ -82,27 +82,20 @@
  inhibit-startup-screen t
 )
 
-(toggle-frame-fullscreen)
 (tool-bar-mode -1)
-(menu-bar-mode -1)
+(menu-bar-mode 1)
 (scroll-bar-mode -1)
 
 
 ;; Fonts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(set-frame-font "Hack Nerd Font 12" nil t)
+(set-frame-font "Hack Nerd Font 14" nil t)
 
 ;; Themes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package modus-themes)
-(use-package standard-themes)
 (use-package ef-themes
   :init
-  (if (string-match-p
-       "dark"
-       (shell-command-to-string "gsettings get org.gnome.desktop.interface color-scheme"))
-      (ef-themes-select 'ef-autumn)
-    (ef-themes-select 'ef-spring))
+    (ef-themes-select 'ef-autumn)
 )
 
 ;; Mode line
@@ -194,7 +187,7 @@
 	"q r" '(restart-emacs :wk "Restart emacs")
 	"q n" '(restart-emacs-start-new-emacs :wk "New emacs")
 	"q q" '(save-buffers-kill-terminal :wk "Quit emacs")
-    
+
     "u" '(:ignore t :wk "User Interface")
 	"u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
 	"u l" '(lr/toggle-line-numbering :wk "Line numbers")
@@ -221,6 +214,10 @@
 
 ;; Org-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq org-directory "~/Notes/"
+      org-refile-targets org-directory
+      org-agenda-files (list org-directory))
 
 (use-package toc-org
     :commands toc-org-enable
@@ -277,3 +274,18 @@
 		 (reusable-frames . visible)
 		 (window-height . 0.3))))
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("2698856af1babf094cf3779d6eacfb49e1edce39a9421844fcad971c92031fe3" default))
+ '(safe-local-variable-values '((git-commit-major-mode . git-commit-elisp-text-mode))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(doom-modeline-evil-insert-state ((t (:background "olive drab" :foreground "white smoke"))))
+ '(doom-modeline-evil-visual-state ((t (:background "medium slate blue" :foreground "white smoke")))))

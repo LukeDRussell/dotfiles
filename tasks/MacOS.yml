@@ -1,3 +1,14 @@
+- name: Install packages
+  community.general.homebrew:
+    update_homebrew: true
+    name: "{{ common_packaged_apps + brew_apps + brew_casks }}"
+    state: present
+
+- name: Install MacOS apps
+  ansible.builtin.package:
+    name: macos_apps
+    state: present
+
 - name: Remove press and hold on keyboard
   community.general.osx_defaults:
     key: ApplePressAndHoldEnabled

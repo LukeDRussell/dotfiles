@@ -1,3 +1,17 @@
+- name: Install common packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ common_packaged_apps }}"
+    state: present
+
+- name: Update packages
+  become: true
+  ansible.builtin.package:
+    name: "*"
+    state: latest
+    update_only: true
+    update_cache: true
+
 - name: Install | Update pdm as not available in Fedora packages
   when:
     - update_install is "yes"

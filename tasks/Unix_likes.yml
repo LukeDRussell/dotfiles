@@ -22,10 +22,19 @@
     state: link
     force: true
 
-- name: Link emacs settings
+- name: Link emacs init.el
   ansible.builtin.file:
-    dest: ~/.config/emacs
-    src: "{{ playbook_dir }}/emacs"
+    dest: ~/.config/emacs/init.el
+    src: "{{ playbook_dir }}/init.el"
+    state: link
+    force: true
+
+- name: Link emacs early-init.el
+  ansible.builtin.file:
+    dest: ~/.config/emacs/early-init.el
+    src: "{{ playbook_dir }}/early-init.el"
+    state: link
+    force: true
 
 - name: Link Global Git Config settings
   when: global_git == "yes"
