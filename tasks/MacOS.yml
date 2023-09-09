@@ -1,20 +1,28 @@
 - name: Install packages
   community.general.homebrew:
-    update_homebrew: true
-    name: "{{ common_packaged_apps + brew_apps + brew_casks }}"
+    name: "{{ common_packaged_apps + brew_apps }}"
     state: present
 
-- name: Install MacOS apps
-  ansible.builtin.package:
-    name: macos_apps
+- name: Upgrade packages
+  community.general.homebrew:
+    upgrade_all: true
+
+- name: Install casks
+  community.general.homebrew_cask:
+    name: "{{ brew_casks }}"
     state: present
 
-- name: Remove press and hold on keyboard
+- name: Upgrade casks
+  community.general.homebrew_cask:
+    upgrade_all: true
+
+- name: Turn off MacOS defaults (booleans)
   community.general.osx_defaults:
-    key: ApplePressAndHoldEnabled
+    key: "{{ item }}"
     type: bool
     value: false
   loop:
+    - ApplePressAndHoldEnabled
     - NSAutomaticDashSubstitutionEnabled
     - NSAutomaticCapitalizationEnabled
     - NSAutomaticQuoteSubstitutionEnabled

@@ -24,14 +24,23 @@
       ignore_errors: true
       changed_when: false
 
-    - name: Install pdm
+    - name: Downlaod pdm install script
       when: check_pdm.failed
-      ansible.builtin.shell:
-        cmd: "curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -"
+      changed_when: always
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py
+        dest: /tmp/install-pdm.py
+        mode: "0600"
+
+    - name: Install pdm from script
+      when: check_pdm.failed
+      changed_when: always
+      ansible.builtin.command: "python /tmp/install-pdm.py"
 
     - name: Update pdm
-      when: check_pdm.failed == false
-      ansible.builtin.shell: "pdm self update"
+      when: not check_pdm.failed
+      ansible.builtin.command: "pdm self update"
+      changed_when: stdout contains "Already up-to-date"
 
 - name: Install | Update 1Password as not available in Fedora pacakges
   when:

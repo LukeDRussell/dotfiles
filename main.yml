@@ -8,17 +8,14 @@
       - ansible
       - bat
       - bottom
-      - calibre
-      - drawio
       - fish
-      - firefox
       - git
       - gitui
       - git-filter-repo
-      - inkscape
       - jq
       - lsd
       - neovim
+      - pandoc
       - pdm
       - pipx
       - python
@@ -29,12 +26,35 @@
     brew_apps:
       - emacs-plus@29
       - fd
-      - font-hack-nerd-font
       - cmake
+      - fheroes2
     brew_casks:
       - 1password
+      - calibre
+      - drawio
+      - firefox
+      - font-hack-nerd-font
+      - inkscape
       - iterm2
       - onedrive
+      - github
+      - logseq
+      - gimp
+      - signal
+      - steam
+      - heroic
+      - wireshark
+      - logi-options-plus
+      - linearmouse
+      - rectangle
+      - kindle
+      - the-unarchiver
+      - krita
+      - kicad
+      - via
+      - vial
+      - visual-studio-code
+
     fedora_apps:
       - 1password
       - fd-find
@@ -46,6 +66,7 @@
     - name: update_install
       prompt: "Update & Install packages (requires -K flag)? [yes | no]"
       default: "no"
+      private: false
 
     - name: global_git
       prompt: "Link global git settings with personal email address? [yes | no]"
