@@ -1,9 +1,8 @@
-;; Package Sources
+;; Packaging
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-(add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "https://stable.melpa.org/packages/"))
 (package-initialize)
 
 (unless (package-installed-p 'use-package)
@@ -40,10 +39,28 @@
 (menu-bar-mode 1)
 (scroll-bar-mode -1)
 
-
 ;; Fonts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(set-frame-font "Hack Nerd Font 14" nil t)
+
+(cond
+ ((find-font (font-spec :name "Hack Nerd Font"))
+  (set-frame-font "Hack Nerd Font 14" nil t)))
+
+
+;; External Packages
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; use-package instructions
+;; :init - Always run before package is loaded. Slows down startup.
+;; :commands - Lazy loads a placeholder for a command, so the package can be loaded on demand.
+;;
+;; :bind - Shortcut macro, bind a key combo to a command (see above). Can put a description in the binding for which-key
+;;     ("C-:" ("Jump to char" . avy-goto-char)
+;;             "M-g f" ("Jump to line" . avy-goto-line)))
+;;
+;; :autoload - used for non-interactive functions.
+;; :custom - Personal customizations. Not functionally different to :config. Equivelant to useing emacs' customize-option.
+;; :config - Run after loading. Can nest other packages inside this with (use-package ...).
 
 
 ;; Themes
@@ -54,23 +71,26 @@
     (ef-themes-select 'ef-autumn)
 )
 
-;; Mode line
+;; Visuals
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
-  :custom
-  (mode-line-percent-position nil)
-  (doom-modeline-buffer-encoding nil)
-  (doom-modeline-vcs-max-length 30)
-  (doom-modeline-modal-icon nil)
+  :config
+  (setq
+	mode-line-percent-position nil
+	doom-modeline-buffer-encoding nil
+	doom-modeline-vcs-max-length 30
+	doom-modeline-modal-icon nil
+  )
 )
-
 
 (use-package nerd-icons
-  :custom
-  (nerd-icons-font-family "Hack Nerd Font")
-)
+  :config
+  (cond
+    ((find-font (font-spec :name "Hack Nerd Font"))
+     (setq nerd-icons-font-family "Hack Nerd Font")))
+  )
 
 (use-package dashboard
   :after nerd-icons
@@ -98,12 +118,15 @@
    evil-insert-state-tag " INSERT "
    evil-insert-state-message nil
    evil-visual-state-tag " VISUAL "
-   evil-visual-state-message nil
    )
+  :custom
+   evil-visual-state-message nil
+)
 (custom-set-faces
  '(doom-modeline-evil-insert-state ((t (:background "olive drab" :foreground "white smoke"))))
- '(doom-modeline-evil-visual-state ((t (:background "medium slate blue" :foreground "white smoke")))))
+ '(doom-modeline-evil-visual-state ((t (:background "medium slate blue" :foreground "white smoke"))))
 )
+
 
 (use-package evil-collection
   :after evil
@@ -126,15 +149,19 @@
     :global-prefix "M-SPC" ;; access leader in insert mode
     )
 
+  (leader-def ;; Leader sequences
 
-;; Try not to replicate vim keybinds, as which-key should help learn them.
-    (leader-def
     "b" '(:ignore t :wk "Buffers")
-	"b b" '(switch-to-buffer :wk "Switch to named...")
-	"b m" '(buffer-menu-other-window :wk "Menu")
-	"b d" '(kill-this-buffer :wk "Close this buffer")
+	"b b" '(switch-to-buffer :wk "Buffer named x")
+	"b m" '(buffer-menu-other-window :wk "Buffer menu")
+	"b d" '(kill-this-buffer :wk "Delete buffer")
 	"b n" '(next-buffer :wk "Next buffer")
 	"b p" '(previous-buffer :wk "Previous buffer")
+	"b l" '(last-buffer :wk "Last buffer")
+
+    "w" '(:ignore t :wk "Windows")
+	"w d" '(evil-quit) :wk "Delete"
+	"w l" '(window-right) :wk "Focus left"
 
     "o" '(:ignore t :wk "Open")
 	"o t" '(vterm-toggle :wk "Terminal")
