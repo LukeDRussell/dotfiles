@@ -13,6 +13,7 @@ set fish_vi_force_cursor
 # Add user installed binaries to path
 fish_add_path ~/.local/bin/
 fish_add_path ~/.pyenv/bin/
+fish_add_path 
 
 # Pyenv
 if command -sq pyenv
@@ -26,11 +27,13 @@ if command -sq nvim
   alias vim=nvim
 end
 
+if command -sq gls
+  alias ls="gls"
+end
 
-# exa
-if command -sq exa
-  alias ls="exa"
-  alias ll="ls --long --header --git --classify --tree --level 1 --group-directories-first"
+# lsd
+if command -sq lsd
+  alias ll="lsd --long --header --git --classify --group-directories-first"
   alias tree="ll --level 3 --ignore-glob=.git/ --color=always"
   abbr lla "ll --all"
   abbr llm "ll --sort=modified"
@@ -41,6 +44,7 @@ else
   alias llm="ls --sort=modified"
   alias lls="ls --sort=size"
 end
+
 
 # Use "play" to pull credentials from ~
 if command -sq ansible

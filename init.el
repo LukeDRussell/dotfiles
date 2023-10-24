@@ -1,96 +1,286 @@
-;; Packaging
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://stable.melpa.org/packages/"))
-(package-initialize)
-
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
-
+;;; init.el --- Emacs configuration -*- lexical-binding: t -*-
 
 ;; My Functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun lr/toggle-line-numbering ()
-  "Cycle line style."
+(defun lr/cycle-line-number-style ()
+  "Cycles through the line styles I like."
   (interactive)
   (cond
    ((eq display-line-numbers nil) (setq display-line-numbers t))
    ((eq display-line-numbers t) (setq display-line-numbers 'relative))
    ((eq display-line-numbers 'relative) (setq display-line-numbers nil))))
 
+;; Settings
 
-;; Customizations - Built-ins
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Performance tweaks for modern machines.
+(setq gc-cons-threshold 100000000) ; 100 mb
+(setq read-process-output-max (* 1024 1024)) ; 1mb
 
-(setq
- visible-bell t
- ring-bell-function 'ignore
- inhibit-startup-screen t
- display-line-numbers 'relative
-)
-
+;; The tool bar is ugly, turn it off.
 (tool-bar-mode -1)
-(menu-bar-mode 1)
-(scroll-bar-mode -1)
 
-;; Fonts
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;; Set the default font, ensuring it exists.
 (cond
- ((find-font (font-spec :name "Hack Nerd Font"))
-  (set-frame-font "Hack Nerd Font 14" nil t)))
+  ((find-font (font-spec :name "Hack Nerd Font"))
+   (set-face-attribute 'default nil :font "Hack Nerd Font" :height 160)))
+
+;; Add unique buffer names in the minibuffer where there are many identical files.
+(require 'uniquify)
+
+;; Automatically insert closing parens
+(electric-pair-mode t)
+
+;; Visualize matching parens
+(show-paren-mode 1)
+
+;; Prefer spaces to tabs
+(setq-default indent-tabs-mode nil)
+
+;; Automatically save your place in files
+(save-place-mode t)
+
+;; Save history in minibuffer to keep recent commands easily accessible
+(savehist-mode t)
+
+;; Keep track of open files
+(recentf-mode t)
+
+;; Keep files up-to-date when they change outside Emacs
+(global-auto-revert-mode t)
 
 
-;; External Packages
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; use-package instructions
-;; :init - Always run before package is loaded. Slows down startup.
-;; :commands - Lazy loads a placeholder for a command, so the package can be loaded on demand.
+;; Display line numbers only when in programming modes
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
+
+;; The `setq' special form is used for setting variables. Remember
+;; that you can look up these variables with "C-h v variable-name".
+(setq uniquify-buffer-name-style 'forward
+      window-resize-pixelwise t
+      frame-resize-pixelwise t
+      load-prefer-newer t
+      backup-by-copying t
+      ;; Backups are placed into your Emacs directory, e.g. ~/.config/emacs/backups
+      backup-directory-alist `(("." . ,(concat user-emacs-directory "backups")))
+      visible-bell t
+      ring-bell-function 'ignore
+      display-line-numbers 'relative
+      inhibit-startup-screen t
+      insert-directory-program "gls"
+      ;; Keep dired up-to-date with files on disk
+      global-auto-revert-non-file-buffers t
+
+      ;; Ignore these regex paths from recent files
+      recentf-exclude
+            '(
+              "/opt/homebrew"
+              (recentf-expand-file-name "~/.config/emacs/elpa") 
+              (recentf-expand-file-name "~/.config/emacs/.cache/treemacs-persist-at-last-error")
+              "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'"
+              )
+            )
+
+;; Bring in package utilities so we can install packages from the web.
+(require 'package)
+
+;; use-package should assume 'ensure'
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
+
+
+;; Add MELPA, an unofficial (but well-curated) package registry to the
+;; list of accepted package registries. By default Emacs only uses GNU
+;; ELPA and NonGNU ELPA, https://elpa.gnu.org/ and
+;; https://elpa.nongnu.org/ respectively.
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+
+;; Add the :vc keyword to use-package, making it easy to install
+;; packages directly from git repositories.
+(unless (package-installed-p 'vc-use-package)
+  (package-vc-install "https://github.com/slotThe/vc-use-package"))
+(require 'vc-use-package)
+
+;; A quick primer on the `use-package' function (refer to
+;; "C-h f use-package" for the full details).
 ;;
-;; :bind - Shortcut macro, bind a key combo to a command (see above). Can put a description in the binding for which-key
-;;     ("C-:" ("Jump to char" . avy-goto-char)
-;;             "M-g f" ("Jump to line" . avy-goto-line)))
-;;
-;; :autoload - used for non-interactive functions.
-;; :custom - Personal customizations. Not functionally different to :config. Equivelant to useing emacs' customize-option.
-;; :config - Run after loading. Can nest other packages inside this with (use-package ...).
+;; (use-package my-package-name
+;;   :ensure t    ; Ensure my-package is installed
+;;   :after foo   ; Load my-package after foo is loaded (seldom used)
+;;   :init        ; Run this code before my-package is loaded
+;;   :bind        ; Bind these keys to these functions
+;;   :custom      ; Set these variables
+;;   :config      ; Run this code after my-package is loaded
 
-
-;; Themes
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;; A package with a great selection of themes:
+;; https://protesilaos.com/emacs/ef-themes
 (use-package ef-themes
-  :init
-    (ef-themes-select 'ef-autumn)
-)
-
-;; Visuals
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
   :config
-  (setq
-	mode-line-percent-position nil
-	doom-modeline-buffer-encoding nil
-	doom-modeline-vcs-max-length 30
-	doom-modeline-modal-icon nil
-  )
+  (ef-themes-select 'ef-autumn))
+
+;; Minibuffer completion is essential to your Emacs workflow and
+;; Vertico is currently one of the best out there. There's a lot to
+;; dive in here so I recommend checking out the documentation for more
+;; details: https://elpa.gnu.org/packages/vertico.html. The short and
+;; sweet of it is that you search for commands with "M-x do-thing" and
+;; the minibuffer will show you a filterable list of matches.
+(use-package vertico
+  :custom
+  (vertico-cycle t)
+  (read-buffer-completion-ignore-case t)
+  (read-file-name-completion-ignore-case t)
+  (completion-styles '(basic substring partial-completion flex))
+  :init
+  (vertico-mode))
+
+;; Improve the accessibility of Emacs documentation by placing
+;; descriptions directly in your minibuffer. Give it a try:
+;; "M-x find-file".
+(use-package marginalia
+  :after vertico
+  :init
+  (marginalia-mode))
+
+;; Adds intellisense-style code completion at point that works great
+;; with LSP via Eglot. You'll likely want to configure this one to
+;; match your editing preferences, there's no one-size-fits-all
+;; solution.
+(use-package corfu
+  :init
+  (global-corfu-mode)
+  :custom
+  (corfu-auto t)
+  ;; You may want to play with delay/prefix/styles to suit your preferences.
+  (corfu-auto-delay 0)
+  (corfu-auto-prefix 0)
+  (completion-styles '(basic)))
+
+;; Adds LSP support. Note that you must have the respective LSP
+;; server installed on your machine to use it with Eglot. e.g.
+;; rust-analyzer to use Eglot with `rust-mode'.
+(use-package eglot
+  ;; Add your programming modes here to automatically start Eglot,
+  ;; assuming you have the respective LSP server installed.
+  :hook ((go-mode . eglot-ensure)))
+
+;; Evil mode ;;
+;;;;;;;;;;;;;;;
+
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1)
+  (evil-set-undo-system 'undo-redo)  ;; Emacs 28+ has this built in
+  :custom
+   (evil-normal-state-tag " NORMAL ")
+   (evil-insert-state-tag " INSERT ")
+   (evil-insert-state-message nil)
+   (evil-visual-state-tag " VISUAL ")
+   (evil-visual-state-message nil) ;; Mode is already displayed in the status bar.
+  :custom-face
+  (doom-modeline-evil-insert-state ((t (:background "olive drab" :foreground "white smoke"))))
+  (doom-modeline-evil-visual-state ((t (:background "medium slate blue" :foreground "white smoke"))))
 )
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Version Control Systems ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package magit)
+
+
+;;;;;;;;;;;;;;
+;; Keybinds ;;
+;;;;;;;;;;;;;;
+
+(use-package general
+  :config
+  (general-evil-setup)
+
+  ;; set up 'SPC' as the global leader key
+  (general-create-definer lr/leader-def
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC"          ;; set leader
+    :global-prefix "M-SPC" ;; access leader in insert mode
+    )
+
+  (lr/leader-def ;; Leader sequences
+
+;; TODO C-x 8 for emojis
+   
+   "b" '(:ignore t :wk "buffers")
+    "b s" '(switch-to-buffer :wk "switch to named buffer")
+    "b m" '(buffer-menu-other-window :wk "menu for buffers")
+    "b k" '(kill-this-buffer :wk "kill buffer")
+    "b n" '(next-buffer :wk "next buffer")
+    "b p" '(previous-buffer :wk "previous buffer")
+
+    "e" '(:ignore t :wk "emacs")
+    "e c" '(:ignore t :wk "config")
+    "e c r" '((load-file user-init-file) :wk "(r)eload user config")
+
+    "o" '(:ignore t :wk "open")
+    "o v" '(vterm-toggle :wk "vterm")
+    "o d" '(dashboard-open :wk "dashboard")
+    "o t" '(treemacs :wk "treemacs")
+
+    "q" '(:ignore t :wk "quit")
+    "q r" '(restart-emacs :wk "Restart emacs")
+    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
+    "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
+
+    "u" '(:ignore t :wk "ui")
+    "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
+    "u l" '(lr/cycle-line-number-style :wk "Line numbers")
+    "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
+
+    "g" '(:ignore t :wk "git")
+    "g s" '(magit-status :wk "status")
+
+    "h" '(:ignore t :wk "(h)elp")
+    "h a" '(apropos :wk "(a)propos")
+    "h f" '(describe-function :wk "(f)unction describe")
+    "h v" '(describe-variable :wk "(v)ariable describe")
+    "h k" '(describe-key :wk "(k)ey describe")
+    "h m" '(info-emacs-manual :wk "(m)anual emacs")
+    "h q" '(help-quick-toggle :wk "(q)uick menu")
+;;    "h o" '(info-org)  ;; Org-mode manual
+    ))
+
+(global-set-key (kbd "C-=") 'text-scale-increase)
+(global-set-key (kbd "C--") 'text-scale-decrease)
+
+;;;;;;;;;;;;;
+;; Visuals ;;
+;;;;;;;;;;;;;
+
+;; Example of built in package manager using a git target.
+(use-package breadcrumb
+  :vc (:fetcher github :repo joaotavora/breadcrumb)
+  :init (breadcrumb-mode))
+
+(use-package which-key
+  :init
+  (which-key-mode)
+  :config
+  (setq which-key-allow-evil-operators t
+        which-key-idle-delay 0.7))
 
 (use-package nerd-icons
   :config
   (cond
     ((find-font (font-spec :name "Hack Nerd Font"))
-     (setq nerd-icons-font-family "Hack Nerd Font")))
-  )
+     (setq nerd-icons-font-family "Hack Nerd Font"))))
 
 (use-package dashboard
   :after nerd-icons
@@ -102,105 +292,47 @@
 	dashboard-icon-type 'nerd-icons
 	dashboard-set-heading-icons t
 	dashboard-set-file-icons t
-	dashboard-set-footer nil
-	)
-)
+	dashboard-set-footer nil))
 
-;; Modal editing - Evil
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(use-package evil
-  :init (setq evil-want-keybinding nil)
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
   :config
-  (evil-mode 1)
-  (setq
-   evil-normal-state-tag " NORMAL "
-   evil-insert-state-tag " INSERT "
-   evil-insert-state-message nil
-   evil-visual-state-tag " VISUAL "
-   )
-  :custom
-   evil-visual-state-message nil
-)
-(custom-set-faces
- '(doom-modeline-evil-insert-state ((t (:background "olive drab" :foreground "white smoke"))))
- '(doom-modeline-evil-visual-state ((t (:background "medium slate blue" :foreground "white smoke"))))
-)
+  (setq mode-line-percent-position nil
+        doom-modeline-buffer-encoding nil
+        doom-modeline-vcs-max-length 30
+        doom-modeline-modal-icon nil))
 
 
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
+;;;;;;;;;;;;;;
+;; Org-mode ;;
+;;;;;;;;;;;;;;
 
-
-;; Keybinds
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(use-package general
-  :config
-  (general-evil-setup)
-
-  ;; set up 'SPC' as the global leader key
-  (general-create-definer leader-def
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC" ;; access leader in insert mode
-    )
-
-  (leader-def ;; Leader sequences
-
-    "b" '(:ignore t :wk "Buffers")
-	"b b" '(switch-to-buffer :wk "Buffer named x")
-	"b m" '(buffer-menu-other-window :wk "Buffer menu")
-	"b d" '(kill-this-buffer :wk "Delete buffer")
-	"b n" '(next-buffer :wk "Next buffer")
-	"b p" '(previous-buffer :wk "Previous buffer")
-	"b l" '(last-buffer :wk "Last buffer")
-
-    "w" '(:ignore t :wk "Windows")
-	"w d" '(evil-quit) :wk "Delete"
-	"w l" '(window-right) :wk "Focus left"
-
-    "o" '(:ignore t :wk "Open")
-	"o t" '(vterm-toggle :wk "Terminal")
-
-    "q" '(:ignore t :wk "Quit")
-	"q r" '(restart-emacs :wk "Restart emacs")
-	"q n" '(restart-emacs-start-new-emacs :wk "New emacs")
-	"q q" '(save-buffers-kill-terminal :wk "Quit emacs")
-
-    "u" '(:ignore t :wk "User Interface")
-	"u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
-	"u l" '(lr/toggle-line-numbering :wk "Line numbers")
-	"u f" '(treemacs :wk "File sidebar")
-	"u F" '(toggle-frame-fullscreen :wk "Fullscreen")
-
-    "h" '(:ignore t :wk "(h)elp")
-	"h a" '(apropos :wk "(a)propos")
-	"h f" '(describe-function :wk "(f)unction")
-	"h v" '(describe-variable :wk "(v)ariable")
-	"h m" '(info-emacs-manual :wk "(m)anual emacs")
-))
-
-(global-set-key (kbd "C-=") 'text-scale-increase)
-(global-set-key (kbd "C--") 'text-scale-decrease)
-
-(use-package which-key
-  :init
-  (which-key-mode)
-  :config
-  (setq which-key-allow-evil-operators t
-        which-key-idle-delay 0.7))
-
-
-;; Org-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; `org-mode' is great but Denote makes it even better by adding
+;; features that you'd find in something like Obsidian (like
+;; backlinks!). You can write your notes in org, markdown, or plain
+;; text, though I recommend giving `org-mode' a try if you've never
+;; used it before. The Denote manual is also excellent:
+;; https://protesilaos.com/emacs/denote
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (use-package denote                                 ;;
+;;   :custom                                           ;;
+;;   (denote-known-keywords '("emacs" "journal"))      ;;
+;;   ;; This is the directory where your notes live.   ;;
+;;   (denote-directory (expand-file-name "~/denote/")) ;;
+;;   :bind                                             ;;
+;;   (("C-c n n" . denote)                             ;;
+;;    ("C-c n f" . denote-open-or-create)              ;;
+;;    ("C-c n i" . denote-link)))                      ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setq org-directory "~/Notes/"
-      org-refile-targets org-directory
-      org-agenda-files (list org-directory))
+      org-agenda-files (list org-directory)
+      org-refile-targets '((org-agenda-files :maxlevel . 5))
+      org-refile-use-outline-path t
+      org-outline-path-complete-in-steps nil
+      org-startup-indented t
+      org-indent-indentation-per-level 2
+      org-hide-emphasis-markers t)
 
 (use-package toc-org
     :commands toc-org-enable
@@ -210,32 +342,54 @@
 (use-package page-break-lines
   :init (global-page-break-lines-mode))
 
-(setq org-startup-indented t
-      org-indent-indentation-per-level 2)
 
-;; File Browsing
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;
+;; Languages ;;
+;;;;;;;;;;;;;;;
+
+(use-package paredit
+;; ELisp
+  :hook ((emacs-lisp-mode . enable-paredit-mode)
+         (lisp-mode . enable-paredit-mode)
+         (ielm-mode . enable-paredit-mode)
+         (lisp-interaction-mode . enable-paredit-mode)
+         (scheme-mode . enable-paredit-mode)))
+
+(use-package go-mode
+  :bind (:map go-mode-map
+	      ("C-c C-f" . 'gofmt))
+  :hook (before-save . gofmt-before-save))
+
+(use-package markdown-mode
+  ;; These extra modes help clean up the Markdown editing experience.
+  ;; `visual-line-mode' turns on word wrap and helps editing commands
+  ;; work with paragraphs of text. `flyspell-mode' turns on an
+  ;; automatic spell checker.
+  :hook ((markdown-mode . visual-line-mode)
+         (markdown-mode . flyspell-mode))
+  :init
+  (setq markdown-command "multimarkdown"))
+
+(use-package yaml-mode)
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; File Management ;;
+;;;;;;;;;;;;;;;;;;;;;
 
 (use-package treemacs)
-(use-package treemacs-icons-dired
-  :hook (dired-mode . treemacs-icons-dired-enable-once))
+
+
 (use-package treemacs-evil
-  :after (treemacs evil))
+:after (treemacs evil))
 
-(use-package dirvish
-  :init (dirvish-override-dired-mode))
+(use-package treemacs-magit
+:after (treemacs magit))
 
 
-;; Other
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(use-package corfu
-  :custom
-  (corfu-auto t)  
-  :init
-  (global-corfu-mode))
-
-(use-package restart-emacs)
+;;;;;;;;;;;;
+;; Shells ;;
+;;;;;;;;;;;;
 
 (use-package vterm
   :config
