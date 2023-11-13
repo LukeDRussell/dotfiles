@@ -42,6 +42,16 @@
 
 ;; Save history in minibuffer to keep recent commands easily accessible
 (savehist-mode t)
+;; Ignore these regex paths from recent files
+(setq recentf-exclude
+    '(
+      "/opt/homebrew"
+      (recentf-expand-file-name "~/.config/emacs/elpa") 
+      (recentf-expand-file-name "~/.config/emacs/.cache/treemacs-persist-at-last-error")
+      "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'"
+      )
+)
+
 
 ;; Keep track of open files
 (recentf-mode t)
@@ -71,16 +81,7 @@
       insert-directory-program "gls"
       ;; Keep dired up-to-date with files on disk
       global-auto-revert-non-file-buffers t
-
-      ;; Ignore these regex paths from recent files
-      recentf-exclude
-            '(
-              "/opt/homebrew"
-              (recentf-expand-file-name "~/.config/emacs/elpa") 
-              (recentf-expand-file-name "~/.config/emacs/.cache/treemacs-persist-at-last-error")
-              "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'"
-              )
-            )
+      )
 
 ;; Bring in package utilities so we can install packages from the web.
 (require 'package)
@@ -89,15 +90,14 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
-
 ;; Add MELPA, an unofficial (but well-curated) package registry to the
 ;; list of accepted package registries. By default Emacs only uses GNU
 ;; ELPA and NonGNU ELPA, https://elpa.gnu.org/ and
 ;; https://elpa.nongnu.org/ respectively.
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 
-;; Add the :vc keyword to use-package, making it easy to install
-;; packages directly from git repositories.
+;; This package adds a new :vc keywords to use-package declarations, with which you can install packages.
+;; Note: was merged into emacs 2023-05-16. Might be in emacs 30
 (unless (package-installed-p 'vc-use-package)
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
 (require 'vc-use-package)
@@ -220,7 +220,7 @@
    
    "b" '(:ignore t :wk "buffers")
     "b s" '(switch-to-buffer :wk "switch to named buffer")
-    "b m" '(buffer-menu-other-window :wk "menu for buffers")
+    "b m" '(buffer-menu :wk "menu for buffers")
     "b k" '(kill-this-buffer :wk "kill buffer")
     "b n" '(next-buffer :wk "next buffer")
     "b p" '(previous-buffer :wk "previous buffer")
@@ -243,6 +243,7 @@
     "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
     "u l" '(lr/cycle-line-number-style :wk "Line numbers")
     "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
+    "u T" '(tear-off-window :wk "Tear off window to new fram%:e")
 
     "g" '(:ignore t :wk "git")
     "g s" '(magit-status :wk "status")
@@ -254,6 +255,7 @@
     "h k" '(describe-key :wk "(k)ey describe")
     "h m" '(info-emacs-manual :wk "(m)anual emacs")
     "h q" '(help-quick-toggle :wk "(q)uick menu")
+    "h o" '(org-info :wk "(o)rg manual")
 ;;    "h o" '(info-org)  ;; Org-mode manual
     ))
 
@@ -325,14 +327,19 @@
 ;;    ("C-c n i" . denote-link)))                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(setq org-directory "~/Notes/"
+(use-package org
+  :hook (org-mode . visual-line-mode)
+  :config
+  (setq org-directory "~/Notes/"
       org-agenda-files (list org-directory)
       org-refile-targets '((org-agenda-files :maxlevel . 5))
       org-refile-use-outline-path t
       org-outline-path-complete-in-steps nil
       org-startup-indented t
       org-indent-indentation-per-level 2
-      org-hide-emphasis-markers t)
+      org-hide-emphasis-markers t
+  )
+)
 
 (use-package toc-org
     :commands toc-org-enable
@@ -379,12 +386,14 @@
 
 (use-package treemacs)
 
-
 (use-package treemacs-evil
 :after (treemacs evil))
 
 (use-package treemacs-magit
 :after (treemacs magit))
+
+(use-package dirvish
+  :after (dirvish-override-dired-mode))
 
 
 ;;;;;;;;;;;;

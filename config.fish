@@ -12,14 +12,7 @@ set fish_vi_force_cursor
 
 # Add user installed binaries to path
 fish_add_path ~/.local/bin/
-fish_add_path ~/.pyenv/bin/
-fish_add_path 
-
-# Pyenv
-if command -sq pyenv
-  status is-interactive; and pyenv init --path | source
-  pyenv init - | source
-end 
+fish_add_path "$HOME/.rye/shims"
 
 # neovim
 if command -sq nvim
@@ -115,5 +108,3 @@ function fish_prompt --description 'Write out the prompt; do not replace this. I
     printf "%b" (string join "\n" (vterm_old_fish_prompt))
     vterm_prompt_end
 end
-# Created by `pipx` on 2023-02-18 08:14:41
-set PATH $PATH /Users/Luke/.local/bin
