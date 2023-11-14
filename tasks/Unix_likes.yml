@@ -7,6 +7,7 @@
     - tmux
     - fish
     - emacs
+    - nvim
 
 - name: Link Tmux settings
   ansible.builtin.file:
@@ -29,10 +30,10 @@
     state: link
     force: true
 
-- name: Link emacs early-init.el
+- name: Link neovim init.lua 
   ansible.builtin.file:
-    dest: ~/.config/emacs/early-init.el
-    src: "{{ playbook_dir }}/early-init.el"
+    dest: ~/.config/nvim/init.lua
+    src: "{{ playbook_dir }}/init.lua"
     state: link
     force: true
 

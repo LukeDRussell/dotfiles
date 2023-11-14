@@ -7,7 +7,7 @@
     common_packaged_apps:
       - ansible
       - bat
-      - bottom
+      - glances
       - fish
       - git
       - gitui
@@ -16,13 +16,15 @@
       - lsd
       - neovim
       - pandoc
-      - pdm
-      - pipx
+        #      - pdm
+        #      - pipx
+        #      I want to swap to 'Rye'
       - python
-      - ripgrep
       - tmux
+      - ripgrep
       - tealdeer
       - zoxide
+      - sd
     brew_apps:
       - emacs-plus@29
       - fd

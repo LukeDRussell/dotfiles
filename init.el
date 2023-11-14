@@ -430,8 +430,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(org yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org paredit page-break-lines org-modern markdown-mode marginalia helpful go-mode general evil-collection ef-themes doom-modeline dirvish denote dashboard corfu breadcrumb)))
+ '(package-vc-selected-packages
+   '((breadcrumb :vc-backend Git :url "https://github.com/joaotavora/breadcrumb")
+     (vc-use-package :vc-backend Git :url "https://github.com/slotThe/vc-use-package"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

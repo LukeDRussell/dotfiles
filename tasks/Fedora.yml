@@ -1,51 +1,23 @@
 - name: Install common packages
   become: true
-  ansible.builtin.package:
+  when: update_install == "yes"
+  ansible.builtin.dnf:
     name: "{{ common_packaged_apps }}"
     state: present
 
 - name: Update packages
   become: true
+  when: update_install == "yes"
   ansible.builtin.package:
     name: "*"
     state: latest
     update_only: true
     update_cache: true
 
-- name: Install | Update pdm as not available in Fedora packages
-  when:
-    - update_install is "yes"
-    - common_packaged_apps contains "pdm"
-  block:
-
-    - name: Check if pdm is already installed
-      ansible.builtin.command: "which pdm"
-      register: check_pdm
-      ignore_errors: true
-      changed_when: false
-
-    - name: Downlaod pdm install script
-      when: check_pdm.failed
-      changed_when: always
-      ansible.builtin.get_url:
-        url: https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py
-        dest: /tmp/install-pdm.py
-        mode: "0600"
-
-    - name: Install pdm from script
-      when: check_pdm.failed
-      changed_when: always
-      ansible.builtin.command: "python /tmp/install-pdm.py"
-
-    - name: Update pdm
-      when: not check_pdm.failed
-      ansible.builtin.command: "pdm self update"
-      changed_when: stdout contains "Already up-to-date"
-
 - name: Install | Update 1Password as not available in Fedora pacakges
   when:
     - update_install == "yes"
-    - common_gui_apps contains "1password"
+    - '"1password" in fedora_apps'
     - ansible_facts.distribution == "Fedora"
   become: true
   block:
@@ -77,7 +49,7 @@
       ansible.builtin.file:
         path: "~/.fonts"
         state: directory
-        mode: "0600"
+        mode: "0700"
 
     - name: Check if Hack NF exists
       ansible.builtin.stat:

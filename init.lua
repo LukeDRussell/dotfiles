@@ -1,64 +1,26 @@
--- Make sure paq is installed (Linux & MacOS)
--- git clone --depth=1 https://github.com/savq/paq-nvim.git ~/.local/share/nvim/site/pack/paqs/start/paq-nvim
+if vim.loader and vim.fn.has "nvim-0.9.1" == 1 then vim.loader.enable() end
 
--- Make sure paq is installed (Windows)
--- git clone https://github.com/savq/paq-nvim.git "$env:LOCALAPPDATA\nvim-data\site\pack\paqs\start\paq-nvim"
+for _, source in ipairs {
+  "astronvim.bootstrap",
+  "astronvim.options",
+  "astronvim.lazy",
+  "astronvim.autocmds",
+  "astronvim.mappings",
+} do
+  local status_ok, fault = pcall(require, source)
+  if not status_ok then vim.api.nvim_err_writeln("Failed to load " .. source .. "\n\n" .. fault) end
+end
 
--- Use paq to install plugins
-require "paq" {
-	"savq/paq-nvim";
-	"nvim-treesitter/nvim-treesitter";
-	"neovim/nvim-lspconfig";
-	"nvim-lua/plenary.nvim";
-	"nvim-telescope/telescope.nvim";
-	"nvim-orgmode/orgmode.nvim";
-	"ojroques/nvim-hardline";
-	"junegunn/goyo.vim";
-	"junegunn/limelight.vim";
-	"lukas-reineke/indent-blankline.nvim";
-	"chentau/marks.nvim";
-	"ishan9299/nvim-solarized-lua"
-}
+if astronvim.default_colorscheme then
+  if not pcall(vim.cmd.colorscheme, astronvim.default_colorscheme) then
+    require("astronvim.utils").notify(
+      ("Error setting up colorscheme: `%s`"):format(astronvim.default_colorscheme),
+      vim.log.levels.ERROR
+    )
+  end
+end
 
--- Language Servers
--- Python
-require'lspconfig'.pylsp.setup{}
-
-
--- Treesitter
-require('orgmode').setup_ts_grammar()
-
-require'nvim-treesitter.configs'.setup {
-  -- If TS highlights are not enabled at all, or disabled via `disable` prop, highlighting will fallback to default Vim syntax highlighting
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = {'org'}, -- Required since TS highlighter doesn't support all syntax features (conceal)
-  },
-  -- One of "all", "maintained" (parsers with maintainers), or a list of languages
-  ensure_installed = "maintained",
-}
-
--- orgmode.nvim
-require'orgmode'.setup {
-	org_agenda_files = '~/Org/*';
-	org_default_notes_file = '~/Org/notes.org'
-}
-
--- hardline status and tab line
-require'hardline'.setup {
-	theme = 'default';
-}
-
-require'marks'.setup {
-	mappings = {
-		toggle = "m,";
-		delete_line = "dm.";
-		next = "m<down>";
-		prev = "m<up>"
-	}
-}
-
-
+require("astronvim.utils").conditional_func(astronvim.user_opts("polish", nil, false), true)
 
 -- My Settings
 vim.opt.scrolloff = 5
