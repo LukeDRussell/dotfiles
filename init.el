@@ -59,11 +59,8 @@
 ;; Keep files up-to-date when they change outside Emacs
 (global-auto-revert-mode t)
 
-
-
 ;; Display line numbers only when in programming modes
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-
 
 ;; The `setq' special form is used for setting variables. Remember
 ;; that you can look up these variables with "C-h v variable-name".
@@ -81,6 +78,9 @@
       insert-directory-program "gls"
       ;; Keep dired up-to-date with files on disk
       global-auto-revert-non-file-buffers t
+      ;; When scrolling top or bottom of window, don't recenter point
+      scroll-conservatively 101
+      scroll-margin 5
       )
 
 ;; Bring in package utilities so we can install packages from the web.
@@ -224,6 +224,7 @@
     "b k" '(kill-this-buffer :wk "kill buffer")
     "b n" '(next-buffer :wk "next buffer")
     "b p" '(previous-buffer :wk "previous buffer")
+    "b d" '(dashboard-open :wk "dashboard")
 
     "e" '(:ignore t :wk "emacs")
     "e c" '(:ignore t :wk "config")
@@ -294,7 +295,9 @@
 	dashboard-icon-type 'nerd-icons
 	dashboard-set-heading-icons t
 	dashboard-set-file-icons t
-	dashboard-set-footer nil))
+	dashboard-set-footer nil
+        dashboard-projects-backend 'project-el
+        ))
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
@@ -338,9 +341,8 @@
       org-startup-indented t
       org-indent-indentation-per-level 2
       org-hide-emphasis-markers t
-  )
+      )
 )
-
 (use-package toc-org
     :commands toc-org-enable
     :init (add-hook 'org-mode-hook 'toc-org-enable))
@@ -353,7 +355,7 @@
 ;;;;;;;;;;;;;;;
 ;; Languages ;;
 ;;;;;;;;;;;;;;;
-
+
 (use-package paredit
 ;; ELisp
   :hook ((emacs-lisp-mode . enable-paredit-mode)
@@ -423,4 +425,16 @@
 		 ;;(dedicated . t) ;dedicated is supported in emacs27
 		 (reusable-frames . visible)
 		 (window-height . 0.3))))
-
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(org yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org paredit page-break-lines org-modern markdown-mode marginalia helpful go-mode general evil-collection ef-themes doom-modeline dirvish denote dashboard corfu breadcrumb)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
