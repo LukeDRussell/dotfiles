@@ -11,6 +11,8 @@
    ((eq display-line-numbers t) (setq display-line-numbers 'relative))
    ((eq display-line-numbers 'relative) (setq display-line-numbers nil))))
 
+
+
 ;; Settings
 
 ;; Performance tweaks for modern machines.
@@ -22,8 +24,13 @@
 
 ;; Set the default font, ensuring it exists.
 (cond
-  ((find-font (font-spec :name "Hack Nerd Font"))
-   (set-face-attribute 'default nil :font "Hack Nerd Font" :height 160)))
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; ((find-font (font-spec :name "Hack Nerd Font Mono"))                         ;;
+  ;;  (set-face-attribute 'default nil :font "Hack Nerd Font Mono" :height 120))) ;;
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ((find-font (font-spec :name "FiraMono Nerd Font"))
+   (set-face-attribute 'default nil :font "FiraMono Nerd Font" :height 140)))
+
 
 ;; Add unique buffer names in the minibuffer where there are many identical files.
 (require 'uniquify)
@@ -38,32 +45,33 @@
 (setq-default indent-tabs-mode nil)
 
 ;; Automatically save your place in files
-(save-place-mode t)
+;;(save-place-mode t)
 
 ;; Save history in minibuffer to keep recent commands easily accessible
 (savehist-mode t)
-;; Ignore these regex paths from recent files
-(setq recentf-exclude
-    '(
-      "/opt/homebrew"
-      (recentf-expand-file-name "~/.config/emacs/elpa") 
-      (recentf-expand-file-name "~/.config/emacs/.cache/treemacs-persist-at-last-error")
-      "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'"
-      )
-)
-
 
 ;; Keep track of open files
-(recentf-mode t)
+;;(recentf-mode t)
 
 ;; Keep files up-to-date when they change outside Emacs
 (global-auto-revert-mode t)
 
-;; Display line numbers only when in programming modes
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+;; Ignore these regex paths from recent file list
+(setq recentf-exclude
+      '(
+        "/opt/homebrew"
+        "/usr/share/emacs/"
+        "~/.config/emacs/elpa/"
+        (recentf-expand-file-name "~/.config/emacs/elpa") 
+        (recentf-expand-file-name "~/.config/emacs/.cache/treemacs-persist-at-last-error")
+        "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'"
+        )
+      )
 
-;; The `setq' special form is used for setting variables. Remember
-;; that you can look up these variables with "C-h v variable-name".
+
+;; Variables
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (setq uniquify-buffer-name-style 'forward
       window-resize-pixelwise t
       frame-resize-pixelwise t
@@ -81,13 +89,24 @@
       ;; When scrolling top or bottom of window, don't recenter point
       scroll-conservatively 101
       scroll-margin 5
-      )
+      desktop-save-mode t
+)
+
+
+;; Hooks
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Enable code folding with inbuilt hs
+(add-hook 'prog-mode-hook 'hs-minor-mode)
+
+;; Display line numbers only when in programming modes
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
 ;; Bring in package utilities so we can install packages from the web.
-(require 'package)
+;;(require 'package)
 
 ;; use-package should assume 'ensure'
-(require 'use-package-ensure)
+;;(require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
 ;; Add MELPA, an unofficial (but well-curated) package registry to the
@@ -116,8 +135,17 @@
 ;; A package with a great selection of themes:
 ;; https://protesilaos.com/emacs/ef-themes
 (use-package ef-themes
+;  :config
+;  (ef-themes-select 'ef-autumn)
+  )
+(use-package modus-themes
   :config
-  (ef-themes-select 'ef-autumn))
+  (modus-themes-select 'modus-vivendi)
+)
+
+
+;; Editing
+;;;;;;;;;;;;;;
 
 ;; Minibuffer completion is essential to your Emacs workflow and
 ;; Vertico is currently one of the best out there. There's a lot to
@@ -156,13 +184,14 @@
   (corfu-auto-prefix 0)
   (completion-styles '(basic)))
 
-;; Adds LSP support. Note that you must have the respective LSP
-;; server installed on your machine to use it with Eglot. e.g.
-;; rust-analyzer to use Eglot with `rust-mode'.
-(use-package eglot
-  ;; Add your programming modes here to automatically start Eglot,
-  ;; assuming you have the respective LSP server installed.
-  :hook ((go-mode . eglot-ensure)))
+(use-package paredit
+  ;; ELisp
+  :hook ((emacs-lisp-mode . enable-paredit-mode)
+         (lisp-mode . enable-paredit-mode)
+         (ielm-mode . enable-paredit-mode)
+         (lisp-interaction-mode . enable-paredit-mode)
+         (scheme-mode . enable-paredit-mode)))
+
 
 ;; Evil mode ;;
 ;;;;;;;;;;;;;;;
@@ -224,7 +253,6 @@
     "b k" '(kill-this-buffer :wk "kill buffer")
     "b n" '(next-buffer :wk "next buffer")
     "b p" '(previous-buffer :wk "previous buffer")
-    "b d" '(dashboard-open :wk "dashboard")
 
     "e" '(:ignore t :wk "emacs")
     "e c" '(:ignore t :wk "config")
@@ -282,22 +310,28 @@
 (use-package nerd-icons
   :config
   (cond
-    ((find-font (font-spec :name "Hack Nerd Font"))
-     (setq nerd-icons-font-family "Hack Nerd Font"))))
+    ((find-font (font-spec :name "Hack Nerd Font Mono"))
+     (setq nerd-icons-font-family "Hack Nerd Font Mono"))))
 
 (use-package dashboard
-  :after nerd-icons
-  :config
-  (dashboard-setup-startup-hook)
-  (setq dashboard-startup-banner 'official
-	dashboard-center-content t
-	dashboard-display-icons-p nil  ;; Currently breaks about missing 'nil' icon in octicon
-	dashboard-icon-type 'nerd-icons
-	dashboard-set-heading-icons t
-	dashboard-set-file-icons t
-	dashboard-set-footer nil
-        dashboard-projects-backend 'project-el
-        ))
+    :config
+        (dashboard-setup-startup-hook)
+    :custom
+        (dashboard-startup-banner 'logo)
+        (dashboard-banner-logo-title nil)
+        (dashboard-center-content t)
+        (dashboard-icon-type 'nerd-icons)
+        (dashboard-set-heading-icons t)
+        (dashboard-set-file-icons t)
+        (dashboard-set-footer nil)
+        (dashboard-projects-backend 'project-el)
+        (dashboard-display-icons-p t)
+        (dashboard-items '(
+            (recents . 5)
+            (agenda . 5)
+            (projects . 5)
+            (bookmarks . 5)
+)))
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
@@ -306,7 +340,6 @@
         doom-modeline-buffer-encoding nil
         doom-modeline-vcs-max-length 30
         doom-modeline-modal-icon nil))
-
 
 ;;;;;;;;;;;;;;
 ;; Org-mode ;;
@@ -334,15 +367,15 @@
   :hook (org-mode . visual-line-mode)
   :config
   (setq org-directory "~/Notes/"
-      org-agenda-files (list org-directory)
-      org-refile-targets '((org-agenda-files :maxlevel . 5))
-      org-refile-use-outline-path t
-      org-outline-path-complete-in-steps nil
-      org-startup-indented t
-      org-indent-indentation-per-level 2
-      org-hide-emphasis-markers t
-      )
-)
+        org-agenda-files (list org-directory)
+        org-refile-targets '((org-agenda-files :maxlevel . 5))
+        org-refile-use-outline-path t
+        org-outline-path-complete-in-steps nil
+        org-startup-indented t
+        org-indent-indentation-per-level 2
+        org-hide-emphasis-markers t
+        )
+  )
 (use-package toc-org
     :commands toc-org-enable
     :init (add-hook 'org-mode-hook 'toc-org-enable))
@@ -355,19 +388,17 @@
 ;;;;;;;;;;;;;;;
 ;; Languages ;;
 ;;;;;;;;;;;;;;;
-
-(use-package paredit
-;; ELisp
-  :hook ((emacs-lisp-mode . enable-paredit-mode)
-         (lisp-mode . enable-paredit-mode)
-         (ielm-mode . enable-paredit-mode)
-         (lisp-interaction-mode . enable-paredit-mode)
-         (scheme-mode . enable-paredit-mode)))
 
-(use-package go-mode
-  :bind (:map go-mode-map
-	      ("C-c C-f" . 'gofmt))
-  :hook (before-save . gofmt-before-save))
+(use-package eglot
+  ;; Add your programming modes here to automatically start Eglot,
+  ;; assuming you have the respective LSP server installed.
+  ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
+  :hook (
+         (go-mode . eglot-ensure)
+         (terraform-mode . eglot-ensure)
+        )
+  )
+
 
 (use-package markdown-mode
   ;; These extra modes help clean up the Markdown editing experience.
@@ -381,6 +412,23 @@
 
 (use-package yaml-mode)
 
+(use-package terraform-mode
+  :after eglot
+  :config
+  (add-to-list 'eglot-server-programs '(terraform-mode . ("terraform-ls" "serve")))
+;  :hook
+;  eglot-ensure
+)
+
+(use-package go-mode
+  :after eglot
+  :bind (:map go-mode-map
+	      ("C-c C-f" . 'gofmt))
+  :hook
+;  eglot-ensure
+  (before-save . gofmt-before-save)
+  :config
+  (setq tab-width 4))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; File Management ;;
@@ -430,12 +478,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-vc-selected-packages
-   '((breadcrumb :vc-backend Git :url "https://github.com/joaotavora/breadcrumb")
-     (vc-use-package :vc-backend Git :url "https://github.com/slotThe/vc-use-package"))))
+ '(package-selected-packages
+   '(org yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org paredit page-break-lines org-modern markdown-mode marginalia helpful go-mode general evil-collection ef-themes doom-modeline dirvish denote dashboard corfu breadcrumb))
+ '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((t (:family "FiraMono Nerd Font Mono" :foundry "nil" :slant normal :weight regular :height 160 :width normal)))))
