@@ -1,4 +1,4 @@
-;;; init.el --- Emacs configuration -*- lexical-binding: t -*-
+;;; Init.el --- Emacs configuration -*- lexical-binding: t -*-
 
 ;; My Functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -41,20 +41,16 @@
 ;; Visualize matching parens
 (show-paren-mode 1)
 
-;; Prefer spaces to tabs
-(setq-default indent-tabs-mode nil)
-
-;; Automatically save your place in files
-;;(save-place-mode t)
-
 ;; Save history in minibuffer to keep recent commands easily accessible
 (savehist-mode t)
 
 ;; Keep track of open files
-;;(recentf-mode t)
+(recentf-mode t)
 
 ;; Keep files up-to-date when they change outside Emacs
 (global-auto-revert-mode t)
+
+
 
 ;; Ignore these regex paths from recent file list
 (setq recentf-exclude
@@ -90,6 +86,8 @@
       scroll-conservatively 101
       scroll-margin 5
       desktop-save-mode t
+    ;; Don't lock files. Causes my keyboard to restart
+      create-lockfiles nil
 )
 
 
@@ -341,6 +339,11 @@
         doom-modeline-vcs-max-length 30
         doom-modeline-modal-icon nil))
 
+(use-package highlight-indent-guides
+  :hook 
+         (prog-mode-hook . highlight-indent-guides-mode)
+)
+
 ;;;;;;;;;;;;;;
 ;; Org-mode ;;
 ;;;;;;;;;;;;;;
@@ -396,6 +399,7 @@
   :hook (
          (go-mode . eglot-ensure)
          (terraform-mode . eglot-ensure)
+         (yaml-mode . eglot-ensure)
         )
   )
 
@@ -429,6 +433,10 @@
   (before-save . gofmt-before-save)
   :config
   (setq tab-width 4))
+
+(use-package lua-mode
+  )
+
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; File Management ;;
@@ -479,7 +487,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(org yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org paredit page-break-lines org-modern markdown-mode marginalia helpful go-mode general evil-collection ef-themes doom-modeline dirvish denote dashboard corfu breadcrumb))
+   '(eglot org yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org paredit page-break-lines org-modern markdown-mode marginalia helpful go-mode general evil-collection ef-themes doom-modeline dirvish denote dashboard corfu breadcrumb))
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
