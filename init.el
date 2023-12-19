@@ -252,6 +252,9 @@
     "b n" '(next-buffer :wk "next buffer")
     "b p" '(previous-buffer :wk "previous buffer")
 
+    "d" '(:ignore t :wk "dirvish")
+     "d s" '(dirvish-side :wk "open dirvish to side")
+
     "e" '(:ignore t :wk "emacs")
     "e c" '(:ignore t :wk "config")
     "e c r" '((load-file user-init-file) :wk "(r)eload user config")
@@ -443,9 +446,10 @@
 ;;;;;;;;;;;;;;;;;;;;;
 
 (use-package treemacs)
+    :init (treemacs-project-follow-mode)
 
 (use-package treemacs-evil
-:after (treemacs evil))
+  :after (treemacs evil))
 
 (use-package treemacs-magit
 :after (treemacs magit))
