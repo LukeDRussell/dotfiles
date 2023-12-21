@@ -56,7 +56,6 @@
  (global-auto-revert-non-file-buffers t) ;; Keep dired up-to-date with files on disk
  (scroll-conservatively 101) ;; When scrolling top or bottom of window, don't recenter point
  (scroll-margin 5)
- (desktop-save-mode t)
  (create-lockfiles nil) ;; Don't lock files. Causes my keyboard to restart
  (recentf-exclude ;; Ignore these regex paths from recent file list
   '("/opt/homebrew"
@@ -225,6 +224,7 @@
   "o v" '(vterm-toggle :wk "vterm")
   "o d" '(dashboard-open :wk "dashboard")
   "o t" '(treemacs :wk "treemacs")
+  "o m" '(magit :wk "magit")
 
   "q" '(:ignore t :wk "quit")
   "q r" '(restart-emacs :wk "Restart emacs")
