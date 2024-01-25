@@ -15,14 +15,44 @@
 
 ;; Set the default font, ensuring it exists.
 (cond
- ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- ;; ((find-font (font-spec :name "Hack Nerd Font Mono"))                         ;;
- ;;  (set-face-attribute 'default nil :font "Hack Nerd Font Mono" :height 120))) ;;
- ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- ((find-font (font-spec :name "FiraMono Nerd Font"))
+
+ ((find-font (font-spec :name "Hack Nerd Font Mono")) ;;
   (set-face-attribute 'default nil
-                      :font "FiraMono Nerd Font"
-                      :height 140)))
+                      :font "Hack Nerd Font Mono"))) ;;
+
+;; ((find-font (font-spec :name "FiraMono Nerd Font"))
+;;  (set-face-attribute 'default nil
+;;                      :font "FiraMono Nerd Font"
+;;                      :height 140)))
+
+;; Settings for use-package itself
+(require 'package)
+(use-package use-package-core :custom (use-package-always-ensure t))
+
+;; Add MELPA, to the list of accepted package registries.
+
+(add-to-list
+ 'package-archives '("melpa" . "https://melpa.org/packages/")
+ t)
+(package-initialize)
+
+;; This package adds a new :vc keywords to use-package declarations, with which you can install packages.
+;; Note: was merged into emacs 2023-05-16. Might be in emacs 30
+(unless (package-installed-p 'vc-use-package)
+  (package-vc-install "https://github.com/slotThe/vc-use-package"))
+
+(require 'vc-use-package)
+
+;; A quick primer on the `use-package' function (refer to
+;; "C-h f use-package" for the full details).
+;;
+;; (use-package my-package-name
+;;   :ensure t    ; Ensure my-package is installed
+;;   :after foo   ; Load my-package after foo is loaded (seldom used)
+;;   :init        ; Run this code before my-package is loaded
+;;   :bind        ; Bind these keys to these functions
+;;   :custom      ; Set these variables
+;;   :config      ; Run this code after my-package is loaded
 
 
 (use-package
@@ -66,30 +96,6 @@
      "~/.config/emacs/.cache/treemacs-persist-at-last-error")
     "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'")))
 
-;; Settings for use-package itself
-(use-package use-package-core :custom (use-package-always-ensure t))
-
-;; Add MELPA, to the list of accepted package registries.
-(add-to-list
- 'package-archives '("melpa" . "https://melpa.org/packages/"))
-
-;; This package adds a new :vc keywords to use-package declarations, with which you can install packages.
-;; Note: was merged into emacs 2023-05-16. Might be in emacs 30
-(unless (package-installed-p 'vc-use-package)
-  (package-vc-install "https://github.com/slotThe/vc-use-package"))
-
-(require 'vc-use-package)
-
-;; A quick primer on the `use-package' function (refer to
-;; "C-h f use-package" for the full details).
-;;
-;; (use-package my-package-name
-;;   :ensure t    ; Ensure my-package is installed
-;;   :after foo   ; Load my-package after foo is loaded (seldom used)
-;;   :init        ; Run this code before my-package is loaded
-;;   :bind        ; Bind these keys to these functions
-;;   :custom      ; Set these variables
-;;   :config      ; Run this code after my-package is loaded
 
 ;; A package with a great selection of themes:
 ;; https://protesilaos.com/emacs/ef-themes
@@ -440,6 +446,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-agenda-files nil nil nil "Customized with use-package org")
  '(package-selected-packages
    '(use-package-core
      yaml-mode
