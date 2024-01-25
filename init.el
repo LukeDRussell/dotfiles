@@ -118,7 +118,6 @@
  (vertico-cycle t)
  (read-buffer-completion-ignore-case t)
  (read-file-name-completion-ignore-case t)
- (completion-styles '(basic substring partial-completion flex))
  :init (vertico-mode))
 
 ;; Improve the accessibility of Emacs documentation by placing
@@ -148,6 +147,12 @@
   (ielm-mode . enable-paredit-mode)
   (lisp-interaction-mode . enable-paredit-mode)
   (scheme-mode . enable-paredit-mode)))
+
+(use-package
+ orderless
+ :custom (completion-styles '(orderless basic))
+ (completion-category-overrides
+  '((file (styles basic partial-completion)))))
 
 
 ;; Evil mode ;;
@@ -208,7 +213,7 @@
   "b" '(:ignore t :wk "buffers")
   "b s" '(switch-to-buffer :wk "switch to named buffer")
   "b m" '(buffer-menu :wk "menu for buffers")
-  "b k" '(kill-this-buffer :wk "kill buffer")
+  "b k" '(kill-buffer-and-window :wk "kill buffer")
   "b n" '(next-buffer :wk "next buffer")
   "b p" '(previous-buffer :wk "previous buffer")
 
@@ -240,6 +245,7 @@
   "h" '(:ignore t :wk "(h)elp")
   "h a" '(apropos :wk "(a)propos")
   "h f" '(describe-function :wk "(f)unction describe")
+  "h i" '(info-display-manual :wk "info dislay manual")
   "h v" '(describe-variable :wk "(v)ariable describe")
   "h k" '(describe-key :wk "(k)ey describe")
   "h m" '(info-emacs-manual :wk "(m)anual emacs")
@@ -392,9 +398,9 @@
 ;; File Management ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-(use-package treemacs)
-:init
-(treemacs-project-follow-mode)
+(use-package
+ treemacs
+ :config (treemacs-project-follow-mode) (treemacs-follow-mode))
 
 (use-package treemacs-evil :after (treemacs evil))
 
@@ -435,10 +441,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(uniquify
-     elisp-autofmt
-     eglot
-     org
+   '(use-package-core
      yaml-mode
      which-key
      vterm-toggle
@@ -447,34 +450,35 @@
      treemacs-magit
      treemacs-evil
      toc-org
+     terraform-mode
+     standard-themes
      paredit
      page-break-lines
      org-modern
+     orderless
+     nano-emacs
+     nano
+     modus-themes
      markdown-mode
      marginalia
+     lua-mode
+     highlight-indent-guides
      helpful
      go-mode
      general
      evil-collection
+     elisp-autofmt
+     eglot
      ef-themes
      doom-modeline
      dirvish
      denote
      dashboard
      corfu
-     breadcrumb))
- '(tool-bar-mode nil))
+     breadcrumb)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default
-   ((t
-     (:family
-      "FiraMono Nerd Font Mono"
-      :foundry "nil"
-      :slant normal
-      :weight regular
-      :height 160
-      :width normal)))))
+ )
