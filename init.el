@@ -1,5 +1,26 @@
-;; My Functions
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; Package Management ;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Help in info-display-manual --> use-package --> index
+
+(require 'package)
+(setq use-package-always-ensure t)
+;; Add MELPA, to the list of accepted package registries.
+(add-to-list
+ 'package-archives '("melpa" . "https://melpa.org/packages/")
+ t)
+(package-initialize)
+;; This package adds a new :vc keywords to use-package declarations, with which you can install packages.
+;; Note: was merged into emacs 2023-05-16. Might be in emacs 30
+(unless (package-installed-p 'vc-use-package)
+  (package-vc-install "https://github.com/slotThe/vc-use-package"))
+(require 'vc-use-package)
+
+
+;;;;;;;;;;;;;;;;;;
+;; My Functions ;;
+;;;;;;;;;;;;;;;;;;
 
 (defun lr/cycle-line-number-style ()
   "Cycles through the line styles I like."
@@ -11,102 +32,115 @@
     (setq display-line-numbers 'relative))
    ((eq display-line-numbers 'relative)
     (setq display-line-numbers nil))))
+(defun lr/default-line-number-style ()
+  (setq display-line-numbers t))
 
 
-;; Set the default font, ensuring it exists.
+;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Misc Emacs Settings ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-hook 'prog-mode-hook 'hs-minor-mode) ;; Enable code folding with inbuilt hs
+(add-hook 'prog-mode-hook 'display-line-numbers-mode) ;; Display line numbers when in programming modes
+
+(savehist-mode t)
+(recentf-mode t) ;; Keep track of open files
+(global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
+
+(setq
+ window-resize-pixelwise t
+ frame-resize-pixelwise t
+ load-prefer-newer t
+ backup-by-copying t
+ backup-directory-alist ;; Backups are placed into your Emacs directory, e.g. ~/.config/emacs/backups
+ `(("." . ,(concat user-emacs-directory "backups")))
+ visible-bell t
+ ring-bell-function 'ignore
+ inhibit-startup-screen t
+ insert-directory-program "gls"
+ global-auto-revert-non-file-buffers t
+ ;; Keep dired up-to-date with files on disk
+ scroll-conservatively 101
+ ;; When scrolling top or bottom of window, don't recenter point
+ scroll-margin 5
+ create-lockfiles nil
+ ;; Don't lock files. Causes my keyboard to restart
+ recentf-exclude ;; Ignore these regex paths from recent file list
+ '("/opt/homebrew"
+   "/usr/share/emacs/"
+   "~/.config/emacs/elpa/"
+   (recentf-expand-file-name "~/.config/emacs/elpa")
+   (recentf-expand-file-name
+    "~/.config/emacs/.cache/treemacs-persist-at-last-error")
+   "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'"))
+
+
+;;;;;;;;;;;;;
+;; Visuals ;;
+;;;;;;;;;;;;;
+
+(tool-bar-mode 0)
+(electric-pair-mode t)
+(show-paren-mode 1)
+(if (eq system-type 'darwin)
+    (menu-bar-mode 1)
+  (menu-bar-mode 0))
+
+;; Font
 (cond
-
- ((find-font (font-spec :name "Hack Nerd Font Mono")) ;;
+ ((find-font (font-spec :name "Hack Nerd Font Mono"))
   (set-face-attribute 'default nil
-                      :font "Hack Nerd Font Mono"))) ;;
+                      :font "Hack Nerd Font Mono"
+                      :height 150)))
 
-;; ((find-font (font-spec :name "FiraMono Nerd Font"))
-;;  (set-face-attribute 'default nil
-;;                      :font "FiraMono Nerd Font"
-;;                      :height 140)))
-
-;; Settings for use-package itself
-(require 'package)
-(use-package use-package-core :custom (use-package-always-ensure t))
-
-;; Add MELPA, to the list of accepted package registries.
-
-(add-to-list
- 'package-archives '("melpa" . "https://melpa.org/packages/")
- t)
-(package-initialize)
-
-;; This package adds a new :vc keywords to use-package declarations, with which you can install packages.
-;; Note: was merged into emacs 2023-05-16. Might be in emacs 30
-(unless (package-installed-p 'vc-use-package)
-  (package-vc-install "https://github.com/slotThe/vc-use-package"))
-
-(require 'vc-use-package)
-
-;; A quick primer on the `use-package' function (refer to
-;; "C-h f use-package" for the full details).
-;;
-;; (use-package my-package-name
-;;   :ensure t    ; Ensure my-package is installed
-;;   :after foo   ; Load my-package after foo is loaded (seldom used)
-;;   :init        ; Run this code before my-package is loaded
-;;   :bind        ; Bind these keys to these functions
-;;   :custom      ; Set these variables
-;;   :config      ; Run this code after my-package is loaded
+;; Themes
+(use-package ef-themes)
+(use-package modus-themes)
+(use-package kanagawa-theme)
 
 
+;; Indent Bars
 (use-package
- emacs
-
+ indent-bars
+ :vc (:fetcher github :repo jdtsmith/indent-bars)
+ :hook ((python-mode yaml-mode) . indent-bars-mode)
  :config
- (tool-bar-mode -1)
- (savehist-mode t)
- (electric-pair-mode t)
- (show-paren-mode 1)
- ;;(recentf-mode t) ;; Keep track of open files
- (global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
-
-
- :hook
- ('prog-mode-hook . 'hs-minor-mode) ;; Enable code folding with inbuilt hs
- ('prog-mode-hook . 'display-line-numbers-mode) ;; Display line numbers when in programming modes
-
-
+ '(indent-bars-prefer-character t)
  :custom
- (window-resize-pixelwise t)
- (frame-resize-pixelwise t)
- (load-prefer-newer t)
- (backup-by-copying t)
- (backup-directory-alist ;; Backups are placed into your Emacs directory, e.g. ~/.config/emacs/backups
-  `(("." . ,(concat user-emacs-directory "backups"))))
- (visible-bell t)
- (ring-bell-function 'ignore)
- (inhibit-startup-screen t)
- (insert-directory-program "gls")
- (global-auto-revert-non-file-buffers t) ;; Keep dired up-to-date with files on disk
- (scroll-conservatively 101) ;; When scrolling top or bottom of window, don't recenter point
- (scroll-margin 5)
- (create-lockfiles nil) ;; Don't lock files. Causes my keyboard to restart
- (recentf-exclude ;; Ignore these regex paths from recent file list
-  '("/opt/homebrew"
-    "/usr/share/emacs/"
-    "~/.config/emacs/elpa/"
-    (recentf-expand-file-name "~/.config/emacs/elpa")
-    (recentf-expand-file-name
-     "~/.config/emacs/.cache/treemacs-persist-at-last-error")
-    "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'")))
+    (indent-bars-pattern ".")
+    (indent-bars-width-frac 0.5)
+    (indent-bars-pad-frac 0.25)
+    (indent-bars-color-by-depth nil)
+    (indent-bars-highlight-current-depth '(:face default :blend 0.4)))
+ 
 
+ 
 
-;; A package with a great selection of themes:
-;; https://protesilaos.com/emacs/ef-themes
+(use-package breadcrumb :init (breadcrumb-mode))
+
 (use-package
- ef-themes
- ;  :config
- ;  (ef-themes-select 'ef-autumn)
- )
+ dashboard
+ :config (dashboard-setup-startup-hook)
+ :custom
+ (dashboard-startup-banner 'logo)
+ (dashboard-banner-logo-title nil)
+ (dashboard-center-content t)
+ (dashboard-icon-type 'nerd-icons)
+ (dashboard-set-heading-icons t)
+ (dashboard-set-file-icons t)
+ (dashboard-set-footer nil)
+ (dashboard-projects-backend 'project-el)
+ (dashboard-display-icons-p t)
+ (dashboard-items '((recents . 5) (agenda . 5) (projects . 5))))
+
 (use-package
- modus-themes
- :config (modus-themes-select 'modus-vivendi))
+ doom-modeline
+ :init (doom-modeline-mode 1)
+ :custom
+ (mode-line-percent-position nil)
+ (doom-modeline-buffer-encoding nil)
+ (doom-modeline-vcs-max-length 30)
+ (doom-modeline-modal-icon nil))
 
 
 ;; Editing
@@ -160,10 +194,8 @@
  (completion-category-overrides
   '((file (styles basic partial-completion)))))
 
-
 ;; Evil mode ;;
 ;;;;;;;;;;;;;;;
-
 (use-package
  evil
  :init
@@ -171,40 +203,34 @@
  (setq evil-want-keybinding nil)
  :config
  (evil-mode 1)
- (evil-set-undo-system 'undo-redo) ;; Emacs 28+ has this built in
+ (evil-set-undo-system 'undo-redo)
+ ;; Emacs 28+ has this built in
  :custom
  (evil-normal-state-tag " NORMAL ")
  (evil-insert-state-tag " INSERT ")
  (evil-insert-state-message nil)
  (evil-visual-state-tag " VISUAL ")
- (evil-visual-state-message nil) ;; Mode is already displayed in the status bar.
+ (evil-visual-state-message nil)
+ ;; Mode is already displayed in the status bar.
  :custom-face
  (doom-modeline-evil-insert-state
   ((t (:background "olive drab" :foreground "white smoke"))))
  (doom-modeline-evil-visual-state
   ((t (:background "medium slate blue" :foreground "white smoke")))))
-
 (use-package
  evil-collection
  :after evil
  :config (evil-collection-init))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Version Control Systems ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (use-package magit)
-
-
 ;;;;;;;;;;;;;;
 ;; Keybinds ;;
 ;;;;;;;;;;;;;;
-
 (use-package
  general
  :config (general-evil-setup)
-
  ;; set up 'SPC' as the global leader key
  (general-create-definer
   lr/leader-def
@@ -216,132 +242,81 @@
  ;; format: off
  (lr/leader-def ;; Leader sequences
 
-  "b" '(:ignore t :wk "buffers")
-  "b s" '(switch-to-buffer :wk "switch to named buffer")
-  "b m" '(buffer-menu :wk "menu for buffers")
-  "b k" '(kill-buffer-and-window :wk "kill buffer")
-  "b n" '(next-buffer :wk "next buffer")
-  "b p" '(previous-buffer :wk "previous buffer")
-
-  "d" '(:ignore t :wk "dirvish")
-  "d d" '(dirvish :wk "open dirvish")
-  "d s" '(dirvish-side :wk "open dirvish to side")
-
-  "e" '(:ignore t :wk "emacs")
-  "e c" '(:ignore t :wk "config")
-  "e c r" '((load-file user-init-file) :wk "(r)eload user config")
-
-  "o" '(:ignore t :wk "open")
-  "o v" '(vterm-toggle :wk "vterm")
-  "o d" '(dashboard-open :wk "dashboard")
-  "o t" '(treemacs :wk "treemacs")
-  "o m" '(magit :wk "magit")
-
-  "q" '(:ignore t :wk "quit")
-  "q r" '(restart-emacs :wk "Restart emacs")
-  "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
-  "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
-
-  "u" '(:ignore t :wk "ui")
-  "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
-  "u l" '(lr/cycle-line-number-style :wk "Line numbers")
-  "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
-  "u T" '(tear-off-window :wk "Tear off window to new fram%:e")
-
-  "h" '(:ignore t :wk "(h)elp")
-  "h a" '(apropos :wk "(a)propos")
-  "h f" '(describe-function :wk "(f)unction describe")
-  "h i" '(info-display-manual :wk "info dislay manual")
-  "h v" '(describe-variable :wk "(v)ariable describe")
-  "h k" '(describe-key :wk "(k)ey describe")
-  "h m" '(info-emacs-manual :wk "(m)anual emacs")
-  "h q" '(help-quick-toggle :wk "(q)uick menu")
-  "h o" '(org-info :wk "(o)rg manual"))
+  "b"
+  '(:ignore t :wk "buffers")
+  "b s"
+  '(switch-to-buffer :wk "switch to named buffer")
+  "b m"
+  '(buffer-menu :wk "menu for buffers")
+  "b k"
+  '(kill-buffer-and-window :wk "kill buffer")
+  "b n"
+  '(next-buffer :wk "next buffer")
+  "b p"
+  '(previous-buffer :wk "previous buffer")
+  "d"
+  '(:ignore t :wk "dirvish")
+  "d d"
+  '(dirvish :wk "open dirvish")
+  "d s"
+  '(dirvish-side :wk "open dirvish to side")
+  "e"
+  '(:ignore t :wk "emacs")
+  "e c"
+  '(:ignore t :wk "config")
+  "e c r"
+  '((load-file user-init-file)
+    :wk "(r)eload user config")
+  "o"
+  '(:ignore t :wk "open")
+  "o v"
+  '(vterm-toggle :wk "vterm")
+  "o d"
+  '(dashboard-open :wk "dashboard")
+  "o t"
+  '(treemacs :wk "treemacs")
+  "o m"
+  '(magit :wk "magit")
+  "q"
+  '(:ignore t :wk "quit")
+  "q r"
+  '(restart-emacs :wk "Restart emacs")
+  "q n"
+  '(restart-emacs-start-new-emacs :wk "restart to New emacs")
+  "q q"
+  '(save-buffers-kill-terminal :wk "Quit emacs")
+  "u"
+  '(:ignore t :wk "ui")
+  "u m"
+  '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
+  "u l"
+  '(lr/cycle-line-number-style :wk "Line numbers")
+  "u F"
+  '(toggle-frame-fullscreen :wk "Fullscreen")
+  "u T"
+  '(tear-off-window :wk "Tear off window to new fram%:e")
+  "h"
+  '(:ignore t :wk "(h)elp")
+  "h a"
+  '(apropos :wk "(a)propos")
+  "h f"
+  '(describe-function :wk "(f)unction describe")
+  "h i"
+  '(info-display-manual :wk "info dislay manual")
+  "h v"
+  '(describe-variable :wk "(v)ariable describe")
+  "h k"
+  '(describe-key :wk "(k)ey describe")
+  "h m"
+  '(info-emacs-manual :wk "(m)anual emacs")
+  "h q"
+  '(help-quick-toggle :wk "(q)uick menu")
+  "h o"
+  '(org-info :wk "(o)rg manual"))
  ;; format: on
  )
-
 (global-set-key (kbd "C-=") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
-
-;;;;;;;;;;;;;
-;; Visuals ;;
-;;;;;;;;;;;;;
-
-;; Example of built in package manager using a git target.
-(use-package
- breadcrumb
- :vc (:fetcher github :repo joaotavora/breadcrumb)
- :init (breadcrumb-mode))
-
-(use-package
- which-key
- :init (which-key-mode)
- :config
- (setq
-  which-key-allow-evil-operators t
-  which-key-idle-delay 0.7))
-
-(use-package
- nerd-icons
- :config
- (cond
-  ((find-font (font-spec :name "Hack Nerd Font Mono"))
-   (setq nerd-icons-font-family "Hack Nerd Font Mono"))))
-
-(use-package
- dashboard
- :config (dashboard-setup-startup-hook)
- :custom
- (dashboard-startup-banner 'logo)
- (dashboard-banner-logo-title nil)
- (dashboard-center-content t)
- (dashboard-icon-type 'nerd-icons)
- (dashboard-set-heading-icons t)
- (dashboard-set-file-icons t)
- (dashboard-set-footer nil)
- (dashboard-projects-backend 'project-el)
- (dashboard-display-icons-p t)
- (dashboard-items
-  '((recents . 5) (agenda . 5) (projects . 5) (bookmarks . 5))))
-
-(use-package
- doom-modeline
- :init (doom-modeline-mode 1)
- :config
- (setq
-  mode-line-percent-position nil
-  doom-modeline-buffer-encoding nil
-  doom-modeline-vcs-max-length 30
-  doom-modeline-modal-icon nil))
-
-(use-package
- highlight-indent-guides
- :hook (prog-mode-hook . highlight-indent-guides-mode))
-
-(use-package
- org
- :hook (org-mode . visual-line-mode)
- :custom
- (org-directory "~/Notes/")
- (org-agenda-files (list org-directory))
- (org-refile-targets '((org-agenda-files :maxlevel . 5)))
- (org-refile-use-outline-path t)
- (org-outline-path-complete-in-steps nil)
- (org-startup-indented t)
- (org-indent-indentation-per-level 2)
- (org-hide-emphasis-markers t)
- (org-todo-keywords
-  '((sequence "TODO(t)" "MAYBE(m)" "|" "DONE(d)" "CANCEL(c)"))))
-
-
-(use-package
- toc-org
- :commands toc-org-enable
- :init (add-hook 'org-mode-hook 'toc-org-enable))
-(use-package
- org-modern
- :init (add-hook 'org-mode-hook 'global-org-modern-mode))
-(use-package page-break-lines :init (global-page-break-lines-mode))
 
 
 ;;;;;;;;;;;;;;;
@@ -358,14 +333,39 @@
   (terraform-mode . eglot-ensure)
   (yaml-mode . eglot-ensure)))
 
+;; Emacs Lisp
+(add-hook 'emacs-lisp-mode 'lr/default-line-number-style)
+
 (use-package
  elisp-autofmt
  :commands (elisp-autofmt-mode elisp-autofmt-buffer)
- :hook (emacs-lisp-mode . elisp-autofmt-mode)
- :custom
- (elisp-autofmt-python-bin "~/.rye/shims/python")
- (elisp-autofmt-on-save-p 'always))
+ :hook (emacs-lisp-mode . elisp-autofmt-mode))
 
+;; Orgmode
+(use-package
+ org
+ :hook (org-mode . visual-line-mode)
+ :custom
+ (org-directory "~/Notes/")
+ (org-agenda-files (list org-directory))
+ (org-refile-targets '((org-agenda-files :maxlevel . 5)))
+ (org-refile-use-outline-path t)
+ (org-outline-path-complete-in-steps nil)
+ (org-startup-indented t)
+ (org-indent-indentation-per-level 2)
+ (org-hide-emphasis-markers t)
+ (org-todo-keywords
+  '((sequence "TODO(t)" "MAYBE(m)" "|" "DONE(d)" "CANCEL(c)"))))
+(use-package
+ toc-org
+ :commands toc-org-enable
+ :init (add-hook 'org-mode-hook 'toc-org-enable))
+(use-package
+ org-modern
+ :init (add-hook 'org-mode-hook 'global-org-modern-mode))
+(use-package page-break-lines :init (global-page-break-lines-mode))
+
+;; Markdown
 
 (use-package
  markdown-mode
@@ -375,9 +375,7 @@
  ;; automatic spell checker.
  :hook ((markdown-mode . visual-line-mode) (markdown-mode . flyspell-mode))
  :init (setq markdown-command "multimarkdown"))
-
 (use-package yaml-mode)
-
 (use-package
  terraform-mode
  :after eglot
@@ -387,7 +385,6 @@
  ;  :hook
  ;  eglot-ensure
  )
-
 (use-package
  go-mode
  :after eglot
@@ -396,31 +393,20 @@
  ;  eglot-ensure
  (before-save . gofmt-before-save)
  :config (setq tab-width 4))
-
 (use-package lua-mode)
-
-
 ;;;;;;;;;;;;;;;;;;;;;
 ;; File Management ;;
 ;;;;;;;;;;;;;;;;;;;;;
-
 (use-package
  treemacs
  :config (treemacs-project-follow-mode) (treemacs-follow-mode))
-
 (use-package treemacs-evil :after (treemacs evil))
-
 (use-package treemacs-magit :after (treemacs magit))
-
 (use-package dirvish :after (dirvish-override-dired-mode))
-
-
 ;;;;;;;;;;;;
 ;; Shells ;;
 ;;;;;;;;;;;;
-
 (use-package vterm :config (setq vterm-copy-exclude-prompt t))
-
 (use-package
  vterm-toggle
  :after vterm
@@ -441,48 +427,23 @@
     ;;(direction . bottom)
     ;;(dedicated . t) ;dedicated is supported in emacs27
     (reusable-frames . visible) (window-height . 0.3))))
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Customize Stuff ;;
+;;;;;;;;;;;;;;;;;;;;;
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(kanagawa))
+ '(custom-safe-themes
+   '("e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(org-agenda-files nil nil nil "Customized with use-package org")
  '(package-selected-packages
-   '(use-package-core
-     yaml-mode
-     which-key
-     vterm-toggle
-     vertico
-     vc-use-package
-     treemacs-magit
-     treemacs-evil
-     toc-org
-     terraform-mode
-     standard-themes
-     paredit
-     page-break-lines
-     org-modern
-     orderless
-     nano-emacs
-     nano
-     modus-themes
-     markdown-mode
-     marginalia
-     lua-mode
-     highlight-indent-guides
-     helpful
-     go-mode
-     general
-     evil-collection
-     elisp-autofmt
-     eglot
-     ef-themes
-     doom-modeline
-     dirvish
-     denote
-     dashboard
-     corfu
-     breadcrumb)))
+   '(kanagawa-theme use-package-core yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode highlight-indent-guides helpful go-mode general evil-collection elisp-autofmt eglot ef-themes doom-modeline dirvish denote dashboard corfu breadcrumb))
+ '(package-vc-selected-packages
+   '((indent-bars :vc-backend Git :url "https://github.com/jdtsmith/indent-bars"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
