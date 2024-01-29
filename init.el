@@ -5,6 +5,7 @@
 ; Help in info-display-manual --> use-package --> index
 
 (require 'package)
+;; Always install packages listed
 (setq use-package-always-ensure t)
 ;; Add MELPA, to the list of accepted package registries.
 (add-to-list
@@ -42,6 +43,9 @@
 
 (add-hook 'prog-mode-hook 'hs-minor-mode) ;; Enable code folding with inbuilt hs
 (add-hook 'prog-mode-hook 'display-line-numbers-mode) ;; Display line numbers when in programming modes
+
+(global-set-key (kbd "C-=") 'text-scale-increase)
+(global-set-key (kbd "C--") 'text-scale-decrease)
 
 (savehist-mode t)
 (recentf-mode t) ;; Keep track of open files
@@ -96,12 +100,17 @@
 ;; Themes
 (use-package ef-themes)
 (use-package modus-themes)
-(use-package kanagawa-theme)
-
+(use-package kanagawa-theme
+  :config (load-theme 'kanagawa))
+(use-package lambda-themes
+ :vc (:fetcher github :repo lambda-emacs/lambda-themes)
+ :custom
+  (lambda-themes-set-italic-comments t)
+  (lambda-themes-set-italic-keywords t)
+  (lambda-themes-set-variable-pitch t) )
 
 ;; Indent Bars
-(use-package
- indent-bars
+(use-package indent-bars
  :vc (:fetcher github :repo jdtsmith/indent-bars)
  :hook ((python-mode yaml-mode) . indent-bars-mode)
  :config
@@ -113,13 +122,15 @@
     (indent-bars-color-by-depth nil)
     (indent-bars-highlight-current-depth '(:face default :blend 0.4)))
  
+;; Colour code brackets, braces, parenthesis
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode)) 
 
- 
+(use-package breadcrumb
+  ;; :init (breadcrumb-mode)
+  )
 
-(use-package breadcrumb :init (breadcrumb-mode))
-
-(use-package
- dashboard
+(use-package dashboard
  :config (dashboard-setup-startup-hook)
  :custom
  (dashboard-startup-banner 'logo)
@@ -133,8 +144,7 @@
  (dashboard-display-icons-p t)
  (dashboard-items '((recents . 5) (agenda . 5) (projects . 5))))
 
-(use-package
- doom-modeline
+(use-package doom-modeline
  :init (doom-modeline-mode 1)
  :custom
  (mode-line-percent-position nil)
@@ -143,34 +153,28 @@
  (doom-modeline-modal-icon nil))
 
 
-;; Editing
-;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;
+;; Editing Support ;;
+;;;;;;;;;;;;;;;;;;;;;
 
-;; Minibuffer completion is essential to your Emacs workflow and
-;; Vertico is currently one of the best out there. There's a lot to
-;; dive in here so I recommend checking out the documentation for more
-;; details: https://elpa.gnu.org/packages/vertico.html. The short and
-;; sweet of it is that you search for commands with "M-x do-thing" and
-;; the minibuffer will show you a filterable list of matches.
-(use-package
- vertico
- :custom
- (vertico-cycle t)
- (read-buffer-completion-ignore-case t)
- (read-file-name-completion-ignore-case t)
- :init (vertico-mode))
+;; Discover keybinds with popups
+(use-package which-key
+  :init (which-key-mode))
 
-;; Improve the accessibility of Emacs documentation by placing
-;; descriptions directly in your minibuffer. Give it a try:
-;; "M-x find-file".
-(use-package marginalia :after vertico :init (marginalia-mode))
+;; Minibuffer completion UI
+(use-package vertico
+  :custom
+  (vertico-cycle t)
+  (read-buffer-completion-ignore-case t)
+  (read-file-name-completion-ignore-case t)
+  :init (vertico-mode))
 
-;; Adds intellisense-style code completion at point that works great
-;; with LSP via Eglot. You'll likely want to configure this one to
-;; match your editing preferences, there's no one-size-fits-all
-;; solution.
-(use-package
- corfu
+;; Minibuffer includes docstrings in margin
+(use-package marginalia
+  :after vertico :init (marginalia-mode))
+
+;; Adds intellisense-style completion popups
+(use-package corfu
  :init (global-corfu-mode)
  :custom (corfu-auto t)
  ;; You may want to play with delay/prefix/styles to suit your preferences.
@@ -178,26 +182,144 @@
  (corfu-auto-prefix 0)
  (completion-styles '(basic)))
 
-(use-package
- paredit
- ;; ELisp
- :hook
- ((emacs-lisp-mode . enable-paredit-mode)
-  (lisp-mode . enable-paredit-mode)
-  (ielm-mode . enable-paredit-mode)
-  (lisp-interaction-mode . enable-paredit-mode)
-  (scheme-mode . enable-paredit-mode)))
+;; Stop caring about the order of search terms in minibuffer filtering
+(use-package orderless
+  :custom (completion-styles '(orderless basic))
+  (completion-category-overrides
+   '((file (styles basic partial-completion)))))
 
-(use-package
- orderless
- :custom (completion-styles '(orderless basic))
- (completion-category-overrides
-  '((file (styles basic partial-completion)))))
+(use-package consult
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  :bind (;; C-c bindings in `mode-specific-map'
+         ("C-c M-x" . consult-mode-command)
+         ("C-c h" . consult-history)
+         ("C-c k" . consult-kmacro)
+         ("C-c m" . consult-man)
+         ("C-c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x bindings in `ctl-x-map'
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ;; M-g bindings in `goto-map'
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings in `search-map'
+         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+         ("M-s c" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key "M-.")
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; "C-+"
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+  ;; By default `consult-project-function' uses `project-root' from project.el.
+  ;; Optionally configure a different project root function.
+  ;;;; 1. project.el (the default)
+  ;; (setq consult-project-function #'consult--default-project--function)
+  ;;;; 2. vc.el (vc-root-dir)
+  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+  ;;;; 3. locate-dominating-file
+  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+  ;;;; 4. projectile.el (projectile-project-root)
+  ;; (autoload 'projectile-project-root "projectile")
+  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+  ;;;; 5. No project support
+  ;; (setq consult-project-function nil)
+)
+
+
+(use-package paredit
+  ;; ELisp
+  :hook
+  ((emacs-lisp-mode . enable-paredit-mode)
+   (lisp-mode . enable-paredit-mode)
+   (ielm-mode . enable-paredit-mode)
+   (lisp-interaction-mode . enable-paredit-mode)
+   (scheme-mode . enable-paredit-mode)))
 
 ;; Evil mode ;;
 ;;;;;;;;;;;;;;;
-(use-package
- evil
+(use-package evil
  :init
  (setq evil-want-integration t)
  (setq evil-want-keybinding nil)
@@ -217,8 +339,7 @@
   ((t (:background "olive drab" :foreground "white smoke"))))
  (doom-modeline-evil-visual-state
   ((t (:background "medium slate blue" :foreground "white smoke")))))
-(use-package
- evil-collection
+(use-package evil-collection
  :after evil
  :config (evil-collection-init))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -228,8 +349,7 @@
 ;;;;;;;;;;;;;;
 ;; Keybinds ;;
 ;;;;;;;;;;;;;;
-(use-package
- general
+(use-package general
  :config (general-evil-setup)
  ;; set up 'SPC' as the global leader key
  (general-create-definer
@@ -315,16 +435,14 @@
   '(org-info :wk "(o)rg manual"))
  ;; format: on
  )
-(global-set-key (kbd "C-=") 'text-scale-increase)
-(global-set-key (kbd "C--") 'text-scale-decrease)
+
 
 
 ;;;;;;;;;;;;;;;
 ;; Languages ;;
 ;;;;;;;;;;;;;;;
 
-(use-package
- eglot
+(use-package eglot
  ;; Add your programming modes here to automatically start Eglot,
  ;; assuming you have the respective LSP server installed.
  ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
@@ -336,14 +454,12 @@
 ;; Emacs Lisp
 (add-hook 'emacs-lisp-mode 'lr/default-line-number-style)
 
-(use-package
- elisp-autofmt
+(use-package elisp-autofmt
  :commands (elisp-autofmt-mode elisp-autofmt-buffer)
  :hook (emacs-lisp-mode . elisp-autofmt-mode))
 
 ;; Orgmode
-(use-package
- org
+(use-package org
  :hook (org-mode . visual-line-mode)
  :custom
  (org-directory "~/Notes/")
@@ -356,19 +472,17 @@
  (org-hide-emphasis-markers t)
  (org-todo-keywords
   '((sequence "TODO(t)" "MAYBE(m)" "|" "DONE(d)" "CANCEL(c)"))))
-(use-package
- toc-org
+(use-package toc-org
  :commands toc-org-enable
  :init (add-hook 'org-mode-hook 'toc-org-enable))
-(use-package
- org-modern
+(use-package org-modern
  :init (add-hook 'org-mode-hook 'global-org-modern-mode))
-(use-package page-break-lines :init (global-page-break-lines-mode))
+(use-package page-break-lines
+  :init (global-page-break-lines-mode))
 
 ;; Markdown
 
-(use-package
- markdown-mode
+(use-package markdown-mode
  ;; These extra modes help clean up the Markdown editing experience.
  ;; `visual-line-mode' turns on word wrap and helps editing commands
  ;; work with paragraphs of text. `flyspell-mode' turns on an
@@ -376,8 +490,7 @@
  :hook ((markdown-mode . visual-line-mode) (markdown-mode . flyspell-mode))
  :init (setq markdown-command "multimarkdown"))
 (use-package yaml-mode)
-(use-package
- terraform-mode
+(use-package terraform-mode
  :after eglot
  :config
  (add-to-list
@@ -385,8 +498,7 @@
  ;  :hook
  ;  eglot-ensure
  )
-(use-package
- go-mode
+(use-package go-mode
  :after eglot
  :bind (:map go-mode-map ("C-c C-f" . 'gofmt))
  :hook
@@ -397,18 +509,20 @@
 ;;;;;;;;;;;;;;;;;;;;;
 ;; File Management ;;
 ;;;;;;;;;;;;;;;;;;;;;
-(use-package
- treemacs
+(use-package treemacs
  :config (treemacs-project-follow-mode) (treemacs-follow-mode))
-(use-package treemacs-evil :after (treemacs evil))
-(use-package treemacs-magit :after (treemacs magit))
-(use-package dirvish :after (dirvish-override-dired-mode))
+(use-package treemacs-evil
+  :after (treemacs evil))
+(use-package treemacs-magit
+  :after (treemacs magit))
+(use-package dirvish
+  :after (dirvish-override-dired-mode))
 ;;;;;;;;;;;;
 ;; Shells ;;
 ;;;;;;;;;;;;
-(use-package vterm :config (setq vterm-copy-exclude-prompt t))
-(use-package
- vterm-toggle
+(use-package vterm
+  :config (setq vterm-copy-exclude-prompt t))
+(use-package vterm-toggle
  :after vterm
  :config
  (setq vterm-toggle-hide-method 'reset-window-configration)
@@ -436,14 +550,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(kanagawa))
  '(custom-safe-themes
-   '("e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
- '(org-agenda-files nil nil nil "Customized with use-package org")
- '(package-selected-packages
-   '(kanagawa-theme use-package-core yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode highlight-indent-guides helpful go-mode general evil-collection elisp-autofmt eglot ef-themes doom-modeline dirvish denote dashboard corfu breadcrumb))
- '(package-vc-selected-packages
-   '((indent-bars :vc-backend Git :url "https://github.com/jdtsmith/indent-bars"))))
+   '("e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
