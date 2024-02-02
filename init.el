@@ -68,6 +68,7 @@
  ;; When scrolling top or bottom of window, don't recenter point
  scroll-margin 5
  create-lockfiles nil
+ native-comp-async-report-warnings-errors "silent"
  ;; Don't lock files. Causes my keyboard to restart
  recentf-exclude ;; Ignore these regex paths from recent file list
  '("/opt/homebrew"
@@ -100,27 +101,34 @@
 ;; Themes
 (use-package ef-themes)
 (use-package modus-themes)
-(use-package kanagawa-theme
-  :config (load-theme 'kanagawa))
+(use-package kanagawa-theme)
 (use-package lambda-themes
- :vc (:fetcher github :repo lambda-emacs/lambda-themes)
- :custom
-  (lambda-themes-set-italic-comments t)
-  (lambda-themes-set-italic-keywords t)
-  (lambda-themes-set-variable-pitch t) )
+   :vc (:fetcher github :repo lambda-emacs/lambda-themes)
+   :custom
+   (lambda-themes-set-italic-comments t)
+   (lambda-themes-set-italic-keywords t)
+   (lambda-themes-set-variable-pitch t) )
+
+ (use-package auto-dark
+   :config (auto-dark-mode t)
+   :custom
+   (auto-dark-dark-theme 'kanagawa)
+   (auto-dark-light-theme 'whiteboard))
 
 ;; Indent Bars
 (use-package indent-bars
- :vc (:fetcher github :repo jdtsmith/indent-bars)
- :hook ((python-mode yaml-mode) . indent-bars-mode)
- :config
- '(indent-bars-prefer-character t)
- :custom
-    (indent-bars-pattern ".")
-    (indent-bars-width-frac 0.5)
-    (indent-bars-pad-frac 0.25)
-    (indent-bars-color-by-depth nil)
-    (indent-bars-highlight-current-depth '(:face default :blend 0.4)))
+  :vc (:fetcher github :repo jdtsmith/indent-bars)
+  :hook ((python-mode yaml-mode) . indent-bars-mode)
+  :config
+  ;; Emacs Plus Plus on MacOS and Windows doesn't support 'Stipples'
+  ;; TODO: Enable on Linux
+  '(indent-bars-prefer-character t)
+  :custom
+  (indent-bars-pattern ".")
+  (indent-bars-width-frac 0.5)
+  (indent-bars-pad-frac 0.25)
+  (indent-bars-color-by-depth nil)
+  (indent-bars-highlight-current-depth '(:face default :blend 0.4)))
  
 ;; Colour code brackets, braces, parenthesis
 (use-package rainbow-delimiters
@@ -131,18 +139,18 @@
   )
 
 (use-package dashboard
- :config (dashboard-setup-startup-hook)
- :custom
- (dashboard-startup-banner 'logo)
- (dashboard-banner-logo-title nil)
- (dashboard-center-content t)
- (dashboard-icon-type 'nerd-icons)
- (dashboard-set-heading-icons t)
- (dashboard-set-file-icons t)
- (dashboard-set-footer nil)
- (dashboard-projects-backend 'project-el)
- (dashboard-display-icons-p t)
- (dashboard-items '((recents . 5) (agenda . 5) (projects . 5))))
+  :config (dashboard-setup-startup-hook)
+  :custom
+  (dashboard-startup-banner 'logo)
+  (dashboard-banner-logo-title nil)
+  (dashboard-center-content t)
+  (dashboard-icon-type 'nerd-icons)
+  (dashboard-set-heading-icons t)
+  (dashboard-set-file-icons t)
+  (dashboard-set-footer nil)
+  (dashboard-projects-backend 'project-el)
+  (dashboard-display-icons-p t)
+  (dashboard-items '((agenda . 5) (projects . 5))))
 
 (use-package doom-modeline
  :init (doom-modeline-mode 1)
@@ -328,6 +336,7 @@
  (evil-set-undo-system 'undo-redo)
  ;; Emacs 28+ has this built in
  :custom
+ ;; Don't duplicate Mode in messages, it's already in the modeline.
  (evil-normal-state-tag " NORMAL ")
  (evil-insert-state-tag " INSERT ")
  (evil-insert-state-message nil)
@@ -339,102 +348,97 @@
   ((t (:background "olive drab" :foreground "white smoke"))))
  (doom-modeline-evil-visual-state
   ((t (:background "medium slate blue" :foreground "white smoke")))))
+
 (use-package evil-collection
- :after evil
- :config (evil-collection-init))
+  :after evil
+  :config (evil-collection-init))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Version Control Systems ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package magit)
+
+
 ;;;;;;;;;;;;;;
 ;; Keybinds ;;
 ;;;;;;;;;;;;;;
 (use-package general
- :config (general-evil-setup)
- ;; set up 'SPC' as the global leader key
- (general-create-definer
-  lr/leader-def
-  :states '(normal insert visual emacs)
-  :keymaps 'override
-  :prefix "SPC" ;; set leader
-  :global-prefix "M-SPC" ;; access leader in insert mode
-  )
- ;; format: off
- (lr/leader-def ;; Leader sequences
+  :config (general-evil-setup)
+  ;; set up 'SPC' as the global leader key
+  (general-create-definer
+    lr/leader-def
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC"	   ;; set leader
+    :global-prefix "M-SPC" ;; access leader in insert mode
+    )
+  ;; format: off
+  (lr/leader-def ;; Leader sequences
 
-  "b"
-  '(:ignore t :wk "buffers")
-  "b s"
-  '(switch-to-buffer :wk "switch to named buffer")
-  "b m"
-  '(buffer-menu :wk "menu for buffers")
-  "b k"
-  '(kill-buffer-and-window :wk "kill buffer")
-  "b n"
-  '(next-buffer :wk "next buffer")
-  "b p"
-  '(previous-buffer :wk "previous buffer")
-  "d"
-  '(:ignore t :wk "dirvish")
-  "d d"
-  '(dirvish :wk "open dirvish")
-  "d s"
-  '(dirvish-side :wk "open dirvish to side")
-  "e"
-  '(:ignore t :wk "emacs")
-  "e c"
-  '(:ignore t :wk "config")
-  "e c r"
-  '((load-file user-init-file)
-    :wk "(r)eload user config")
-  "o"
-  '(:ignore t :wk "open")
-  "o v"
-  '(vterm-toggle :wk "vterm")
-  "o d"
-  '(dashboard-open :wk "dashboard")
-  "o t"
-  '(treemacs :wk "treemacs")
-  "o m"
-  '(magit :wk "magit")
-  "q"
-  '(:ignore t :wk "quit")
-  "q r"
-  '(restart-emacs :wk "Restart emacs")
-  "q n"
-  '(restart-emacs-start-new-emacs :wk "restart to New emacs")
-  "q q"
-  '(save-buffers-kill-terminal :wk "Quit emacs")
-  "u"
-  '(:ignore t :wk "ui")
-  "u m"
-  '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
-  "u l"
-  '(lr/cycle-line-number-style :wk "Line numbers")
-  "u F"
-  '(toggle-frame-fullscreen :wk "Fullscreen")
-  "u T"
-  '(tear-off-window :wk "Tear off window to new fram%:e")
-  "h"
-  '(:ignore t :wk "(h)elp")
-  "h a"
-  '(apropos :wk "(a)propos")
-  "h f"
-  '(describe-function :wk "(f)unction describe")
-  "h i"
-  '(info-display-manual :wk "info dislay manual")
-  "h v"
-  '(describe-variable :wk "(v)ariable describe")
-  "h k"
-  '(describe-key :wk "(k)ey describe")
-  "h m"
-  '(info-emacs-manual :wk "(m)anual emacs")
-  "h q"
-  '(help-quick-toggle :wk "(q)uick menu")
-  "h o"
-  '(org-info :wk "(o)rg manual"))
- ;; format: on
- )
+    "b" '(:ignore t :wk "buffers")
+    "b s" '(switch-to-buffer :wk "switch to named buffer")
+    "b m" '(consult-buffer :wk "menu for buffers")
+    "b k" '(kill-buffer-and-window :wk "kill buffer")
+    "b n" '(next-buffer :wk "next buffer")
+    "b p" '(previous-buffer :wk "previous buffer")
+    "b P" '(consult-project-buffer :wk Project buffers)
+    "d" '(:ignore t :wk "dirvish")
+    "d d" '(dirvish :wk "open dirvish")
+    "d s" '(dirvish-side :wk "open dirvish to side")
+    "e" '(:ignore t :wk "emacs")
+    "e c" '(:ignore t :wk "config")
+    "e c r" '((load-file user-init-file) :wk "(r)eload user config")
+    "e o" '(describe-variable 'system-configuration-options) :wk "emacs build options"
+    "o" '(:ignore t :wk "open")
+    "o v"
+    '(vterm-toggle :wk "vterm")
+    "o d"
+    '(dashboard-open :wk "dashboard")
+    "o t"
+    '(treemacs :wk "treemacs")
+    "o m"
+    '(magit :wk "magit")
+    "o f" '(consult-find :wk "file")
+    "q"
+    '(:ignore t :wk "quit")
+    "q r"
+    '(restart-emacs :wk "Restart emacs")
+    "q n"
+    '(restart-emacs-start-new-emacs :wk "restart to New emacs")
+    "q q"
+    '(save-buffers-kill-terminal :wk "Quit emacs")
+    "u"
+    '(:ignore t :wk "ui")
+    "u m"
+    '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
+    "u l"
+    '(lr/cycle-line-number-style :wk "Line numbers")
+    "u F"
+    '(toggle-frame-fullscreen :wk "Fullscreen")
+    "u T"
+    '(tear-off-window :wk "Tear off window to new fram%:e")
+    "u t" '(consult-theme :wk "theme preview / change")
+    "h"
+    '(:ignore t :wk "(h)elp")
+    "h a"
+    '(apropos :wk "(a)propos")
+    "h f"
+    '(describe-function :wk "(f)unction describe")
+    "h i"
+    '(info-display-manual :wk "info dislay manual")
+    "h v"
+    '(describe-variable :wk "(v)ariable describe")
+    "h k"
+    '(describe-key :wk "(k)ey describe")
+    "h m"
+    '(info-emacs-manual :wk "(m)anual emacs")
+    "h q"
+    '(help-quick-toggle :wk "(q)uick menu")
+    "h o"
+    '(org-info :wk "(o)rg manual"))
+  ;; format: on
+  )
 
 
 
@@ -551,7 +555,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default)))
+   '("e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
+ '(package-selected-packages
+   '(golden-ratio yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful go-mode general evil-collection elisp-autofmt eglot ef-themes doom-modeline dirvish denote dashboard corfu consult breadcrumb)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
