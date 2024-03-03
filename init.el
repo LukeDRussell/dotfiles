@@ -50,6 +50,7 @@
 (savehist-mode t)
 (recentf-mode t) ;; Keep track of open files
 (global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
+(pixel-scroll-precision-mode)
 
 (setq
  window-resize-pixelwise t
@@ -99,6 +100,7 @@
                       :height 150)))
 
 ;; Themes
+(use-package standard-themes)
 (use-package ef-themes)
 (use-package modus-themes)
 (use-package kanagawa-theme)
@@ -110,10 +112,12 @@
    (lambda-themes-set-variable-pitch t) )
 
  (use-package auto-dark
-   :config (auto-dark-mode t)
+;;   :config (auto-dark-mode t)
    :custom
    (auto-dark-dark-theme 'kanagawa)
    (auto-dark-light-theme 'whiteboard))
+
+(load-theme 'kanagawa)
 
 ;; Indent Bars
 (use-package indent-bars
@@ -150,7 +154,7 @@
   (dashboard-set-footer nil)
   (dashboard-projects-backend 'project-el)
   (dashboard-display-icons-p t)
-  (dashboard-items '((agenda . 5) (projects . 5))))
+  (dashboard-items '((recents . 5) (projects . 5))))
 
 (use-package doom-modeline
  :init (doom-modeline-mode 1)
@@ -167,7 +171,12 @@
 
 ;; Discover keybinds with popups
 (use-package which-key
-  :init (which-key-mode))
+  :after evil
+  :init (which-key-mode)
+  :custom
+    (which-key-max-display-columns 5)
+    (which-key-add-column-padding 10)
+)
 
 ;; Minibuffer completion UI
 (use-package vertico
@@ -342,6 +351,8 @@
  (evil-insert-state-message nil)
  (evil-visual-state-tag " VISUAL ")
  (evil-visual-state-message nil)
+ (evil-split-window-below t)
+ (evil-vsplit-window-right t)
  ;; Mode is already displayed in the status bar.
  :custom-face
  (doom-modeline-evil-insert-state
@@ -376,67 +387,64 @@
   ;; format: off
   (lr/leader-def ;; Leader sequences
 
-    "b" '(:ignore t :wk "buffers")
+    "b"   '(:ignore t :wk "buffers")
     "b s" '(switch-to-buffer :wk "switch to named buffer")
     "b m" '(consult-buffer :wk "menu for buffers")
-    "b k" '(kill-buffer-and-window :wk "kill buffer")
+    "b d" '(kill-buffer-and-window :wk "delete buffer")
     "b n" '(next-buffer :wk "next buffer")
     "b p" '(previous-buffer :wk "previous buffer")
     "b P" '(consult-project-buffer :wk Project buffers)
-    "d" '(:ignore t :wk "dirvish")
-    "d d" '(dirvish :wk "open dirvish")
-    "d s" '(dirvish-side :wk "open dirvish to side")
+
+    "w"       '(:ignore t :wk "windows")
+    "w v"     '(evil-window-vnew :wk "vertical split")
+    "w h"     '(evil-window-new :wk "horizontal split")
+    "w d"     '(evil-window-delete :wk "delete")
+    "w n"     '(evil-window-next :wk "next")  
+    "w p"     '(evil-window-prev :wk "prev")
+    "w r"       '(evil-window-rotate-upwards :wk rotate)
+    "w <up>"    '(evil-window-up :wk "up")
+    "w <down>"  '(evil-window-down :wk "down")
+    "w <left>"  '(evil-window-left :wk "left")
+    "w <right>" '(evil-window-right :wk "right")
+    
     "e" '(:ignore t :wk "emacs")
     "e c" '(:ignore t :wk "config")
-    "e c r" '((load-file user-init-file) :wk "(r)eload user config")
+    "e c r" '(load-file 'user-init-file :wk "(r)eload user config")
     "e o" '(describe-variable 'system-configuration-options) :wk "emacs build options"
+
     "o" '(:ignore t :wk "open")
-    "o v"
-    '(vterm-toggle :wk "vterm")
-    "o d"
-    '(dashboard-open :wk "dashboard")
-    "o t"
-    '(treemacs :wk "treemacs")
-    "o m"
-    '(magit :wk "magit")
+    "o v" '(vterm-toggle :wk "vterm")
+    "o d" '(dirvish :wk "open dirvish")
+    "o s" '(dirvish-side :wk "open dirvish to side")
+    "o D" '(dashboard-open :wk "dashboard")
+    "o t" '(treemacs :wk "treemacs")
+    "o m" '(magit :wk "magit")
     "o f" '(consult-find :wk "file")
-    "q"
-    '(:ignore t :wk "quit")
-    "q r"
-    '(restart-emacs :wk "Restart emacs")
-    "q n"
-    '(restart-emacs-start-new-emacs :wk "restart to New emacs")
-    "q q"
-    '(save-buffers-kill-terminal :wk "Quit emacs")
-    "u"
-    '(:ignore t :wk "ui")
-    "u m"
-    '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
-    "u l"
-    '(lr/cycle-line-number-style :wk "Line numbers")
-    "u F"
-    '(toggle-frame-fullscreen :wk "Fullscreen")
-    "u T"
-    '(tear-off-window :wk "Tear off window to new fram%:e")
+
+    "q" '(:ignore t :wk "quit")
+    "q r" '(restart-emacs :wk "Restart emacs")
+    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
+    "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
+
+    "u" '(:ignore t :wk "ui")
+    "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
+    "u l" '(lr/cycle-line-number-style :wk "Line numbers")
+    "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
+    "u T" '(tear-off-window :wk "Tear off window to new fram%:e")
     "u t" '(consult-theme :wk "theme preview / change")
-    "h"
-    '(:ignore t :wk "(h)elp")
-    "h a"
-    '(apropos :wk "(a)propos")
-    "h f"
-    '(describe-function :wk "(f)unction describe")
-    "h i"
-    '(info-display-manual :wk "info dislay manual")
-    "h v"
-    '(describe-variable :wk "(v)ariable describe")
-    "h k"
-    '(describe-key :wk "(k)ey describe")
-    "h m"
-    '(info-emacs-manual :wk "(m)anual emacs")
-    "h q"
-    '(help-quick-toggle :wk "(q)uick menu")
-    "h o"
-    '(org-info :wk "(o)rg manual"))
+
+    
+    "h" '(:ignore t :wk "(h)elp")
+    "h a" '(apropos :wk "(a)propos")
+    "h c" '(describe-command :wk "Describe Command")
+    "h f" '(describe-function :wk "Describe Function")
+    "h v" '(describe-variable :wk "Describe Variable")
+    "h k" '(describe-key :wk "Describe Key")
+    "h s" '(describe-symbol :wk "Describe Symbol")
+    "h i" '(info-display-manual :wk "Display Info manual")
+    "h m" '(info-emacs-manual :wk "emacs manual")
+    "h q" '(help-quick-toggle :wk "quick help menu")
+    "h o" '(org-info :wk "Org manual"))
   ;; format: on
   )
 
@@ -481,6 +489,28 @@
  :init (add-hook 'org-mode-hook 'toc-org-enable))
 (use-package org-modern
  :init (add-hook 'org-mode-hook 'global-org-modern-mode))
+
+(use-package org-appear
+  :hook
+    (org-mode . org-appear-mode)
+    (org-mode . (lambda ()
+	(add-hook 'evil-insert-state-entry-hook
+		    #'org-appear-manual-start
+		    nil
+		    t)
+	(add-hook 'evil-insert-state-exit-hook
+		    #'org-appear-manual-stop
+		    nil
+			t)))
+  :custom
+	(org-appear-trigger 'manual)
+	(org-appear-autolinks t)
+	(org-appear-autosubmarkers t)
+	(org-appear-autoentities)
+	(org-appear-autokeywords)
+	(org-appear-inside-latex)
+)
+
 (use-package page-break-lines
   :init (global-page-break-lines-mode))
 
@@ -520,7 +550,7 @@
 (use-package treemacs-magit
   :after (treemacs magit))
 (use-package dirvish
-  :after (dirvish-override-dired-mode))
+  :config (dirvish-override-dired-mode))
 ;;;;;;;;;;;;
 ;; Shells ;;
 ;;;;;;;;;;;;
@@ -557,7 +587,10 @@
  '(custom-safe-themes
    '("e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
-   '(golden-ratio yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful go-mode general evil-collection elisp-autofmt eglot ef-themes doom-modeline dirvish denote dashboard corfu consult breadcrumb)))
+   '(org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
+ '(package-vc-selected-packages
+   '((indent-bars :vc-backend Git :url "https://github.com/jdtsmith/indent-bars")
+     (lambda-themes :vc-backend Git :url "https://github.com/lambda-emacs/lambda-themes"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
