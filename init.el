@@ -158,17 +158,7 @@
     (dashboard-display-icons-p t)
     (dashboard-items '((recents . 5) (projects . 5))))
 
-(use-package doom-modeline
- :init
-    (doom-modeline-mode 1)
- :config
-    (column-number-mode 1)
-    (line-number-mode 1)
- :custom
-    (mode-line-percent-position t)
-    (doom-modeline-buffer-encoding nil)
-    (doom-modeline-vcs-max-length 30)
-    (doom-modeline-modal-icon nil)
+(use-package mini-echo
 )
 
 
@@ -354,19 +344,6 @@
  :custom
  (evil-split-window-below t)
  (evil-vsplit-window-right t)
- ;; Don't duplicate Mode in messages, it's already in the modeline.
- (evil-insert-state-message nil)
- (evil-visual-state-message nil)
- ;; Customize the Mode labels to how they usually are in the bottom line thingie
- (evil-normal-state-tag " NORMAL ")
- (evil-insert-state-tag " INSERT ")
- (evil-visual-state-tag " VISUAL ")
- ;; Mode is already displayed in the status bar.
- :custom-face
- (doom-modeline-evil-insert-state
-  ((t (:background "olive drab" :foreground "white smoke"))))
- (doom-modeline-evil-visual-state
-  ((t (:background "medium slate blue" :foreground "white smoke")))))
 
 (use-package evil-collection
   :after evil
