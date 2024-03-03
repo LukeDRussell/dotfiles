@@ -86,6 +86,7 @@
 ;;;;;;;;;;;;;
 
 (tool-bar-mode 0)
+(scroll-bar-mode 0)
 (electric-pair-mode t)
 (show-paren-mode 1)
 (if (eq system-type 'darwin)
@@ -117,7 +118,7 @@
    (auto-dark-dark-theme 'kanagawa)
    (auto-dark-light-theme 'whiteboard))
 
-(load-theme 'kanagawa)
+;; (load-theme 'kanagawa)
 
 ;; Indent Bars
 (use-package indent-bars
@@ -584,8 +585,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(kanagawa))
  '(custom-safe-themes
-   '("e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
+   '("7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
    '(org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
  '(package-vc-selected-packages
