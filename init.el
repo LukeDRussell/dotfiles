@@ -61,6 +61,7 @@
  `(("." . ,(concat user-emacs-directory "backups")))
  visible-bell t
  ring-bell-function 'ignore
+ vc-follow-symlinks t
  inhibit-startup-screen t
  insert-directory-program "gls"
  global-auto-revert-non-file-buffers t
@@ -93,13 +94,6 @@
     (menu-bar-mode 1)
   (menu-bar-mode 0))
 
-;; Font
-(cond
- ((find-font (font-spec :name "Hack Nerd Font Mono"))
-  (set-face-attribute 'default nil
-                      :font "Hack Nerd Font Mono"
-                      :height 150)))
-
 ;; Themes
 (use-package standard-themes)
 (use-package ef-themes)
@@ -113,12 +107,19 @@
    (lambda-themes-set-variable-pitch t) )
 
  (use-package auto-dark
-;;   :config (auto-dark-mode t)
+   :config (auto-dark-mode t)
    :custom
-   (auto-dark-dark-theme 'kanagawa)
-   (auto-dark-light-theme 'whiteboard))
+   (auto-dark-dark-theme 'lambda-light-faded)
+   (auto-dark-light-theme 'lambda-dark-faded))
 
-;; (load-theme 'kanagawa)
+;; Font. Load after theme settings
+
+;; (cond
+; ;  ((find-font (font-spec :name "Hack Nerd Font Mono"))
+;;   (set-face-attribute 'default nil
+;;                       :font "Hack Nerd Font Mono"
+;;                       :height 150)))
+(set-face-attribute 'default nil :height 140)
 
 ;; Indent Bars
 (use-package indent-bars
@@ -159,6 +160,12 @@
     (dashboard-items '((recents . 5) (projects . 5))))
 
 (use-package mini-echo
+  :config
+    (mini-echo-mode)
+  :custom
+    (mini-echo-define-segments (
+      :long ("major-mode" "buffer-name" "vcs" "buffer-position" "flymake" "process" "selection-info" "narrow" "macro" "profiler" "repeat")
+      :short ("buffer-name-short" "buffer-position" "process" "profiler" "selection-info" "narrow" "macro" "repeat")))
 )
 
 
@@ -344,6 +351,7 @@
  :custom
  (evil-split-window-below t)
  (evil-vsplit-window-right t)
+)
 
 (use-package evil-collection
   :after evil
@@ -376,28 +384,33 @@
     "b s" '(switch-to-buffer :wk "switch to named buffer")
     "b m" '(consult-buffer :wk "menu for buffers")
     "b d" '(kill-buffer-and-window :wk "delete buffer")
+    "b i" '(ibuffer :wk "IBuffer")
     "b n" '(next-buffer :wk "next buffer")
     "b p" '(previous-buffer :wk "previous buffer")
     "b P" '(consult-project-buffer :wk Project buffers)
 
     "w"       '(:ignore t :wk "windows")
-    "w v"     '(evil-window-vnew :wk "vertical split")
-    "w h"     '(evil-window-new :wk "horizontal split")
-    "w d"     '(evil-window-delete :wk "delete")
-    "w n"     '(evil-window-next :wk "next")  
-    "w p"     '(evil-window-prev :wk "prev")
+    "w v"       '(evil-window-vnew :wk "vertical split")
+    "w h"       '(evil-window-new :wk "horizontal split")
+    "w d"       '(evil-window-delete :wk "delete")
+    "w n"       '(evil-window-next :wk "next")  
+    "w p"       '(evil-window-prev :wk "prev")
+    "w m"       '(delete-other-windows :wk "maximise current")
     "w r"       '(evil-window-rotate-upwards :wk rotate)
+    "w T"       '(tear-off-window :wk "Tear off window to new frame")
     "w <up>"    '(evil-window-up :wk "up")
     "w <down>"  '(evil-window-down :wk "down")
     "w <left>"  '(evil-window-left :wk "left")
     "w <right>" '(evil-window-right :wk "right")
     
-    "e" '(:ignore t :wk "emacs")
-    "e c" '(:ignore t :wk "config")
-    "e c r" '(load-file 'user-init-file :wk "(r)eload user config")
-    "e o" '(describe-variable 'system-configuration-options) :wk "emacs build options"
+    "e"     '(:ignore t :wk "emacs")
+    "e c"   '(:ignore t :wk "config")
+    "e c l" '((lambda () (interactive) (load-file user-init-file)) :wk "reload user config")
+    "e c o" '((lambda () (interactive) (find-file user-init-file)) :wk "open user config")
+    "e o"   '(describe-variable 'system-configuration-options) :wk "emacs build options"
+    "e p"   '(list-packages)
 
-    "o" '(:ignore t :wk "open")
+    "o"   '(:ignore t :wk "open")
     "o v" '(vterm-toggle :wk "vterm")
     "o d" '(dirvish :wk "open dirvish")
     "o s" '(dirvish-side :wk "open dirvish to side")
@@ -415,7 +428,6 @@
     "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
     "u l" '(lr/cycle-line-number-style :wk "Line numbers")
     "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
-    "u T" '(tear-off-window :wk "Tear off window to new fram%:e")
     "u t" '(consult-theme :wk "theme preview / change")
 
     
@@ -465,15 +477,18 @@
  (org-refile-use-outline-path t)
  (org-outline-path-complete-in-steps nil)
  (org-startup-indented t)
- (org-indent-indentation-per-level 2)
+ (org-indent-indentation-per-level 1)
  (org-hide-emphasis-markers t)
  (org-todo-keywords
   '((sequence "TODO(t)" "MAYBE(m)" "|" "DONE(d)" "CANCEL(c)"))))
+
 (use-package toc-org
- :commands toc-org-enable
- :init (add-hook 'org-mode-hook 'toc-org-enable))
+  :commands toc-org-enable
+  :init (add-hook 'org-mode-hook 'toc-org-enable))
+
 (use-package org-modern
- :init (add-hook 'org-mode-hook 'global-org-modern-mode))
+;;  :init (add-hook 'org-mode-hook 'global-org-modern-mode)
+  )
 
 (use-package org-appear
   :hook
@@ -569,11 +584,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(kanagawa))
  '(custom-safe-themes
-   '("7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
+   '("5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
-   '(org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
+    '(org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
  '(package-vc-selected-packages
    '((indent-bars :vc-backend Git :url "https://github.com/jdtsmith/indent-bars")
      (lambda-themes :vc-backend Git :url "https://github.com/lambda-emacs/lambda-themes"))))
