@@ -124,7 +124,7 @@
 ;; Indent Bars
 (use-package indent-bars
   :vc (:fetcher github :repo jdtsmith/indent-bars)
-  :hook ((python-mode yaml-mode) . indent-bars-mode)
+  :hook ((python-ts-mode yaml-ts-mode) . indent-bars-mode)
   :config
   ;; Emacs Plus Plus on MacOS and Windows doesn't support 'Stipples'
   ;; TODO: Enable on Linux
@@ -168,6 +168,14 @@
       :short ("buffer-name-short" "buffer-position" "process" "profiler" "selection-info" "narrow" "macro" "repeat")))
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Workspace Management ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package tabspaces
+  :vc (tabspaces :url "https://github.com/mclear-tools/tabspaces")
+  :hook (after-init . tabspaces-mode)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Editing Support ;;
@@ -196,12 +204,14 @@
 
 ;; Adds intellisense-style completion popups
 (use-package corfu
- :init (global-corfu-mode)
- :custom (corfu-auto t)
- ;; You may want to play with delay/prefix/styles to suit your preferences.
- (corfu-auto-delay 0)
- (corfu-auto-prefix 0)
- (completion-styles '(basic)))
+  :init
+  (global-corfu-mode)
+  (corfu-popupinfo-mode)
+ :custom
+  (corfu-auto t)
+  (corfu-cycle t)
+  (corfu-quit-at-boundary)
+ )
 
 ;; Stop caring about the order of search terms in minibuffer filtering
 (use-package orderless
@@ -328,16 +338,6 @@
   ;; (setq consult-project-function nil)
 )
 
-
-(use-package paredit
-  ;; ELisp
-  :hook
-  ((emacs-lisp-mode . enable-paredit-mode)
-   (lisp-mode . enable-paredit-mode)
-   (ielm-mode . enable-paredit-mode)
-   (lisp-interaction-mode . enable-paredit-mode)
-   (scheme-mode . enable-paredit-mode)))
-
 ;; Evil mode ;;
 ;;;;;;;;;;;;;;;
 (use-package evil
@@ -402,6 +402,10 @@
     "w <down>"  '(evil-window-down :wk "down")
     "w <left>"  '(evil-window-left :wk "left")
     "w <right>" '(evil-window-right :wk "right")
+
+    "v" '(:ignore t :wk "version control")
+    "v m" '(magit :wk "magit")
+    "v h" '(magit-log-buffer-file :wk "history of file")
     
     "e"     '(:ignore t :wk "emacs")
     "e c"   '(:ignore t :wk "config")
@@ -418,6 +422,7 @@
     "o t" '(treemacs :wk "treemacs")
     "o m" '(magit :wk "magit")
     "o f" '(consult-find :wk "file")
+    "o a" '(org-agenda :wk "agenda")
 
     "q" '(:ignore t :wk "quit")
     "q r" '(restart-emacs :wk "Restart emacs")
@@ -426,6 +431,7 @@
 
     "u" '(:ignore t :wk "ui")
     "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
+    "u M" '(org-modern-mode :wk "Org-Modern mode")
     "u l" '(lr/cycle-line-number-style :wk "Line numbers")
     "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
     "u t" '(consult-theme :wk "theme preview / change")
@@ -445,29 +451,10 @@
   ;; format: on
   )
 
+;;;;;;;;;;;;;
+;; Orgmode ;;
+;;;;;;;;;;;;;
 
-
-;;;;;;;;;;;;;;;
-;; Languages ;;
-;;;;;;;;;;;;;;;
-
-(use-package eglot
- ;; Add your programming modes here to automatically start Eglot,
- ;; assuming you have the respective LSP server installed.
- ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
- :hook
- ((go-mode . eglot-ensure)
-  (terraform-mode . eglot-ensure)
-  (yaml-mode . eglot-ensure)))
-
-;; Emacs Lisp
-(add-hook 'emacs-lisp-mode 'lr/default-line-number-style)
-
-(use-package elisp-autofmt
- :commands (elisp-autofmt-mode elisp-autofmt-buffer)
- :hook (emacs-lisp-mode . elisp-autofmt-mode))
-
-;; Orgmode
 (use-package org
  :hook (org-mode . visual-line-mode)
  :custom
