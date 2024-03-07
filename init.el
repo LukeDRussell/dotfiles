@@ -464,69 +464,117 @@
  (org-refile-use-outline-path t)
  (org-outline-path-complete-in-steps nil)
  (org-startup-indented t)
- (org-indent-indentation-per-level 1)
  (org-hide-emphasis-markers t)
+ (org-pretty-entities t)
  (org-todo-keywords
-  '((sequence "TODO(t)" "MAYBE(m)" "|" "DONE(d)" "CANCEL(c)"))))
-
-(use-package toc-org
-  :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
+  '((sequence "TODO(t)" "SOMEDAY(s)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)"))))
 
 (use-package org-modern
-;;  :init (add-hook 'org-mode-hook 'global-org-modern-mode)
+  :hook (org-mode . global-org-modern-mode)
+  :custom (org-modern-hide-stars " ")
   )
 
 (use-package org-appear
-  :hook
+    :hook
     (org-mode . org-appear-mode)
     (org-mode . (lambda ()
 	(add-hook 'evil-insert-state-entry-hook
-		    #'org-appear-manual-start
-		    nil
-		    t)
+		#'org-appear-manual-start
+		nil
+		t)
 	(add-hook 'evil-insert-state-exit-hook
-		    #'org-appear-manual-stop
-		    nil
-			t)))
-  :custom
-	(org-appear-trigger 'manual)
-	(org-appear-autolinks t)
-	(org-appear-autosubmarkers t)
-	(org-appear-autoentities)
-	(org-appear-autokeywords)
-	(org-appear-inside-latex)
+		#'org-appear-manual-stop
+		nil
+		t)))
+    :custom
+    (org-appear-trigger 'manual)
+    (org-appear-autolinks t)
+    (org-appear-autosubmarkers t)
+    (org-appear-autoentities)
+    (org-appear-autokeywords)
+    (org-appear-inside-latex)
+    )
+
+;;;;;;;;;;;;;;;
+;; Languages ;;
+;;;;;;;;;;;;;;;
+
+;; Emacs Lisp
+(add-hook 'emacs-lisp-mode 'lr/default-line-number-style)
+
+;; Get a nice pre-packaged grammar bundle
+(use-package tree-sitter-langs)
+
+(use-package eglot
+ ;; Add your programming modes here to automatically start Eglot,
+ ;; assuming you have the respective LSP server installed.
+ ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
+ :hook
+ ((go-ts-mode . eglot-ensure)
+  (terraform-ts-mode . eglot-ensure)
+  (yaml-ts-mode . eglot-ensure)
+  (python-ts-mode . eglot-ensure)
+  )
+ )
+
+;; Use Tree-sitter modes instead of 'legacy' modes, for languages
+;; that have ts modes
+(setq major-mode-remap-alist
+      '(
+	(bash-mode . bash-ts-mode)
+	(c++-mode . c++-ts-mode)
+	(c-or-c++-mode . c-or-c++-mode)
+	(c-mode . c-ts-mode)
+	(cmake-mode . cmake-ts-mode)
+	(csharp-mode . csharp-ts-mode)
+	(css-mode . css-ts-mode)
+	(go-mode . go-ts-mode)
+	(java-mode . java-ts-mode)
+	(js2-mode . js-ts-mode)
+	(js-json-mode. json-ts-mode)
+	(python-mode . python-ts-mode)
+	(ruby-mode . ruby-ts-mode)
+	;; (yaml-mode . yaml-ts-mode) ; Error: Warning (treesit): Cannot activate tree-sitter, because language grammar for yaml is unavailable (not-found
+	(terraform-mode . terraform-ts-mode)
+	))
+
+;; Some tree-sitter modes don't exactly match the grammer name
+(setq treesit-load-name-override-list
+      '((terraform "libtree-sitter-hcl" "tree_sitter_hcl")
+	(js "libtree-sitter-js" "tree_sitter_javascript"))
 )
 
-(use-package page-break-lines
-  :init (global-page-break-lines-mode))
-
 ;; Markdown
-
 (use-package markdown-mode
  ;; These extra modes help clean up the Markdown editing experience.
  ;; `visual-line-mode' turns on word wrap and helps editing commands
  ;; work with paragraphs of text. `flyspell-mode' turns on an
  ;; automatic spell checker.
  :hook ((markdown-mode . visual-line-mode) (markdown-mode . flyspell-mode))
- :init (setq markdown-command "multimarkdown"))
-(use-package yaml-mode)
-(use-package terraform-mode
+ :init (setq markdown-command "multimarkdown")
+ )
+
+(use-package python
+  :after eglot
+  )
+
+(use-package terraform-ts-mode
+ :vc (:fetcher github :repo kgrotel/terraform-ts-mode)
  :after eglot
  :config
  (add-to-list
-  'eglot-server-programs '(terraform-mode . ("terraform-ls" "serve")))
- ;  :hook
- ;  eglot-ensure
- )
-(use-package go-mode
+  'eglot-server-programs '(terraform-ts-mode . ("terraform-ls" "serve")))
+)
+
+(use-package go
  :after eglot
  :bind (:map go-mode-map ("C-c C-f" . 'gofmt))
  :hook
  ;  eglot-ensure
  (before-save . gofmt-before-save)
- :config (setq tab-width 4))
-(use-package lua-mode)
+ :config (setq tab-width 4)
+ )
+
 ;;;;;;;;;;;;;;;;;;;;;
 ;; File Management ;;
 ;;;;;;;;;;;;;;;;;;;;;
@@ -574,9 +622,11 @@
  '(custom-safe-themes
    '("5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
-    '(org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
+   '(tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
  '(package-vc-selected-packages
-   '((indent-bars :vc-backend Git :url "https://github.com/jdtsmith/indent-bars")
+   '((tabspaces :url "https://github.com/mclear-tools/tabspaces")
+     (:vc-backend Git :url "https://github.com/kgrotel/terraform-ts-mode")
+     (indent-bars :vc-backend Git :url "https://github.com/jdtsmith/indent-bars")
      (lambda-themes :vc-backend Git :url "https://github.com/lambda-emacs/lambda-themes"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
