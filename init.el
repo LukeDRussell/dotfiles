@@ -1,27 +1,29 @@
-;;;;;;;;;;;;;;;;;;;;;;;;
-;; Package Management ;;
-;;;;;;;;;;;;;;;;;;;;;;;;
+;; === Package Management ===========================================================================
 
-; Help in info-display-manual --> use-package --> index
+;; Help in info-display-manual --> use-package --> index
+;; use (featurep 'builtin-package-name) to figoure out the name of a builtin module / package / thingie
+;; e.g. (featurep 'use-package-core) evals to t
 
 (require 'package)
-;; Always install packages listed
-(setq use-package-always-ensure t)
-;; Add MELPA, to the list of accepted package registries.
-(add-to-list
- 'package-archives '("melpa" . "https://melpa.org/packages/")
- t)
-(package-initialize)
-;; This package adds a new :vc keywords to use-package declarations, with which you can install packages.
-;; Note: was merged into emacs 2023-05-16. Might be in emacs 30
+
+(use-package use-package-core
+  :ensure nil
+  :init
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t) ;; Add MELPA, to the list of accepted package registries.
+  :config
+    (package-initialize)
+  :custom
+    (use-package-always-ensure t) ;; Always install packages listed
+)
+
+;; use-package support for installing from source.
+;; Note: was merged into emacs 2023-05-16. Should be emacs 30.
 (unless (package-installed-p 'vc-use-package)
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
 (require 'vc-use-package)
 
 
-;;;;;;;;;;;;;;;;;;
-;; My Functions ;;
-;;;;;;;;;;;;;;;;;;
+;; === My Functions =================================================================================
 
 (defun lr/cycle-line-number-style ()
   "Cycles through the line styles I like."
@@ -33,93 +35,104 @@
     (setq display-line-numbers 'relative))
    ((eq display-line-numbers 'relative)
     (setq display-line-numbers nil))))
+
 (defun lr/default-line-number-style ()
   (setq display-line-numbers t))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Misc Emacs Settings ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;
+;; === Emacs core ===================================================================================
 
-(add-hook 'prog-mode-hook 'hs-minor-mode) ;; Enable code folding with inbuilt hs
-(add-hook 'prog-mode-hook 'display-line-numbers-mode) ;; Display line numbers when in programming modes
+(use-package emacs
+;; Generally, for things in C code, that don't have their own /feature/
 
-(global-set-key (kbd "C-=") 'text-scale-increase)
-(global-set-key (kbd "C--") 'text-scale-decrease)
+  :ensure nil
 
-(savehist-mode t)
-(recentf-mode t) ;; Keep track of open files
-(global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
-(pixel-scroll-precision-mode)
+  :hook
+    (emacs-startup . toggle-frame-maximized)
+    (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
+    (prog-mode . display-line-numbers-mode) ;; Display line numbers when in programming modes
 
-(setq
- window-resize-pixelwise t
- frame-resize-pixelwise t
- load-prefer-newer t
- backup-by-copying t
- backup-directory-alist ;; Backups are placed into your Emacs directory, e.g. ~/.config/emacs/backups
- `(("." . ,(concat user-emacs-directory "backups")))
- visible-bell t
- ring-bell-function 'ignore
- vc-follow-symlinks t
- inhibit-startup-screen t
- insert-directory-program "gls"
- global-auto-revert-non-file-buffers t
- ;; Keep dired up-to-date with files on disk
- scroll-conservatively 101
- ;; When scrolling top or bottom of window, don't recenter point
- scroll-margin 5
- create-lockfiles nil
- native-comp-async-report-warnings-errors "silent"
- ;; Don't lock files. Causes my keyboard to restart
- recentf-exclude ;; Ignore these regex paths from recent file list
- '("/opt/homebrew"
-   "/usr/share/emacs/"
-   "~/.config/emacs/elpa/"
-   (recentf-expand-file-name "~/.config/emacs/elpa")
-   (recentf-expand-file-name
-    "~/.config/emacs/.cache/treemacs-persist-at-last-error")
-   "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'"))
+  :bind
+    ("C-=" . text-scale-increase)
+    ("C--" . text-scale-decrease)
+
+  :config
+    (tool-bar-mode 0) ;; Tool bar is ugly
+    (scroll-bar-mode 0) ;; Scroll bar is also ugly
+    (if (eq system-type 'darwin)
+	(menu-bar-mode 1) ;; Hide menu bar in Linux and Windows
+    (menu-bar-mode 0))  ;; Keep the menu bar in MacOS as it integrates with the OS top panel
+    (electric-pair-mode t)
+    (show-paren-mode 1)
+    (savehist-mode t) ;; Save minibuffer history
+    (recentf-mode t) ;; Keep track of open files
+    (global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
+    ;; (pixel-scroll-precision-mode) ;; It's really jerky on my Macbook
+
+  :custom-face
+    (default ((t (:height 150 ))))
+
+  :custom
+    (window-resize-pixelwise t)
+    (frame-resize-pixelwise t)
+    (load-prefer-newer t)
+    (backup-by-copying t)
+    (backup-directory-alist ;; Backups are placed into your Emacs directory, e.g. ~/.config/emacs/backups
+    `(("." . ,(concat user-emacs-directory "backups"))))
+    (visible-bell t)
+    (ring-bell-function 'ignore)
+    (vc-follow-symlinks t) ;; Stop bugging me when opening my init.el which is a symlink.
+    (inhibit-startup-screen t)
+    (insert-directory-program "gls") ;; Make this MacOS only
+    (global-auto-revert-non-file-buffers t) ;; Keep dired up-to-date with files on disk
+    (scroll-conservatively 101) ;; When scrolling top or bottom of window, don't recenter point
+    (scroll-margin 5)
+    (create-lockfiles nil) ;; Don't lock files. Causes my keyboard to restart
+    (native-comp-async-report-warnings-errors "silent")
+    (recentf-exclude ;; Ignore these regex paths from recent file list
+     '("/opt/homebrew"
+       "/usr/share/emacs/"
+       "~/.config/emacs/elpa/"
+       "~/.config/emacs/.cache/"
+       "~/Library/CloudStorage/"
+	(recentf-expand-file-name "~/.config/emacs/elpa")
+	(recentf-expand-file-name
+	    "~/.config/emacs/.cache/treemacs-persist-at-last-error")
+	"/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'")))
 
 
-;;;;;;;;;;;;;
-;; Visuals ;;
-;;;;;;;;;;;;;
 
-(tool-bar-mode 0)
-(scroll-bar-mode 0)
-(electric-pair-mode t)
-(show-paren-mode 1)
-(if (eq system-type 'darwin)
-    (menu-bar-mode 1)
-  (menu-bar-mode 0))
 
-;; Themes
-(use-package standard-themes)
-(use-package ef-themes)
-(use-package modus-themes)
-(use-package kanagawa-theme)
+;; === Themes ======================================================================================
+
+(use-package kanagawa-theme
+  :defer t)
+(use-package standard-themes
+  :defer t)
+(use-package ef-themes
+  :defer t)
+(use-package modus-themes
+  :defer t)
 (use-package lambda-themes
-   :vc (:fetcher github :repo lambda-emacs/lambda-themes)
-   :custom
-   (lambda-themes-set-italic-comments t)
-   (lambda-themes-set-italic-keywords t)
-   (lambda-themes-set-variable-pitch t) )
+  :vc (:fetcher github :repo lambda-emacs/lambda-themes)
+  :custom
+    (lambda-themes-set-italic-comments t)
+    (lambda-themes-set-italic-keywords t)
+    (lambda-themes-set-variable-pitch t)
+  :defer t)
 
- (use-package auto-dark
-   :config (auto-dark-mode t)
-   :custom
-   (auto-dark-dark-theme 'lambda-light-faded)
-   (auto-dark-light-theme 'lambda-dark-faded))
+(use-package solarized-theme
+  :defer t)
 
-;; Font. Load after theme settings
+(use-package auto-dark
+  :config (auto-dark-mode t)
+  :custom
+    (auto-dark-light-theme 'solarized-light)
+    (auto-dark-dark-theme 'solarized-dark)
+)
 
-;; (cond
-; ;  ((find-font (font-spec :name "Hack Nerd Font Mono"))
-;;   (set-face-attribute 'default nil
-;;                       :font "Hack Nerd Font Mono"
-;;                       :height 150)))
-(set-face-attribute 'default nil :height 140)
+
+;; === Visuals ========================================================================================
 
 ;; Indent Bars
 (use-package indent-bars
@@ -151,13 +164,14 @@
     (dashboard-startup-banner 'logo)
     (dashboard-banner-logo-title nil)
     (dashboard-center-content t)
+    (dashboard-vertically-center-content t)
     (dashboard-icon-type 'nerd-icons)
     (dashboard-set-heading-icons t)
     (dashboard-set-file-icons t)
     (dashboard-set-footer nil)
     (dashboard-projects-backend 'project-el)
     (dashboard-display-icons-p t)
-    (dashboard-items '((recents . 5) (projects . 5))))
+    (dashboard-items '((recents . 10) (projects . 10))))
 
 (use-package mini-echo
   :config
@@ -506,6 +520,7 @@
 (use-package tree-sitter-langs)
 
 (use-package eglot
+  :defer t
  ;; Add your programming modes here to automatically start Eglot,
  ;; assuming you have the respective LSP server installed.
  ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
@@ -620,9 +635,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
+   '("833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "aed3a896c4ea7cd7603f7a242fe2ab21f1539ab4934347e32b0070a83c9ece01" "a242356ae1aebe9f633974c0c29b10f3e00ec2bc96a61ff2cdad5ffa4264996d" "5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
-   '(tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
+   '(solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
  '(package-vc-selected-packages
    '((tabspaces :url "https://github.com/mclear-tools/tabspaces")
      (:vc-backend Git :url "https://github.com/kgrotel/terraform-ts-mode")
