@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;; === Package Management ===========================================================================
 
 ;; Help in info-display-manual --> use-package --> index
@@ -136,7 +138,17 @@
     :defer t)
 
 
-;; === Visuals ========================================================================================
+
+;; === Fonts ========================================================================================
+
+(cond
+ ((find-font (font-spec :name "Hack Nerd Font Mono"))
+  (set-face-attribute 'default nil
+                      :font "Hack Nerd Font Propo"
+                      :height 140)))
+
+
+;; === Visuals ======================================================================================
 
 (use-package indent-bars
     :vc (:fetcher github :repo jdtsmith/indent-bars)
