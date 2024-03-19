@@ -373,7 +373,97 @@
 
 ;; === Modal editing ================================================================================
 
-
+(use-package meow
+    :init
+	(defun meow-setup ()
+	(setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+	(meow-motion-overwrite-define-key
+	'("j" . meow-next)
+	'("k" . meow-prev)
+	'("<escape>" . ignore))
+	(meow-leader-define-key
+	;; SPC j/k will run the original command in MOTION state.
+	'("j" . "H-j")
+	'("k" . "H-k")
+	;; Use SPC (0-9) for digit arguments.
+	'("1" . meow-digit-argument)
+	'("2" . meow-digit-argument)
+	'("3" . meow-digit-argument)
+	'("4" . meow-digit-argument)
+	'("5" . meow-digit-argument)
+	'("6" . meow-digit-argument)
+	'("7" . meow-digit-argument)
+	'("8" . meow-digit-argument)
+	'("9" . meow-digit-argument)
+	'("0" . meow-digit-argument)
+	'("/" . meow-keypad-describe-key)
+	'("?" . meow-cheatsheet))
+	(meow-normal-define-key
+	'("0" . meow-expand-0)
+	'("9" . meow-expand-9)
+	'("8" . meow-expand-8)
+	'("7" . meow-expand-7)
+	'("6" . meow-expand-6)
+	'("5" . meow-expand-5)
+	'("4" . meow-expand-4)
+	'("3" . meow-expand-3)
+	'("2" . meow-expand-2)
+	'("1" . meow-expand-1)
+	'("-" . negative-argument)
+	'(";" . meow-reverse)
+	'("," . meow-inner-of-thing)
+	'("." . meow-bounds-of-thing)
+	'("[" . meow-beginning-of-thing)
+	'("]" . meow-end-of-thing)
+	'("a" . meow-append)
+	'("A" . meow-open-below)
+	'("b" . meow-back-word)
+	'("B" . meow-back-symbol)
+	'("c" . meow-change)
+	'("d" . meow-delete)
+	'("D" . meow-backward-delete)
+	'("e" . meow-next-word)
+	'("E" . meow-next-symbol)
+	'("f" . mbbeow-find)
+	'("g" . meow-cancel-selection)
+	'("G" . meow-grab)
+	'("h" . meow-left)
+	'("H" . meow-left-expand)
+	'("i" . meow-insert)
+	'("I" . meow-open-above)
+	'("j" . meow-next)
+	'("J" . meow-next-expand)
+	'("k" . meow-prev)
+	'("K" . meow-prev-expand)
+	'("l" . meow-right)
+	'("L" . meow-right-expand)
+	'("m" . meow-join)
+	'("n" . meow-search)
+	'("o" . meow-block)
+	'("O" . meow-to-block)
+	'("p" . meow-yank)
+	'("q" . meow-quit)
+	'("Q" . meow-goto-line)
+	'("r" . meow-replace)
+	'("R" . meow-swap-grab)
+	'("s" . meow-kill)
+	'("t" . meow-till)
+	'("u" . meow-undo)
+	'("U" . meow-undo-in-selection)
+	'("v" . meow-visit)
+	'("w" . meow-mark-word)
+	'("W" . meow-mark-symbol)
+	'("x" . meow-line)
+	'("X" . meow-goto-line)
+	'("y" . meow-save)
+	'("Y" . meow-sync-grab)
+	'("z" . meow-pop-selection)
+	'("'" . repeat)
+	'("<escape>" . ignore)))
+    :config
+	(meow-setup)
+	(meow-global-mode 1)
+)
 
 
 ;; === Version Control Systems ======================================================================
@@ -548,17 +638,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default)))
  '(custom-enabled-themes '(kanagawa))
  '(custom-safe-themes
    '("833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "aed3a896c4ea7cd7603f7a242fe2ab21f1539ab4934347e32b0070a83c9ece01" "a242356ae1aebe9f633974c0c29b10f3e00ec2bc96a61ff2cdad5ffa4264996d" "5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
- '(package-selected-packages
-   '(terraform-doc tramp use-package-ensure-system-package mini-echo bind-key eglot eldoc faceup flymake jsonrpc org project soap-client use-package verilog-mode solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit  toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general  elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
- '(package-vc-selected-packages
-   '((outli :vc-backend Git :url "https://github.com/jdtsmith/outli")
-     (tabspaces :url "https://github.com/mclear-tools/tabspaces")
-     (:vc-backend Git :url "https://github.com/kgrotel/terraform-ts-mode")
-     (indent-bars :vc-backend Git :url "https://github.com/jdtsmith/indent-bars")
-     (lambda-themes :vc-backend Git :url "https://github.com/lambda-emacs/lambda-themes"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
