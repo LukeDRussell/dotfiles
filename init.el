@@ -216,7 +216,6 @@
 ;; === Editing Support ==============================================================================
 
 (use-package which-key ;; Discover keybinds with popup
-    :after evil
     :init (which-key-mode)
     :custom
 	(which-key-max-display-columns 5)
@@ -374,22 +373,7 @@
 
 ;; === Modal editing ================================================================================
 
-(use-package evil
-    :init
-	(setq evil-want-integration t)
-	(setq evil-want-keybinding nil)
-    :config
-	(evil-mode 1)
-	(evil-set-undo-system 'undo-redo) ;; Only because Emacs 28+ has this built in
-    :custom
-	(evil-split-window-below t)
-	(evil-vsplit-window-right t)
-)
 
-(use-package evil-collection
-    :after evil
-    :config (evil-collection-init)
-)
 
 
 ;; === Version Control Systems ======================================================================
@@ -398,90 +382,6 @@
 
 
 ;; === Keybinds =====================================================================================
-
-(use-package general
-    :config
-	(general-evil-setup)
-	(general-create-definer lr/leader-def
-	;; set up 'SPC' as the global leader key
-	    :states '(normal insert visual emacs)
-	    :keymaps 'override
-	    :prefix "SPC"	   ;; set leader
-	    :global-prefix "M-SPC" ;; access leader in insert mode
-	)
-	;; format: off
-	(lr/leader-def ;; Leader sequences
-
-	    "b"   '(:ignore t :wk "buffers")
-	    "b s" '(switch-to-buffer :wk "switch to named buffer")
-	    "b m" '(consult-buffer :wk "menu for buffers")
-	    "b d" '(kill-buffer-and-window :wk "delete buffer")
-	    "b i" '(ibuffer :wk "IBuffer")
-	    "b n" '(next-buffer :wk "next buffer")
-	    "b p" '(previous-buffer :wk "previous buffer")
-	    "b P" '(consult-project-buffer :wk Project buffers)
-
-	    "w"       '(:ignore t :wk "windows")
-	    "w v"       '(evil-window-vnew :wk "vertical split")
-	    "w h"       '(evil-window-new :wk "horizontal split")
-	    "w d"       '(evil-window-delete :wk "delete")
-	    "w n"       '(evil-window-next :wk "next")  
-	    "w p"       '(evil-window-prev :wk "prev")
-	    "w m"       '(delete-other-windows :wk "maximise current")
-	    "w r"       '(evil-window-rotate-upwards :wk rotate)
-	    "w T"       '(tear-off-window :wk "Tear off window to new frame")
-	    "w <up>"    '(evil-window-up :wk "up")
-	    "w <down>"  '(evil-window-down :wk "down")
-	    "w <left>"  '(evil-window-left :wk "left")
-	    "w <right>" '(evil-window-right :wk "right")
-
-	    "v" '(:ignore t :wk "version control")
-	    "v m" '(magit :wk "magit")
-	    "v h" '(magit-log-buffer-file :wk "history of file")
-
-	    "e"     '(:ignore t :wk "emacs")
-	    "e c"   '(:ignore t :wk "config")
-	    "e c l" '((lambda () (interactive) (load-file user-init-file)) :wk "reload user config")
-	    "e c o" '((lambda () (interactive) (find-file user-init-file)) :wk "open user config")
-	    "e o"   '(describe-variable 'system-configuration-options) :wk "emacs build options"
-	    "e p"   '(list-packages :wk "list all pacakges")
-	    "e u"   '(package-menu-filter-upgradable :wk "show packages that can be upgraded")
-
-	    "o"   '(:ignore t :wk "open")
-	    "o v" '(vterm-toggle :wk "vterm")
-	    "o d" '(dirvish :wk "open dirvish")
-	    "o s" '(dirvish-side :wk "open dirvish to side")
-	    "o D" '(dashboard-open :wk "dashboard")
-	    "o t" '(treemacs :wk "treemacs")
-	    "o m" '(magit :wk "magit")
-	    "o f" '(consult-find :wk "file")
-	    "o a" '(org-agenda :wk "agenda")
-
-	    "q" '(:ignore t :wk "quit")
-	    "q r" '(restart-emacs :wk "Restart emacs")
-	    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
-	    "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
-
-	    "u" '(:ignore t :wk "ui")
-	    "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
-	    "u M" '(org-modern-mode :wk "Org-Modern mode")
-	    "u l" '(lr/cycle-line-number-style :wk "Line numbers")
-	    "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
-	    "u t" '(consult-theme :wk "theme preview / change")
-
-	    "h" '(:ignore t :wk "(h)elp")
-	    "h a" '(apropos :wk "(a)propos")
-	    "h c" '(describe-command :wk "Describe Command")
-	    "h f" '(describe-function :wk "Describe Function")
-	    "h v" '(describe-variable :wk "Describe Variable")
-	    "h k" '(describe-key :wk "Describe Key")
-	    "h s" '(describe-symbol :wk "Describe Symbol")
-	    "h i" '(info-display-manual :wk "Display Info manual")
-	    "h m" '(info-emacs-manual :wk "emacs manual")
-	    "h q" '(help-quick-toggle :wk "quick help menu")
-	    "h o" '(org-info :wk "Org manual"))
-	;; format: on
-)
 
 
 ;; === Orgmode ======================================================================================
@@ -509,11 +409,8 @@
 (use-package org-appear
     :hook
 	(org-mode . org-appear-mode)
-	(org-mode . (lambda ()
-	    (add-hook 'evil-insert-state-entry-hook #'org-appear-manual-start nil t)
-	    (add-hook 'evil-insert-state-exit-hook #'org-appear-manual-stop nil t)))
     :custom
-	(org-appear-trigger 'manual)
+	(org-appear-trigger 'always)
 	(org-appear-autolinks t)
 	(org-appear-autosubmarkers t)
 	(org-appear-autoentities)
@@ -606,10 +503,6 @@
     :config (treemacs-project-follow-mode) (treemacs-follow-mode)
     :defer t)
 
-(use-package treemacs-evil
-    :after (treemacs evil)
-    :defer t)
-
 (use-package treemacs-magit
     :after (treemacs magit)
     :defer t)
@@ -659,7 +552,7 @@
  '(custom-safe-themes
    '("833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "aed3a896c4ea7cd7603f7a242fe2ab21f1539ab4934347e32b0070a83c9ece01" "a242356ae1aebe9f633974c0c29b10f3e00ec2bc96a61ff2cdad5ffa4264996d" "5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
-   '(terraform-doc tramp use-package-ensure-system-package mini-echo bind-key eglot eldoc faceup flymake jsonrpc org project soap-client use-package verilog-mode solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
+   '(terraform-doc tramp use-package-ensure-system-package mini-echo bind-key eglot eldoc faceup flymake jsonrpc org project soap-client use-package verilog-mode solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit  toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general  elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
  '(package-vc-selected-packages
    '((outli :vc-backend Git :url "https://github.com/jdtsmith/outli")
      (tabspaces :url "https://github.com/mclear-tools/tabspaces")
