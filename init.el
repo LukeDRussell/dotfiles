@@ -3,20 +3,20 @@
 ;; Package Management
 
 ; Help in info-display-manual --> use-package --> index
-; use (featurep 'builtin-package-name) to figoure out the name of a builtin module / package / thingie
+; use (featurep 'builtin-package-name) to figure out the name of a builtin module / package / thingie
 ; e.g. (featurep 'use-package-core) evals to t
 
 (require 'package)
 
 (use-package use-package-core
-    :ensure nil
+    :ensure nil  ;; This package is built-in, don't try to download it.
     :init
         (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
     :config
         (package-initialize)
     :custom
 	(use-package-always-ensure t) ;; Always install packages listed
-	(package-install-upgrade-built-in t)
+	(package-install-upgrade-built-in t)  ;; Upgrade built-in packages from package-archives.
 )
 
 ; use-package support for installing from source.
@@ -39,10 +39,6 @@
     ((eq display-line-numbers 'relative)
 	(setq display-line-numbers nil)))
 )
-
-(defun lr/default-line-number-style ()
-    (setq display-line-numbers t)
-    )
 
 (defun lr/copy-current-line-position-to-clipboard ()
   "Copy current line in file to clipboard as '</path/to/file>:<line-number>'. Stolen from https://gist.github.com/kristianhellquist/3082383"
@@ -524,11 +520,15 @@
 
 ;; === Languages ====================================================================================
 
-;; Emacs Lisp
-(add-hook 'emacs-lisp-mode 'lr/default-line-number-style)
+(use-package elisp-mode
+  :ensure nil
+  :hook (emacs-lisp-mode . (display-line-numbers t))
+)
 
-;; Get a nice pre-packaged grammar bundle
-(use-package tree-sitter-langs)
+;; Auto install and use all tree-sitter grammars
+;; Run =treesit-auto-install-all= to install the grammars
+(use-package treesit-auto
+  :config (global-treesit-auto-mode))
 
 (use-package eglot
     :defer t
@@ -536,36 +536,11 @@
     ;; assuming you have the respective LSP server installed.
     ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
     :hook (
-	(go-ts-mode . eglot-ensure)
+	((go-mode go-ts-mode) . eglot-ensure)
 	(terraform-ts-mode . eglot-ensure)
 	(yaml-ts-mode . eglot-ensure)
 	(python-ts-mode . eglot-ensure)
 ))
-
-;; Use Tree-sitter modes instead of 'legacy' modes, for languages support it
-(setq major-mode-remap-alist '(
-    (bash-mode . bash-ts-mode)
-    (c++-mode . c++-ts-mode)
-    (c-or-c++-mode . c-or-c++-ts-mode)
-    (c-mode . c-ts-mode)
-    (cmake-mode . cmake-ts-mode)
-    (csharp-mode . csharp-ts-mode)
-    (css-mode . css-ts-mode)
-    (go-mode . go-ts-mode)
-    (java-mode . java-ts-mode)
-    (js2-mode . js-ts-mode)
-    (js-json-mode. json-ts-mode)
-    (python-mode . python-ts-mode)
-    (ruby-mode . ruby-ts-mode)
-    (terraform-mode . terraform-ts-mode)
-    ;; (yaml-mode . yaml-ts-mode) ; Error: Warning (treesit): Cannot activate tree-sitter, because language grammar for yaml is unavailable (not-found
-))
-
-;; Some tree-sitter modes don't exactly match the grammer name
-(setq treesit-load-name-override-list
-    '((terraform "libtree-sitter-hcl" "tree_sitter_hcl")
-    (js "libtree-sitter-js" "tree_sitter_javascript"))
-)
 
 ;; Markdown
 (use-package markdown-mode
@@ -659,7 +634,7 @@
  '(custom-safe-themes
    '("833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "aed3a896c4ea7cd7603f7a242fe2ab21f1539ab4934347e32b0070a83c9ece01" "a242356ae1aebe9f633974c0c29b10f3e00ec2bc96a61ff2cdad5ffa4264996d" "5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
-   '(terraform-doc tramp use-package-ensure-system-package mini-echo bind-key eglot eldoc faceup flymake jsonrpc org project soap-client use-package verilog-mode solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
+   '(treesit-auto terraform-doc tramp use-package-ensure-system-package mini-echo bind-key eglot eldoc faceup flymake jsonrpc org project soap-client use-package verilog-mode solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
  '(package-vc-selected-packages
    '((outli :vc-backend Git :url "https://github.com/jdtsmith/outli")
      (tabspaces :url "https://github.com/mclear-tools/tabspaces")
