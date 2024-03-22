@@ -58,7 +58,7 @@
         (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
         (prog-mode . display-line-numbers-mode) ;; Display line numbers when in programming modes
     :bind
-        ("C-=" . text-scale-increase)
+        ("C-+" . text-scale-increase)
         ("C--" . text-scale-decrease)
     :config
         (tool-bar-mode 0) ;; Tool bar is ugly
@@ -74,6 +74,9 @@
         ;; (pixel-scroll-precision-mode) ;; It's really jerky on my Macbook
         (if (eq system-type 'darwin)
             (setq insert-directory-program "gls")())
+	(cond
+	    ((find-font (font-spec :name "Hack Nerd Font Mono"))
+		(set-face-attribute 'default nil :font "Hack Nerd Font Propo")))
     :custom-face
         (default ((t (:height 150 ))))
     :custom
@@ -142,16 +145,6 @@
     :defer t)
 
 
-
-;; === Fonts ========================================================================================
-
-(cond
- ((find-font (font-spec :name "Hack Nerd Font Mono"))
-  (set-face-attribute 'default nil
-                      :font "Hack Nerd Font Propo"
-                      :height 140)))
-
-
 ;; === Visuals ======================================================================================
 
 (use-package indent-bars
@@ -194,7 +187,7 @@
     :config
         (mini-echo-mode)
     :custom
-        (mini-echo-define-segments (
+        (mini-echo-default-segments '(
 	    :long ("major-mode" "buffer-name" "vcs" "buffer-position" "flymake" "process" "selection-info" "narrow" "macro" "profiler" "repeat")
 	    :short ("buffer-name-short" "buffer-position" "process" "profiler" "selection-info" "narrow" "macro" "repeat"))
 	)
@@ -469,6 +462,7 @@
 	    "h a" '(apropos :wk "(a)propos")
 	    "h c" '(describe-command :wk "Describe Command")
 	    "h f" '(describe-function :wk "Describe Function")
+	    "h F" '(describe-face :wk "Describe Face")
 	    "h v" '(describe-variable :wk "Describe Variable")
 	    "h k" '(describe-key :wk "Describe Key")
 	    "h s" '(describe-symbol :wk "Describe Symbol")
@@ -480,7 +474,7 @@
 )
 
 
-;; === Orgmode ======================================================================================
+;; === Writing ======================================================================================
 
 (use-package org
     :hook (org-mode . visual-line-mode)
@@ -495,6 +489,13 @@
 	(org-pretty-entities t)
 	(org-todo-keywords
 	    '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
+)
+
+(use-package org-gcal
+  :custom
+  (org-gcal-client-id "lrussell@canva.com")
+  (org-gcal-client-secret "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")
+  (org-gcal-fetch-file-alist '(("lrussell@canva.com" . "~/Notes/cal-canva.org")))
 )
 
 (use-package org-modern
@@ -517,31 +518,6 @@
 	(org-appear-inside-latex)
 )
 
-
-;; === Languages ====================================================================================
-
-(use-package elisp-mode
-  :ensure nil
-  :hook (emacs-lisp-mode . (display-line-numbers t))
-)
-
-;; Auto install and use all tree-sitter grammars
-;; Run =treesit-auto-install-all= to install the grammars
-(use-package treesit-auto
-  :config (global-treesit-auto-mode))
-
-(use-package eglot
-    :defer t
-    ;; Add your programming modes here to automatically start Eglot,
-    ;; assuming you have the respective LSP server installed.
-    ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
-    :hook (
-	((go-mode go-ts-mode) . eglot-ensure)
-	(terraform-ts-mode . eglot-ensure)
-	(yaml-ts-mode . eglot-ensure)
-	(python-ts-mode . eglot-ensure)
-))
-
 ;; Markdown
 (use-package markdown-mode
     ;; These extra modes help clean up the Markdown editing experience.
@@ -554,15 +530,43 @@
 	(setq markdown-command "multimarkdown")
  )
 
+
+;; === Programming ====================================================================================
+
+(use-package elisp-mode
+  :ensure nil
+  :hook (emacs-lisp-mode . (display-line-numbers t))
+)
+
+;; Auto install and use all tree-sitter grammars
+;; Run =treesit-auto-install-all= to install the grammars
+(use-package treesit-auto
+  :config (global-treesit-auto-mode))
+
+;; Language Server Protocol support
+(use-package eglot
+    :defer t
+    ;; Add your programming modes here to automatically start Eglot,
+    ;; assuming you have the respective LSP server installed.
+    ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
+    :hook (((
+	    go-mode go-ts-mode
+	    python-mode python-ts-mode
+	    terraform-mode terraform-ts-mode
+	    yaml-mode yaml-ts-mode
+	    ) . eglot-ensure))
+)
+
 (use-package python
     :after eglot
 )
 
-(use-package terraform-ts-mode
-    :vc (:fetcher github :repo kgrotel/terraform-ts-mode)
+(use-package terraform-mode
     :after eglot
+    :defer t
     :config
-	(add-to-list 'eglot-server-programs '(terraform-ts-mode . ("terraform-ls" "serve")))
+    (add-to-list 'eglot-server-programs '(terraform-mode . ("terraform-ls" "serve")))
+    (terraform-format-on-save-mode)
 )
 
 (use-package go
@@ -634,7 +638,7 @@
  '(custom-safe-themes
    '("833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "aed3a896c4ea7cd7603f7a242fe2ab21f1539ab4934347e32b0070a83c9ece01" "a242356ae1aebe9f633974c0c29b10f3e00ec2bc96a61ff2cdad5ffa4264996d" "5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
-   '(treesit-auto terraform-doc tramp use-package-ensure-system-package mini-echo bind-key eglot eldoc faceup flymake jsonrpc org project soap-client use-package verilog-mode solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
+   '(org-gcal treesit-auto terraform-doc tramp use-package-ensure-system-package mini-echo bind-key eglot eldoc faceup flymake jsonrpc org project soap-client use-package verilog-mode solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
  '(package-vc-selected-packages
    '((outli :vc-backend Git :url "https://github.com/jdtsmith/outli")
      (tabspaces :url "https://github.com/mclear-tools/tabspaces")
