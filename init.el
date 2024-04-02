@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t; -*-
-;; Package Management
+
+;; === Package Management ===========================================================================
+
 ; Help in info-display-manual --> use-package --> index
 ; use (featurep 'builtin-package-name) to figure out the name of a builtin module / package / thingie
 ; e.g. (featurep 'use-package-core) evals to t
@@ -14,12 +16,16 @@
 	(use-package-always-ensure t) ;; Always install packages listed
 	(package-install-upgrade-built-in t)  ;; Upgrade built-in packages from package-archives.
 )
+
 ; use-package support for installing from source.
 ; Note: was merged into emacs 2023-05-16. Should be emacs 30.
 (unless (package-installed-p 'vc-use-package)
     (package-vc-install "https://github.com/slotThe/vc-use-package"))
 (require 'vc-use-package)
+
+
 ;; === My Functions =================================================================================
+
 (defun lr/cycle-line-number-style ()
     "Cycles through the line styles I like."
     (interactive)
@@ -32,19 +38,22 @@
 	(setq display-line-numbers nil)))
 )
 (defun lr/copy-current-line-position-to-clipboard ()
-  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'. Stolen from https://gist.github.com/kristianhellquist/3082383"
+    "Copy current line in file to clipboard as '</path/to/file>:<line-number>'. Stolen from https://gist.github.com/kristianhellquist/3082383"
     (interactive)
     (let ((path-with-line-number
            (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
       (kill-new path-with-line-number)
       (message (concat path-with-line-number " copied to clipboard"))))
+
+
 ;; === Emacs core ===================================================================================
+
 (use-package emacs ;; For things without their own /feature/
     :ensure nil
     :hook
         (emacs-startup . toggle-frame-maximized)
         (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
-        (prog-mode . display-line-numbers-mode) ;; Display line numbers when in programming modes
+	(prog-mode . display-line-numbers-mode)
     :bind
         ("C-=" . text-scale-increase)
         ("C--" . text-scale-decrease)
@@ -73,6 +82,7 @@
         (visible-bell t)
         (ring-bell-function 'ignore)
         (vc-follow-symlinks t) ;; Stop bugging me when opening my init.el which is a symlink.
+	(use-short-answers t)
         (inhibit-startup-screen t)
         (inhibit-startup-message t)
         (inhibit-startup-echo-area-message "lrussell")
@@ -93,6 +103,8 @@
             "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'")
         )
 )
+
+
 ;; === Themes ======================================================================================
 (use-package kanagawa-theme
     :defer t)
@@ -114,15 +126,19 @@
 (use-package auto-dark
     :config (auto-dark-mode t)
     :custom
-        (auto-dark-light-theme 'kanagawa)
-        (auto-dark-dark-theme 'kanagawa)
+        (auto-dark-light-theme 'modus-operandi)
+        (auto-dark-dark-theme 'modus-vivendi)
     :defer t)
+
+
 ;; === Fonts ========================================================================================
 (cond
  ((find-font (font-spec :name "Hack Nerd Font Mono"))
   (set-face-attribute 'default nil
                       :font "Hack Nerd Font Propo"
                       :height 140)))
+
+
 ;; === Visuals ======================================================================================
 (use-package indent-bars
     :vc (:fetcher github :repo jdtsmith/indent-bars)
@@ -138,9 +154,11 @@
 (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode)
     :defer t)
+
 (use-package breadcrumb
     ;; :init (breadcrumb-mode)
-    :defer t)
+  :defer t)
+
 (use-package dashboard
     :config
         (dashboard-setup-startup-hook)
@@ -165,7 +183,16 @@
 	    :long ("major-mode" "buffer-name" "vcs" "buffer-position" "flymake" "process" "selection-info" "narrow" "macro" "profiler" "repeat")
 	    :short ("buffer-name-short" "buffer-position" "process" "profiler" "selection-info" "narrow" "macro" "repeat"))
 	)
-)
+	)
+
+(use-package visual-fill-column
+  :config
+      (global-visual-fill-column-mode)
+  :custom
+	(visual-fill-column-center-text t)
+	(fill-column 150)
+  )
+
 ;; === Workspace Management =========================================================================
 (use-package tabspaces ;; Each tab is a set of isolated buffers
     :vc (tabspaces :url "https://github.com/mclear-tools/tabspaces")
@@ -174,7 +201,7 @@
 ;; === Editing Support ==============================================================================
 (use-package which-key ;; Discover keybinds with popup
     :after evil
-    :init (which-key-mode)
+    :config (which-key-mode)
     :custom
 	(which-key-max-display-columns 5)
 	(which-key-add-column-padding 10)
@@ -344,13 +371,24 @@
 	;; format: off
 	(lr/leader-def ;; Leader sequences
 	    "b"   '(:ignore t :wk "buffers")
-	    "b s" '(switch-to-buffer :wk "switch to named buffer")
-	    "b m" '(consult-buffer :wk "menu for buffers")
+	    "b c" '(consult-buffer :wk "menu for buffers")
 	    "b d" '(kill-buffer-and-window :wk "delete buffer")
-	    "b i" '(ibuffer :wk "IBuffer")
 	    "b n" '(next-buffer :wk "next buffer")
 	    "b p" '(previous-buffer :wk "previous buffer")
-	    "b P" '(consult-project-buffer :wk Project buffers)
+	    "b m" '(consult-project-buffer :wk Project buffers)
+
+	    "e"     '(:ignore t :wk "emacs")
+	    "e c" '((lambda () (interactive) (find-file user-init-file)) :wk "config edit")
+	    "e l" '((lambda () (interactive) (load-file user-init-file)) :wk "load config")
+	    "e o"   '(describe-variable 'system-configuration-options) :wk "options used for build "
+	    "e p"   '(list-packages :wk "list all pacakges")
+	    "e u"   '(package-menu-filter-upgradable :wk "show packages that can be upgraded")
+
+	    "f"   '(:ignore t :wk "files")
+	    "f f" '(consult-fd :wk "find in project")
+	    "f g" '(consult-ripgrep :wk "grep in project")
+	    "f s" '(save-buffer :wk "save buffer")
+
 	    "w"       '(:ignore t :wk "windows")
 	    "w v"       '(evil-window-vnew :wk "vertical split")
 	    "w h"       '(evil-window-new :wk "horizontal split")
@@ -367,13 +405,7 @@
 	    "v" '(:ignore t :wk "version control")
 	    "v m" '(magit :wk "magit")
 	    "v h" '(magit-log-buffer-file :wk "history of file")
-	    "e"     '(:ignore t :wk "emacs")
-	    "e c"   '(:ignore t :wk "config")
-	    "e c l" '((lambda () (interactive) (load-file user-init-file)) :wk "reload user config")
-	    "e c o" '((lambda () (interactive) (find-file user-init-file)) :wk "open user config")
-	    "e o"   '(describe-variable 'system-configuration-options) :wk "emacs build options"
-	    "e p"   '(list-packages :wk "list all pacakges")
-	    "e u"   '(package-menu-filter-upgradable :wk "show packages that can be upgraded")
+
 	    "o"   '(:ignore t :wk "open")
 	    "o v" '(vterm-toggle :wk "vterm")
 	    "o d" '(dirvish :wk "open dirvish")
@@ -381,8 +413,10 @@
 	    "o D" '(dashboard-open :wk "dashboard")
 	    "o t" '(treemacs :wk "treemacs")
 	    "o m" '(magit :wk "magit")
-	    "o f" '(consult-find :wk "file")
+	    "o f" '(consult-find :wk "find file")
 	    "o a" '(org-agenda :wk "agenda")
+	    "o p" '(tabspaces-open-or-create-project-and-workspace :wk "project in tab")
+
 	    "q" '(:ignore t :wk "quit")
 	    "q r" '(restart-emacs :wk "Restart emacs")
 	    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
@@ -419,8 +453,10 @@
 	(org-hide-emphasis-markers t)
 	(org-pretty-entities t)
 	(org-todo-keywords
-	    '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
+	 '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
+	(org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
 )
+
 (use-package org-modern
     :hook (org-mode . global-org-modern-mode)
     :custom (org-modern-hide-stars " ")
@@ -440,14 +476,15 @@
 	(org-appear-inside-latex)
 )
 ;; === Languages ====================================================================================
-(use-package elisp-mode
+(use-package emacs
   :ensure nil
-  :hook (emacs-lisp-mode . (display-line-numbers t))
 )
+
 ;; Auto install and use all tree-sitter grammars
 ;; Run =treesit-auto-install-all= to install the grammars
 (use-package treesit-auto
   :config (global-treesit-auto-mode))
+
 (use-package eglot
     :defer t
     ;; Add your programming modes here to automatically start Eglot,
@@ -487,6 +524,9 @@
 	(before-save . gofmt-before-save)
     :config (setq tab-width 4)
 )
+
+(use-package fish-mode)
+
 ;; === File Management ==============================================================================
 (use-package treemacs
     :config (treemacs-project-follow-mode) (treemacs-follow-mode)
@@ -532,17 +572,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(kanagawa))
- '(custom-safe-themes
-   '("833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "aed3a896c4ea7cd7603f7a242fe2ab21f1539ab4934347e32b0070a83c9ece01" "a242356ae1aebe9f633974c0c29b10f3e00ec2bc96a61ff2cdad5ffa4264996d" "5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64" "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563" "1b623b81f373d49bcf057315fe404b30c500c3b5a387cf86c699d83f2f5763f4" "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f" "7d10494665024176a90895ff7836a8e810d9549a9872c17db8871900add93d5c" "e70e87ad139f94d3ec5fdf782c978450fc2cb714d696e520b176ff797b97b8d2" default))
  '(package-selected-packages
-   '(treesit-auto terraform-doc tramp use-package-ensure-system-package mini-echo bind-key eglot eldoc faceup flymake jsonrpc org project soap-client use-package verilog-mode solarized-theme use-package-core tabspaces tree-sitter-langs org-superstar org-appear yaml-mode which-key vterm-toggle vertico vc-use-package treemacs-magit treemacs-evil toc-org terraform-mode standard-themes rainbow-delimiters paredit page-break-lines org-modern orderless nano-emacs nano modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides helpful golden-ratio go-mode general evil-collection elisp-autofmt ef-themes doom-modeline dirvish denote dashboard corfu consult centaur-tabs breadcrumb auto-dark))
- '(package-vc-selected-packages
-   '((outli :vc-backend Git :url "https://github.com/jdtsmith/outli")
-     (tabspaces :url "https://github.com/mclear-tools/tabspaces")
-     (:vc-backend Git :url "https://github.com/kgrotel/terraform-ts-mode")
-     (indent-bars :vc-backend Git :url "https://github.com/jdtsmith/indent-bars")
-     (lambda-themes :vc-backend Git :url "https://github.com/lambda-emacs/lambda-themes"))))
+   '(fish-mode treesit-auto visual-fill-column yaml-mode which-key vterm-toggle vertico verilog-mode vc-use-package use-package-ensure-system-package treemacs-magit treemacs-evil tree-sitter-langs tramp toc-org terraform-ts-mode terraform-mode tabspaces standard-themes solarized-theme rainbow-delimiters paredit page-break-lines org-modern org-appear orderless modus-themes mini-echo markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides go-mode go general evil-collection elisp-autofmt ef-themes doom-modeline dirvish dashboard corfu consult breadcrumb auto-dark)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
