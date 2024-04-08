@@ -128,7 +128,7 @@
     :custom
         (auto-dark-light-theme 'modus-operandi)
         (auto-dark-dark-theme 'modus-vivendi)
-    :defer t)
+)
 
 
 ;; === Fonts ========================================================================================
@@ -155,10 +155,6 @@
     :hook (prog-mode . rainbow-delimiters-mode)
     :defer t)
 
-(use-package breadcrumb
-    ;; :init (breadcrumb-mode)
-  :defer t)
-
 (use-package dashboard
     :config
         (dashboard-setup-startup-hook)
@@ -174,7 +170,8 @@
         (dashboard-projects-backend 'project-el)
         (dashboard-display-icons-p t)
         (dashboard-items '((recents . 10) (projects . 10)))
-)
+ )
+
 (use-package mini-echo
     :config
         (mini-echo-mode)
@@ -183,7 +180,7 @@
 	    :long ("major-mode" "buffer-name" "vcs" "buffer-position" "flymake" "process" "selection-info" "narrow" "macro" "profiler" "repeat")
 	    :short ("buffer-name-short" "buffer-position" "process" "profiler" "selection-info" "narrow" "macro" "repeat"))
 	)
-	)
+)
 
 (use-package visual-fill-column
   :config
@@ -573,7 +570,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(fish-mode treesit-auto visual-fill-column yaml-mode which-key vterm-toggle vertico verilog-mode vc-use-package use-package-ensure-system-package treemacs-magit treemacs-evil tree-sitter-langs tramp toc-org terraform-ts-mode terraform-mode tabspaces standard-themes solarized-theme rainbow-delimiters paredit page-break-lines org-modern org-appear orderless modus-themes mini-echo markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides go-mode go general evil-collection elisp-autofmt ef-themes doom-modeline dirvish dashboard corfu consult breadcrumb auto-dark)))
+   '(outli nano-emacs nano fish-mode treesit-auto visual-fill-column yaml-mode which-key vterm-toggle vertico verilog-mode vc-use-package use-package-ensure-system-package treemacs-magit treemacs-evil tree-sitter-langs tramp toc-org terraform-ts-mode terraform-mode tabspaces standard-themes solarized-theme rainbow-delimiters paredit page-break-lines org-modern org-appear orderless modus-themes mini-echo markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides go-mode go general evil-collection elisp-autofmt ef-themes doom-modeline dirvish dashboard corfu consult breadcrumb auto-dark)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
