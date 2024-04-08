@@ -36,7 +36,8 @@
 	(setq display-line-numbers 'relative))
     ((eq display-line-numbers 'relative)
 	(setq display-line-numbers nil)))
-)
+    )
+
 (defun lr/copy-current-line-position-to-clipboard ()
     "Copy current line in file to clipboard as '</path/to/file>:<line-number>'. Stolen from https://gist.github.com/kristianhellquist/3082383"
     (interactive)
@@ -126,8 +127,8 @@
 (use-package auto-dark
     :config (auto-dark-mode t)
     :custom
-        (auto-dark-light-theme 'modus-operandi)
-        (auto-dark-dark-theme 'modus-vivendi)
+        (auto-dark-light-theme 'lambda-light)
+        (auto-dark-dark-theme 'lambda-dark)
 )
 
 
@@ -152,14 +153,14 @@
     :defer t)
  
 (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode)
+;;    :hook (prog-mode . rainbow-delimiters-mode)
     :defer t)
 
 (use-package dashboard
     :config
         (dashboard-setup-startup-hook)
     :custom
-        (dashboard-startup-banner 'logo)
+        (dashboard-startup-banner 'official)
         (dashboard-banner-logo-title nil)
         (dashboard-center-content t)
         (dashboard-vertically-center-content t)
@@ -169,7 +170,7 @@
         (dashboard-set-footer nil)
         (dashboard-projects-backend 'project-el)
         (dashboard-display-icons-p t)
-        (dashboard-items '((recents . 10) (projects . 10)))
+        (dashboard-items '((recents . 10) (projects . 10) (bookmarks . 10)))
  )
 
 (use-package mini-echo
@@ -180,9 +181,25 @@
 	    :long ("major-mode" "buffer-name" "vcs" "buffer-position" "flymake" "process" "selection-info" "narrow" "macro" "profiler" "repeat")
 	    :short ("buffer-name-short" "buffer-position" "process" "profiler" "selection-info" "narrow" "macro" "repeat"))
 	)
+	)
+
+
+(use-package doom-modeline
+ :init
+;;    (doom-modeline-mode 1)
+ :config
+    (column-number-mode 1)
+    (line-number-mode 1)
+ :custom
+    (mode-line-percent-position t)
+    (doom-modeline-buffer-encoding nil)
+    (doom-modeline-vcs-max-length 30)
+    (doom-modeline-modal-icon nil)
 )
 
 (use-package visual-fill-column
+  ;; I like having text centred when the window is really wide. I don't like turning my head left to read the
+  ;; text of ultrawide frames.
   :config
       (global-visual-fill-column-mode)
   :custom
@@ -347,7 +364,20 @@
     :custom
 	(evil-split-window-below t)
 	(evil-vsplit-window-right t)
-)
+	;; Don't duplicate Mode in messages, it's already in the modeline.
+	(evil-insert-state-message nil)
+	(evil-visual-state-message nil)
+	;; Customize the Mode labels to how they usually are in the bottom line thingie
+	(evil-normal-state-tag " NORMAL ")
+	(evil-insert-state-tag " INSERT ")
+	(evil-visual-state-tag " VISUAL ")
+	;; Mode is already displayed in the status bar.
+	:custom-face
+	(doom-modeline-evil-insert-state
+	((t (:background "olive drab" :foreground "white smoke"))))
+	(doom-modeline-evil-visual-state
+	 ((t (:background "medium slate blue" :foreground "white smoke")))))
+
 (use-package evil-collection
     :after evil
     :config (evil-collection-init)
