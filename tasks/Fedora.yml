@@ -14,32 +14,6 @@
     update_only: true
     update_cache: true
 
-- name: Install | Update 1Password as not available in Fedora pacakges
-  when:
-    - update_install == "yes"
-    - '"1password" in fedora_apps'
-    - ansible_facts.distribution == "Fedora"
-  become: true
-  block:
-    - name: Add 1Password repo key
-      ansible.builtin.rpm_key:
-        state: present
-        key: https://downloads.1password.com/linux/keys/1password.asc
-
-    - name: Add 1Password repo
-      ansible.builtin.yum_repository:
-        name: 1password
-        description: 1password Stable Channel
-        baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
-        gpgcheck: true
-        gpgkey:
-          - https://downloads.1password.com/linux/keys/1password.asc
-
-    - name: Update & Install 1Password
-      ansible.builtin.package:
-        name: 1password
-        state: present
-
 - name: Install Nerd Fonts
   when:
     - ansible_facts.distribution == "Fedora"

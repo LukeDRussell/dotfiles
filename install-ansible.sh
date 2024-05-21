@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script uses ansible to install dotfiles.
+# This script uses ansible to install dotfiles, so make sure it's installed.
 
 # Set OS & Distro variables
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -34,4 +34,3 @@ if ! command -v ansible &> /dev/null ; then
 	$SUDO $CMD_PKG_INSTALL install ansible -y
 fi
 
-ansible-playbook main.yml -K
