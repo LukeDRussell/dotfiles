@@ -45,7 +45,9 @@ abbr -a gitaa git add .
 abbr -a gitca git commit -a -m \"
 abbr -a gits git status
 abbr -a gitl git log --oneline --decorate --all --graph
+abbr -a gitp git pull --rebase
 
 zoxide init fish | source
 
 source ~/.config/fish/work.fish
+
