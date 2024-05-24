@@ -37,7 +37,6 @@
     ((eq display-line-numbers 'relative)
 	(setq display-line-numbers nil)))
     )
-
 (defun lr/copy-current-line-position-to-clipboard ()
     "Copy current line in file to clipboard as '</path/to/file>:<line-number>'. Stolen from https://gist.github.com/kristianhellquist/3082383"
     (interactive)
@@ -72,8 +71,6 @@
         ;; (pixel-scroll-precision-mode) ;; It's really jerky on my Macbook
         (if (eq system-type 'darwin)
             (setq insert-directory-program "gls")())
-    :custom-face
-        (default ((t (:height 150 ))))
     :custom
         (window-resize-pixelwise t)
         (frame-resize-pixelwise t)
@@ -107,54 +104,48 @@
 
 
 ;; === Themes ======================================================================================
+
 (use-package kanagawa-theme
-    :defer t)
-(use-package standard-themes
-    :defer t)
+  :defer t)
+
 (use-package ef-themes
-    :defer t)
-(use-package modus-themes
-    :defer t)
-(use-package lambda-themes
-    :vc (:fetcher github :repo lambda-emacs/lambda-themes)
-    :custom
-        (lambda-themes-set-italic-comments t)
-        (lambda-themes-set-italic-keywords t)
-        (lambda-themes-set-variable-pitch t)
-    :defer t)
+  :defer t)
+
 (use-package solarized-theme
-    :defer t)
+  :defer t)
+
 (use-package auto-dark
-    :config (auto-dark-mode t)
-    :custom
-        (auto-dark-light-theme 'lambda-light)
-        (auto-dark-dark-theme 'lambda-dark)
-)
+  :config (auto-dark-mode t)
+  :custom
+  (auto-dark-light-theme 'modus-operandi)
+  (auto-dark-dark-theme 'modus-vivendi)
+  )
 
 
 ;; === Fonts ========================================================================================
+
 (cond
- ((find-font (font-spec :name "Hack Nerd Font Mono"))
+ ((find-font (font-spec :name "Hack NFM"))
   (set-face-attribute 'default nil
-                      :font "Hack Nerd Font Propo"
-                      :height 140)))
+                      :font "Hack NFM"
+                      :height 120)))
 
 
 ;; === Visuals ======================================================================================
 (use-package indent-bars
-    :vc (:fetcher github :repo jdtsmith/indent-bars)
-    :hook
-	(prog-mode . indent-bars-mode)
-    :custom
-	(indent-bars-prefer-character t)
-	(indent-bars-treesit-support t)
-	(indent-bars-color-by-depth nil)
-	(indent-bars-highlight-current-depth '(:face default :blend 0.4))
-    :defer t)
+  :vc (:fetcher github :repo jdtsmith/indent-bars)
+  :hook
+  (prog-mode . indent-bars-mode)
+  :custom
+  (indent-bars-prefer-character t)
+  (indent-bars-treesit-support t)
+  (indent-bars-color-by-depth nil)
+  (indent-bars-highlight-current-depth '(:face default :blend 0.4))
+  :defer t)
  
 (use-package rainbow-delimiters
-;;    :hook (prog-mode . rainbow-delimiters-mode)
-    :defer t)
+  :hook (prog-mode . rainbow-delimiters-mode)
+  :defer t)
 
 (use-package dashboard
     :config
@@ -204,22 +195,26 @@
       (global-visual-fill-column-mode)
   :custom
 	(visual-fill-column-center-text t)
-	(fill-column 150)
-  )
+(fill-column 150)
+)
+
 
 ;; === Workspace Management =========================================================================
 (use-package tabspaces ;; Each tab is a set of isolated buffers
     :vc (tabspaces :url "https://github.com/mclear-tools/tabspaces")
     :hook (after-init . tabspaces-mode)
 )
+
+
 ;; === Editing Support ==============================================================================
 (use-package which-key ;; Discover keybinds with popup
-    :after evil
-    :config (which-key-mode)
-    :custom
-	(which-key-max-display-columns 5)
-	(which-key-add-column-padding 10)
-)
+  :after meow
+  :config (which-key-mode)
+  :custom
+  (which-key-max-display-columns 5)
+  (which-key-add-column-padding 10)
+  )
+
 (use-package vertico ;; Minibuffer completion UI
     :init (vertico-mode)
     :custom
@@ -227,10 +222,12 @@
 	(read-buffer-completion-ignore-case t)
 	(read-file-name-completion-ignore-case t)
 )
+
 (use-package marginalia ;; Docstrings in minibuffer margin
     :after vertico
     :init (marginalia-mode)
 )
+
 (use-package corfu ;; Intellisense-style completion popups
     :init
 	(global-corfu-mode)
@@ -240,11 +237,13 @@
 	(corfu-cycle t)
 	(corfu-quit-at-boundary)
 )
+
 (use-package orderless ;; Stop caring about the order of search terms in minibuffer filtering
     :custom
 	(completion-styles '(orderless basic)) (completion-category-overrides
 	    '((file (styles basic partial-completion))))
 )
+
 (use-package consult
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (;; C-c bindings in `mode-specific-map'
@@ -353,121 +352,109 @@
   ;;;; 5. No project support
   ;; (setq consult-project-function nil)
 )
+
+
 ;; === Modal editing ================================================================================
-(use-package evil
-    :init
-	(setq evil-want-integration t)
-	(setq evil-want-keybinding nil)
-    :config
-	(evil-mode 1)
-	(evil-set-undo-system 'undo-redo) ;; Only because Emacs 28+ has this built in
-    :custom
-	(evil-split-window-below t)
-	(evil-vsplit-window-right t)
-	;; Don't duplicate Mode in messages, it's already in the modeline.
-	(evil-insert-state-message nil)
-	(evil-visual-state-message nil)
-	;; Customize the Mode labels to how they usually are in the bottom line thingie
-	(evil-normal-state-tag " NORMAL ")
-	(evil-insert-state-tag " INSERT ")
-	(evil-visual-state-tag " VISUAL ")
-	;; Mode is already displayed in the status bar.
-	:custom-face
-	(doom-modeline-evil-insert-state
-	((t (:background "olive drab" :foreground "white smoke"))))
-	(doom-modeline-evil-visual-state
-	 ((t (:background "medium slate blue" :foreground "white smoke")))))
 
-(use-package evil-collection
-    :after evil
-    :config (evil-collection-init)
-)
+(defun meow-setup ()
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  (meow-motion-overwrite-define-key
+   '("j" . meow-next)
+   '("k" . meow-prev)
+   '("<escape>" . ignore))
+  (meow-leader-define-key
+   ;; SPC j/k will run the original command in MOTION state.
+   '("j" . "H-j")
+   '("k" . "H-k")
+   ;; Use SPC (0-9) for digit arguments.
+   '("1" . meow-digit-argument)
+   '("2" . meow-digit-argument)
+   '("3" . meow-digit-argument)
+   '("4" . meow-digit-argument)
+   '("5" . meow-digit-argument)
+   '("6" . meow-digit-argument)
+   '("7" . meow-digit-argument)
+   '("8" . meow-digit-argument)
+   '("9" . meow-digit-argument)
+   '("0" . meow-digit-argument)
+   '("/" . meow-keypad-describe-key)
+   '("?" . meow-cheatsheet))
+  (meow-normal-define-key
+   '("0" . meow-expand-0)
+   '("9" . meow-expand-9)
+   '("8" . meow-expand-8)
+   '("7" . meow-expand-7)
+   '("6" . meow-expand-6)
+   '("5" . meow-expand-5)
+   '("4" . meow-expand-4)
+   '("3" . meow-expand-3)
+   '("2" . meow-expand-2)
+   '("1" . meow-expand-1)
+   '("-" . negative-argument)
+   '(";" . meow-reverse)
+   '("," . meow-inner-of-thing)
+   '("." . meow-bounds-of-thing)
+   '("[" . meow-beginning-of-thing)
+   '("]" . meow-end-of-thing)
+   '("a" . meow-append)
+   '("A" . meow-open-below)
+   '("b" . meow-back-word)
+   '("B" . meow-back-symbol)
+   '("c" . meow-change)
+   '("d" . meow-delete)
+   '("D" . meow-backward-delete)
+   '("e" . meow-next-word)
+   '("E" . meow-next-symbol)
+   '("f" . meow-find)
+   '("g" . meow-cancel-selection)
+   '("G" . meow-grab)
+   '("h" . meow-left)
+   '("H" . meow-left-expand)
+   '("i" . meow-insert)
+   '("I" . meow-open-above)
+   '("j" . meow-next)
+   '("J" . meow-next-expand)
+   '("k" . meow-prev)
+   '("K" . meow-prev-expand)
+   '("l" . meow-right)
+   '("L" . meow-right-expand)
+   '("m" . meow-join)
+   '("n" . meow-search)
+   '("o" . meow-block)
+   '("O" . meow-to-block)
+   '("p" . meow-yank)
+   '("q" . meow-quit)
+   '("Q" . meow-goto-line)
+   '("r" . meow-replace)
+   '("R" . meow-swap-grab)
+   '("s" . meow-kill)
+   '("t" . meow-till)
+   '("u" . meow-undo)
+   '("U" . meow-undo-in-selection)
+   '("v" . meow-visit)
+   '("w" . meow-mark-word)
+   '("W" . meow-mark-symbol)
+   '("x" . meow-line)
+   '("X" . meow-goto-line)
+   '("y" . meow-save)
+   '("Y" . meow-sync-grab)
+   '("z" . meow-pop-selection)
+   '("'" . repeat)
+   '("<escape>" . ignore)))
+
+(use-package meow
+  :config
+  (meow-setup)
+  (meow-global-mode 1)
+  :custom
+  (meow-use-clipboard t))
+
+
 ;; === Version Control Systems ======================================================================
+
 (use-package magit)
-;; === Keybinds =====================================================================================
-(use-package general
-    :config
-	(general-evil-setup)
-	(general-create-definer lr/leader-def
-	;; set up 'SPC' as the global leader key
-	    :states '(normal insert visual emacs)
-	    :keymaps 'override
-	    :prefix "SPC"	   ;; set leader
-	    :global-prefix "M-SPC" ;; access leader in insert mode
-	)
-	;; format: off
-	(lr/leader-def ;; Leader sequences
-	    "b"   '(:ignore t :wk "buffers")
-	    "b c" '(consult-buffer :wk "menu for buffers")
-	    "b d" '(kill-buffer-and-window :wk "delete buffer")
-	    "b n" '(next-buffer :wk "next buffer")
-	    "b p" '(previous-buffer :wk "previous buffer")
-	    "b m" '(consult-project-buffer :wk Project buffers)
 
-	    "e"     '(:ignore t :wk "emacs")
-	    "e c" '((lambda () (interactive) (find-file user-init-file)) :wk "config edit")
-	    "e l" '((lambda () (interactive) (load-file user-init-file)) :wk "load config")
-	    "e o"   '(describe-variable 'system-configuration-options) :wk "options used for build "
-	    "e p"   '(list-packages :wk "list all pacakges")
-	    "e u"   '(package-menu-filter-upgradable :wk "show packages that can be upgraded")
 
-	    "f"   '(:ignore t :wk "files")
-	    "f f" '(consult-fd :wk "find in project")
-	    "f g" '(consult-ripgrep :wk "grep in project")
-	    "f s" '(save-buffer :wk "save buffer")
-
-	    "w"       '(:ignore t :wk "windows")
-	    "w v"       '(evil-window-vnew :wk "vertical split")
-	    "w h"       '(evil-window-new :wk "horizontal split")
-	    "w d"       '(evil-window-delete :wk "delete")
-	    "w n"       '(evil-window-next :wk "next")  
-	    "w p"       '(evil-window-prev :wk "prev")
-	    "w m"       '(delete-other-windows :wk "maximise current")
-	    "w r"       '(evil-window-rotate-upwards :wk rotate)
-	    "w T"       '(tear-off-window :wk "Tear off window to new frame")
-	    "w <up>"    '(evil-window-up :wk "up")
-	    "w <down>"  '(evil-window-down :wk "down")
-	    "w <left>"  '(evil-window-left :wk "left")
-	    "w <right>" '(evil-window-right :wk "right")
-	    "v" '(:ignore t :wk "version control")
-	    "v m" '(magit :wk "magit")
-	    "v h" '(magit-log-buffer-file :wk "history of file")
-
-	    "o"   '(:ignore t :wk "open")
-	    "o v" '(vterm-toggle :wk "vterm")
-	    "o d" '(dirvish :wk "open dirvish")
-	    "o s" '(dirvish-side :wk "open dirvish to side")
-	    "o D" '(dashboard-open :wk "dashboard")
-	    "o t" '(treemacs :wk "treemacs")
-	    "o m" '(magit :wk "magit")
-	    "o f" '(consult-find :wk "find file")
-	    "o a" '(org-agenda :wk "agenda")
-	    "o p" '(tabspaces-open-or-create-project-and-workspace :wk "project in tab")
-
-	    "q" '(:ignore t :wk "quit")
-	    "q r" '(restart-emacs :wk "Restart emacs")
-	    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
-	    "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
-	    "u" '(:ignore t :wk "ui")
-	    "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
-	    "u M" '(org-modern-mode :wk "Org-Modern mode")
-	    "u l" '(lr/cycle-line-number-style :wk "Line numbers")
-	    "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
-	    "u t" '(consult-theme :wk "theme preview / change")
-	    "h" '(:ignore t :wk "(h)elp")
-	    "h a" '(apropos :wk "(a)propos")
-	    "h c" '(describe-command :wk "Describe Command")
-	    "h f" '(describe-function :wk "Describe Function")
-	    "h v" '(describe-variable :wk "Describe Variable")
-	    "h k" '(describe-key :wk "Describe Key")
-	    "h s" '(describe-symbol :wk "Describe Symbol")
-	    "h i" '(info-display-manual :wk "Display Info manual")
-	    "h m" '(info-emacs-manual :wk "emacs manual")
-	    "h q" '(help-quick-toggle :wk "quick help menu")
-	    "h o" '(org-info :wk "Org manual"))
-	;; format: on
-)
-;; === Orgmode ======================================================================================
 (use-package org
     :hook (org-mode . visual-line-mode)
     :custom
@@ -501,28 +488,28 @@
 	(org-appear-autoentities)
 	(org-appear-autokeywords)
 	(org-appear-inside-latex)
-)
+	)
+
+
 ;; === Languages ====================================================================================
-(use-package emacs
-  :ensure nil
-)
 
 ;; Auto install and use all tree-sitter grammars
 ;; Run =treesit-auto-install-all= to install the grammars
 (use-package treesit-auto
-  :config (global-treesit-auto-mode))
+  :custom
+  (treesit-auto-install-all)
+  :config
+  (global-treesit-auto-mode)
+  (treesit-auto-add-to-auto-mode-alist 'all))
 
 (use-package eglot
-    :defer t
-    ;; Add your programming modes here to automatically start Eglot,
-    ;; assuming you have the respective LSP server installed.
-    ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
-    :hook (
-	((go-mode go-ts-mode) . eglot-ensure)
-	(terraform-ts-mode . eglot-ensure)
-	(yaml-ts-mode . eglot-ensure)
-	(python-ts-mode . eglot-ensure)
-))
+  :defer t
+  ;; Add your programming modes here to automatically start Eglot,
+  ;; assuming you have the respective LSP server installed.
+  ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
+  :hook (
+	 (python-ts-mode . eglot-ensure)
+	 ))
 ;; Markdown
 (use-package markdown-mode
     ;; These extra modes help clean up the Markdown editing experience.
@@ -537,22 +524,9 @@
 (use-package python
     :after eglot
 )
-(use-package terraform-ts-mode
-    :vc (:fetcher github :repo kgrotel/terraform-ts-mode)
-    :after eglot
-    :config
-	(add-to-list 'eglot-server-programs '(terraform-ts-mode . ("terraform-ls" "serve")))
-)
-(use-package go
-    :after eglot
-    :bind
-	(:map go-mode-map ("C-c C-f" . 'gofmt))
-    :hook
-	(before-save . gofmt-before-save)
-    :config (setq tab-width 4)
-)
-
 (use-package fish-mode)
+
+(use-package yaml)
 
 ;; === File Management ==============================================================================
 (use-package treemacs
@@ -599,8 +573,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("b29ba9bfdb34d71ecf3322951425a73d825fb2c002434282d2e0e8c44fce8185" default))
  '(package-selected-packages
-   '(outli nano-emacs nano fish-mode treesit-auto visual-fill-column yaml-mode which-key vterm-toggle vertico verilog-mode vc-use-package use-package-ensure-system-package treemacs-magit treemacs-evil tree-sitter-langs tramp toc-org terraform-ts-mode terraform-mode tabspaces standard-themes solarized-theme rainbow-delimiters paredit page-break-lines org-modern org-appear orderless modus-themes mini-echo markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides go-mode go general evil-collection elisp-autofmt ef-themes doom-modeline dirvish dashboard corfu consult breadcrumb auto-dark)))
+   '(awesome-tray outli nano-emacs nano fish-mode treesit-auto visual-fill-column yaml-mode which-key vterm-toggle vertico verilog-mode vc-use-package use-package-ensure-system-package treemacs-magit treemacs-evil tree-sitter-langs tramp toc-org terraform-ts-mode terraform-mode tabspaces standard-themes solarized-theme rainbow-delimiters paredit page-break-lines org-modern org-appear orderless modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides go-mode go general evil-collection elisp-autofmt ef-themes dirvish dashboard corfu consult breadcrumb auto-dark))
+ '(package-vc-selected-packages
+   '((awesome-tray :url "https://github.com/manateelazycat/awesome-tray"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
