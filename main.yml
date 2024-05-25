@@ -16,9 +16,7 @@
       - lsd
       - neovim
       - pandoc
-        #      - pdm
-        #      - pipx
-        #      I want to swap to 'Rye'
+      - pipx
       - python
       - tmux
       - ripgrep
@@ -31,7 +29,6 @@
       - cmake
       - fheroes2
     brew_casks:
-      - 1password
       - calibre
       - drawio
       - firefox
@@ -53,26 +50,13 @@
       - the-unarchiver
       - krita
       - kicad
-      - via
       - vial
       - visual-studio-code
 
     fedora_apps:
-      - 1password
       - fd-find
       - emacs
       - util-linux-user
-
-  vars_prompt:
-
-    - name: update_install
-      prompt: "Update & Install packages (requires -K flag)? [yes | no]"
-      default: "no"
-      private: false
-
-    - name: global_git
-      prompt: "Link global git settings with personal email address? [yes | no]"
-      default: "no"
 
   tasks:
 

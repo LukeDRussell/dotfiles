@@ -1,13 +1,11 @@
 - name: Install common packages
   become: true
-  when: update_install == "yes"
   ansible.builtin.dnf:
     name: "{{ common_packaged_apps }}"
     state: present
 
 - name: Update packages
   become: true
-  when: update_install == "yes"
   ansible.builtin.package:
     name: "*"
     state: latest

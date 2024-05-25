@@ -1,6 +1,9 @@
 # Disable welcome
 set -U fish_greeting
 
+set EDITOR nvim
+set SUDO_EDITOR $EDITOR
+
 
 # Enable vim-like 
 fish_vi_key_bindings
@@ -37,6 +40,8 @@ else
   alias llm="ls --sort=modified"
   alias lls="ls --sort=size"
 end
+
+alias play="ansible-playbook"
 
 # Git Abbreviations
 abbr -a gitco git checkout

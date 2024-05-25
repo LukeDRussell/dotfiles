@@ -7,7 +7,7 @@
     - tmux
     - fish
     - emacs
-    - nvim
+  # - nvim - exclude as I'm using Astronvim instead
 
 - name: Link Tmux settings
   ansible.builtin.file:
@@ -30,17 +30,24 @@
     state: link
     force: true
 
-- name: Link neovim init.lua 
-  ansible.builtin.file:
-    dest: ~/.config/nvim/init.lua
-    src: "{{ playbook_dir }}/init.lua"
-    state: link
-    force: true
-
 - name: Link Global Git Config settings
-  when: global_git == "yes"
   ansible.builtin.file:
     dest: ~/.gitconfig
     src: "{{ playbook_dir }}/gitconfig"
     state: link
     force: true
+
+- name: Install fisher
+  ansible.builtin.shell:
+    cmd: curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+  args:
+    executable: /usr/bin/fish
+
+- name: Install fish plugins
+  ansible.builtin.shell:
+    cmd: "fisher install  {{ item }}"
+  args:
+    executable: /usr/bin/fish
+  loop:
+    - nickeb96/puffer-fish
+    - IlanCosman/tide@v6

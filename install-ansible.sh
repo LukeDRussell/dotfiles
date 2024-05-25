@@ -34,3 +34,6 @@ if ! command -v ansible &> /dev/null ; then
 	$SUDO $CMD_PKG_INSTALL install ansible -y
 fi
 
+if command -v ansible &> /dev/null ; then
+	echo "Ansible is ready."
+fi
