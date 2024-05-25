@@ -68,7 +68,7 @@
         (savehist-mode t) ;; Save minibuffer history
         (recentf-mode t) ;; Keep track of open files
         (global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
-        ;; (pixel-scroll-precision-mode) ;; It's really jerky on my Macbook
+        (pixel-scroll-precision-mode) ;; It's really jerky on my Macbook
         (if (eq system-type 'darwin)
             (setq insert-directory-program "gls")())
     :custom
@@ -79,6 +79,7 @@
         (backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
         (visible-bell t)
         (ring-bell-function 'ignore)
+	(display-line-numbers-type relative)
         (vc-follow-symlinks t) ;; Stop bugging me when opening my init.el which is a symlink.
 	(use-short-answers t)
         (inhibit-startup-screen t)
@@ -113,6 +114,14 @@
 
 (use-package solarized-theme
   :defer t)
+
+(use-package modus-themes
+  :defer t
+  :custom
+  (modus-themes-common-palette-overrides
+   '((bg-line-number-active unspecified)
+     (bg-line-number-inactive unspecified))
+   ))
 
 (use-package auto-dark
   :config (auto-dark-mode t)
@@ -208,7 +217,7 @@
 
 ;; === Editing Support ==============================================================================
 (use-package which-key ;; Discover keybinds with popup
-  :after meow
+  :after evil
   :config (which-key-mode)
   :custom
   (which-key-max-display-columns 5)
@@ -356,104 +365,118 @@
 
 ;; === Modal editing ================================================================================
 
-(defun meow-setup ()
-  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-  (meow-motion-overwrite-define-key
-   '("j" . meow-next)
-   '("k" . meow-prev)
-   '("<escape>" . ignore))
-  (meow-leader-define-key
-   ;; SPC j/k will run the original command in MOTION state.
-   '("j" . "H-j")
-   '("k" . "H-k")
-   ;; Use SPC (0-9) for digit arguments.
-   '("1" . meow-digit-argument)
-   '("2" . meow-digit-argument)
-   '("3" . meow-digit-argument)
-   '("4" . meow-digit-argument)
-   '("5" . meow-digit-argument)
-   '("6" . meow-digit-argument)
-   '("7" . meow-digit-argument)
-   '("8" . meow-digit-argument)
-   '("9" . meow-digit-argument)
-   '("0" . meow-digit-argument)
-   '("/" . meow-keypad-describe-key)
-   '("?" . meow-cheatsheet))
-  (meow-normal-define-key
-   '("0" . meow-expand-0)
-   '("9" . meow-expand-9)
-   '("8" . meow-expand-8)
-   '("7" . meow-expand-7)
-   '("6" . meow-expand-6)
-   '("5" . meow-expand-5)
-   '("4" . meow-expand-4)
-   '("3" . meow-expand-3)
-   '("2" . meow-expand-2)
-   '("1" . meow-expand-1)
-   '("-" . negative-argument)
-   '(";" . meow-reverse)
-   '("," . meow-inner-of-thing)
-   '("." . meow-bounds-of-thing)
-   '("[" . meow-beginning-of-thing)
-   '("]" . meow-end-of-thing)
-   '("a" . meow-append)
-   '("A" . meow-open-below)
-   '("b" . meow-back-word)
-   '("B" . meow-back-symbol)
-   '("c" . meow-change)
-   '("d" . meow-delete)
-   '("D" . meow-backward-delete)
-   '("e" . meow-next-word)
-   '("E" . meow-next-symbol)
-   '("f" . meow-find)
-   '("g" . meow-cancel-selection)
-   '("G" . meow-grab)
-   '("h" . meow-left)
-   '("H" . meow-left-expand)
-   '("i" . meow-insert)
-   '("I" . meow-open-above)
-   '("j" . meow-next)
-   '("J" . meow-next-expand)
-   '("k" . meow-prev)
-   '("K" . meow-prev-expand)
-   '("l" . meow-right)
-   '("L" . meow-right-expand)
-   '("m" . meow-join)
-   '("n" . meow-search)
-   '("o" . meow-block)
-   '("O" . meow-to-block)
-   '("p" . meow-yank)
-   '("q" . meow-quit)
-   '("Q" . meow-goto-line)
-   '("r" . meow-replace)
-   '("R" . meow-swap-grab)
-   '("s" . meow-kill)
-   '("t" . meow-till)
-   '("u" . meow-undo)
-   '("U" . meow-undo-in-selection)
-   '("v" . meow-visit)
-   '("w" . meow-mark-word)
-   '("W" . meow-mark-symbol)
-   '("x" . meow-line)
-   '("X" . meow-goto-line)
-   '("y" . meow-save)
-   '("Y" . meow-sync-grab)
-   '("z" . meow-pop-selection)
-   '("'" . repeat)
-   '("<escape>" . ignore)))
 
-(use-package meow
-  :config
-  (meow-setup)
-  (meow-global-mode 1)
-  :custom
-  (meow-use-clipboard t))
+(use-package evil
+    :init
+	(setq evil-want-integration t)
+	(setq evil-want-keybinding nil)
+    :config
+	(evil-mode 1)
+	(evil-set-undo-system 'undo-redo) ;; Only because Emacs 28+ has this built in
+    :custom
+	(evil-split-window-below t)
+	(evil-vsplit-window-right t)
+)
+
+(use-package evil-collection
+    :after evil
+    :config (evil-collection-init)
+)
+
+
+;; === Leader Key Bindings =====================================================================================
+
+(use-package general
+    :config
+	(general-evil-setup)
+	(general-create-definer lr/leader-def
+	;; set up 'SPC' as the global leader key
+	    :states '(normal insert visual emacs)
+	    :keymaps 'override
+	    :prefix "SPC"	   ;; set leader
+	    :global-prefix "M-SPC" ;; access leader in insert mode
+	)
+	;; format: off
+	(lr/leader-def ;; Leader sequences
+
+	    "b"   '(:ignore t :wk "buffers")
+	    "b s" '(switch-to-buffer :wk "switch to named buffer")
+	    "b m" '(consult-buffer :wk "menu for buffers")
+	    "b d" '(kill-buffer-and-window :wk "delete buffer")
+	    "b i" '(ibuffer :wk "IBuffer")
+	    "b n" '(next-buffer :wk "next buffer")
+	    "b p" '(previous-buffer :wk "previous buffer")
+	    "b P" '(consult-project-buffer :wk Project buffers)
+
+	    "w"       '(:ignore t :wk "windows")
+	    "w v"       '(evil-window-vnew :wk "vertical split")
+	    "w h"       '(evil-window-new :wk "horizontal split")
+	    "w d"       '(evil-window-delete :wk "delete")
+	    "w n"       '(evil-window-next :wk "next")
+	    "w p"       '(evil-window-prev :wk "prev")
+	    "w m"       '(delete-other-windows :wk "maximise current")
+	    "w r"       '(evil-window-rotate-upwards :wk rotate)
+	    "w T"       '(tear-off-window :wk "Tear off window to new frame")
+	    "w <up>"    '(evil-window-up :wk "up")
+	    "w <down>"  '(evil-window-down :wk "down")
+	    "w <left>"  '(evil-window-left :wk "left")
+	    "w <right>" '(evil-window-right :wk "right")
+
+	    "v" '(:ignore t :wk "version control")
+	    "v m" '(magit :wk "magit")
+	    "v h" '(magit-log-buffer-file :wk "history of file")
+
+	    "e"     '(:ignore t :wk "emacs")
+	    "e c"   '(:ignore t :wk "config")
+	    "e c l" '((lambda () (interactive) (load-file user-init-file)) :wk "reload user config")
+	    "e c o" '((lambda () (interactive) (find-file user-init-file)) :wk "open user config")
+	    "e o"   '(describe-variable 'system-configuration-options) :wk "emacs build options"
+	    "e p"   '(list-packages :wk "list all pacakges")
+	    "e u"   '(package-menu-filter-upgradable :wk "show packages that can be upgraded")
+
+	    "o"   '(:ignore t :wk "open")
+	    "o v" '(vterm-toggle :wk "vterm")
+	    "o d" '(dirvish :wk "open dirvish")
+	    "o s" '(dirvish-side :wk "open dirvish to side")
+	    "o D" '(dashboard-open :wk "dashboard")
+	    "o t" '(treemacs :wk "treemacs")
+	    "o m" '(magit :wk "magit")
+	    "o f" '(consult-find :wk "file")
+	    "o a" '(org-agenda :wk "agenda")
+
+	    "q" '(:ignore t :wk "quit")
+	    "q r" '(restart-emacs :wk "Restart emacs")
+	    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
+	    "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
+
+	    "u" '(:ignore t :wk "ui")
+	    "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
+	    "u M" '(org-modern-mode :wk "Org-Modern mode")
+	    "u l" '(lr/cycle-line-number-style :wk "Line numbers")
+	    "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
+	    "u t" '(consult-theme :wk "theme preview / change")
+
+	    "h" '(:ignore t :wk "(h)elp")
+	    "h a" '(apropos :wk "(a)propos")
+	    "h c" '(describe-command :wk "Describe Command")
+	    "h f" '(describe-function :wk "Describe Function")
+	    "h F" '(describe-face :wk "Describe Face")
+	    "h v" '(describe-variable :wk "Describe Variable")
+	    "h k" '(describe-key :wk "Describe Key")
+	    "h s" '(describe-symbol :wk "Describe Symbol")
+	    "h i" '(info-display-manual :wk "Display Info manual")
+	    "h m" '(info-emacs-manual :wk "emacs manual")
+	    "h q" '(help-quick-toggle :wk "quick help menu")
+	    "h o" '(org-info :wk "Org manual"))
+	;; format: on
+	)
 
 
 ;; === Version Control Systems ======================================================================
 
 (use-package magit)
 
+;; === Org Mode ======================================================================
 
 (use-package org
     :hook (org-mode . visual-line-mode)

@@ -1,9 +1,8 @@
 # Disable welcome
 set -U fish_greeting
 
-set EDITOR nvim
+set EDITOR emacs
 set SUDO_EDITOR $EDITOR
-
 
 # Enable vim-like 
 fish_vi_key_bindings
