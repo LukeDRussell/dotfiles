@@ -79,7 +79,7 @@
         (backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
         (visible-bell t)
         (ring-bell-function 'ignore)
-	(display-line-numbers-type relative)
+	(display-line-numbers-type 'relative)
         (vc-follow-symlinks t) ;; Stop bugging me when opening my init.el which is a symlink.
 	(use-short-answers t)
         (inhibit-startup-screen t)
@@ -520,7 +520,7 @@
 ;; Run =treesit-auto-install-all= to install the grammars
 (use-package treesit-auto
   :custom
-  (treesit-auto-install-all)
+  (treesit-auto-install t)
   :config
   (global-treesit-auto-mode)
   (treesit-auto-add-to-auto-mode-alist 'all))
@@ -533,6 +533,13 @@
   :hook (
 	 (python-ts-mode . eglot-ensure)
 	 ))
+
+(use-package eglot-booster
+  ;; Requires =eglot-lsp-booster= is installed and in emacs path.
+	:vc (:fetcher github :repo jdtsmith/eglot-booster)
+	:after eglot
+	:config	(eglot-booster-mode))
+
 ;; Markdown
 (use-package markdown-mode
     ;; These extra modes help clean up the Markdown editing experience.
@@ -551,6 +558,9 @@
 
 (use-package yaml)
 
+;; Try yaml-pro
+
+
 ;; === File Management ==============================================================================
 (use-package treemacs
     :config (treemacs-project-follow-mode) (treemacs-follow-mode)
@@ -566,6 +576,10 @@
     :defer t)
     
 ;; === Shells =======================================================================================
+
+(use-package exec-path-from-shell
+  :config (exec-path-from-shell-initialize))
+
 (use-package vterm
     :config (setq vterm-copy-exclude-prompt t)
     :if (not (eq system-type 'windows-nt))
@@ -596,12 +610,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("b29ba9bfdb34d71ecf3322951425a73d825fb2c002434282d2e0e8c44fce8185" default))
- '(package-selected-packages
-   '(awesome-tray outli nano-emacs nano fish-mode treesit-auto visual-fill-column yaml-mode which-key vterm-toggle vertico verilog-mode vc-use-package use-package-ensure-system-package treemacs-magit treemacs-evil tree-sitter-langs tramp toc-org terraform-ts-mode terraform-mode tabspaces standard-themes solarized-theme rainbow-delimiters paredit page-break-lines org-modern org-appear orderless modus-themes markdown-mode marginalia lua-mode lambda-themes kanagawa-theme indent-bars highlight-indent-guides go-mode go general evil-collection elisp-autofmt ef-themes dirvish dashboard corfu consult breadcrumb auto-dark))
+ '(package-selected-packages '(exec-path-from-shell eglot-booster))
  '(package-vc-selected-packages
-   '((awesome-tray :url "https://github.com/manateelazycat/awesome-tray"))))
+   '((eglot-booster :vc-backend Git :url "https://github.com/jdtsmith/eglot-booster"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

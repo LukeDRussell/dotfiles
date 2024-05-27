@@ -14,6 +14,7 @@ set fish_vi_force_cursor
 
 # Add user installed binaries to path
 fish_add_path ~/.local/bin/
+fish_add_path ~/bin/
 fish_add_path "$HOME/.rye/shims"
 
 # neovim
