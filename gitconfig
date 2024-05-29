@@ -3,20 +3,24 @@
   email = lukedrussell+git@outlook.com
 [credential]
   helper = cache --timeout 86400
-[url "https://"]
-  insteadOf = git://
+[core]
+	excludesfile = /Users/lrussell/.gitignore_global
+	editor = nvim
+	autocrlf = true
+[init]
+	defaultBranch = dev
+[pull]
+	rebase = true
+[push]
+	default = simple
 [filter "lfs"]
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
-[init]
-	defaultBranch = dev
-[pull]
-	ff = only
-[push]
-	default = simple
 [core]
 	excludesfile = /Users/lrussell/.gitignore_global
 	editor = nvim
 	autocrlf = true
+[url "https://"]
+  insteadOf = git://
