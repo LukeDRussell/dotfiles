@@ -56,3 +56,5 @@ zoxide init fish | source
 
 source ~/.config/fish/work.fish
 
+set PATH $PATH /home/russelluk/.local/bin
+

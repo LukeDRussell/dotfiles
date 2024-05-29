@@ -8,6 +8,7 @@
     - fish
     - emacs
   # - nvim - exclude as I'm using Astronvim instead
+    - zoxide
 
 - name: Link Tmux settings
   ansible.builtin.file:

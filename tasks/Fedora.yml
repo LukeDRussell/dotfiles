@@ -4,6 +4,13 @@
     name: "{{ common_packaged_apps }}"
     state: present
 
+- name: Install Fedora packages
+  become: true
+  when: update_install == "yes"
+  ansible.builtin.dnf:
+    name: "{{ fedora_apps }}"
+    state: present
+
 - name: Update packages
   become: true
   ansible.builtin.package:
