@@ -42,6 +42,7 @@ else
 end
 
 alias play="ansible-playbook"
+alias tm="tmux new -A -s main"
 
 # Git Abbreviations
 abbr -a gitco git checkout

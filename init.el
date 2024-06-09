@@ -26,17 +26,6 @@
 
 ;; === My Functions =================================================================================
 
-(defun lr/cycle-line-number-style ()
-    "Cycles through the line styles I like."
-    (interactive)
-    (cond
-    ((eq display-line-numbers nil)
-	(setq display-line-numbers t))
-    ((eq display-line-numbers t)
-	(setq display-line-numbers 'relative))
-    ((eq display-line-numbers 'relative)
-	(setq display-line-numbers nil)))
-    )
 (defun lr/copy-current-line-position-to-clipboard ()
     "Copy current line in file to clipboard as '</path/to/file>:<line-number>'. Stolen from https://gist.github.com/kristianhellquist/3082383"
     (interactive)
@@ -54,24 +43,33 @@
         (emacs-startup . toggle-frame-maximized)
         (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
 	(prog-mode . display-line-numbers-mode)
-    :bind
+    :bind (
+	([escape] . keyboard-quit)
         ("C-=" . text-scale-increase)
         ("C--" . text-scale-decrease)
+	:map minibuffer-local-map
+	    ([escape] . minibuffer-keyboard-quit)
+	    ([escape] . minibuffer-keyboard-quit)
+	    ([escape] . minibuffer-keyboard-quit)
+	    ([escape] . minibuffer-keyboard-quit)
+	    ([escape] . minibuffer-keyboard-quit)
+	    )
     :config
         (tool-bar-mode 0) ;; Tool bar is ugly
         (scroll-bar-mode 0) ;; Scroll bar is also ugly
         (if (eq system-type 'darwin)
-        (menu-bar-mode 1) ;; Hide menu bar in Linux and Windows
-        (menu-bar-mode 0))  ;; Keep the menu bar in MacOS as it integrates with the OS top panel
+            ((setq insert-directory-program "gls")
+	    (menu-bar-mode 1)) ;; Keep the menu bar in MacOS as it integrates with the OS top panel
+        (menu-bar-mode 0))  ;; Hide menu bar in Linux and Windows
         (electric-pair-mode t)
         (show-paren-mode 1)
         (savehist-mode t) ;; Save minibuffer history
         (recentf-mode t) ;; Keep track of open files
         (global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
-        (pixel-scroll-precision-mode) ;; It's really jerky on my Macbook
-        (if (eq system-type 'darwin)
-            (setq insert-directory-program "gls")())
+        (pixel-scroll-precision-mode)
     :custom
+	(user-full-name "Luke D Russell")
+	(user-mail-address "LukeDRussell+git@outlook.com")
         (window-resize-pixelwise t)
         (frame-resize-pixelwise t)
         (load-prefer-newer t)
@@ -107,6 +105,7 @@
 ;; === Themes ======================================================================================
 
 (use-package kanagawa-theme
+  :vc (:fetcher github :repo emacsattic/kanagawa-theme)
   :defer t)
 
 (use-package ef-themes
@@ -610,7 +609,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(exec-path-from-shell eglot-booster))
+ '(package-selected-packages '(idlwave xref exec-path-from-shell eglot-booster))
  '(package-vc-selected-packages
    '((eglot-booster :vc-backend Git :url "https://github.com/jdtsmith/eglot-booster"))))
 (custom-set-faces
