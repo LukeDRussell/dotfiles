@@ -6,7 +6,6 @@
 
 - name: Install Fedora packages
   become: true
-  when: update_install == "yes"
   ansible.builtin.dnf:
     name: "{{ fedora_apps }}"
     state: present
@@ -32,12 +31,12 @@
 
     - name: Check if Hack NF exists
       ansible.builtin.stat:
-        path: "~/.fonts/Hack Regular Nerd Font Complete Mono.ttf"
+        path: "~/.fonts/HackNerdFontMono-Regular.ttf"
       register: font_hack_exists
 
     - name: Download Hack
       when: not font_hack_exists.stat.exists
       ansible.builtin.unarchive:
-        src: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.zip
+        src: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Hack.tar.xz
         dest: "{{ lookup('env', 'HOME') }}/.fonts/"
         remote_src: true

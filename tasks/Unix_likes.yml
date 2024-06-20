@@ -24,6 +24,11 @@
     state: link
     force: true
 
+- name: Ensure work.fish exists
+  ansible.builtin.file:
+    path: ~/.config/fish/work.fish
+    state: touch
+
 - name: Link emacs init.el
   ansible.builtin.file:
     dest: ~/.config/emacs/init.el
@@ -38,6 +43,7 @@
     state: link
     force: true
 
+# TODO: Make this idempotent and return accurate changed value
 - name: Install fisher
   ansible.builtin.shell:
     cmd: curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
@@ -52,3 +58,5 @@
   loop:
     - nickeb96/puffer-fish
     - IlanCosman/tide@v6
+
+# TODO: Make fish the default shell for my user
