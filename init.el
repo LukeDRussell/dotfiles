@@ -34,7 +34,30 @@
       (kill-new path-with-line-number)
       (message (concat path-with-line-number " copied to clipboard"))))
 
+;; Copied originally from https://thaodan.de/org-clock-frame-title.html
+(defvar base-frame-title-format nil
+    "Like frame-title-format to be used as a base for to modify it by")
 
+(setq base-frame-title-format
+	'((:eval (if (buffer-file-name)
+		    (abbreviate-file-name (buffer-file-name))
+		"%b"))
+	(:eval (if (buffer-modified-p)
+		    " •"))
+	" — Emacs"))
+
+(defun clock-in-frame-title ()
+    (if (org-clocking-p)
+	(setq frame-title-format (list  base-frame-title-format
+					" — 🕓: "
+					(org-clock-get-clock-string)
+					" — ⟳:"
+					org-timer-mode-line-string))
+    (setq frame-title-format base-frame-title-format)))
+;;(run-at-time t 1 'clock-in-frame-title)
+;;(add-hook 'org-clock-in-hook 'clock-in-frame-title)
+;;(add-hook 'org-clock-out-hook 'clock-in-frame-title)
+;;(add-hook 'org-clock-cancel-hook 'clock-in-frame-title)
 ;; === Emacs core ===================================================================================
 
 (use-package emacs ;; For things without their own /feature/
@@ -104,10 +127,6 @@
 
 ;; === Themes ======================================================================================
 
-(use-package kanagawa-theme
-  :vc (:fetcher github :repo emacsattic/kanagawa-theme)
-  :defer t)
-
 (use-package ef-themes
   :defer t)
 
@@ -136,6 +155,11 @@
  ((find-font (font-spec :name "Hack NFM"))
   (set-face-attribute 'default nil
                       :font "Hack NFM"
+                      :height 120)))
+(cond
+ ((find-font (font-spec :name "Hack Nerd Font Mono"))
+  (set-face-attribute 'default nil
+                      :font "Hack Nerd Font Mono"
                       :height 120)))
 
 
@@ -478,40 +502,50 @@
 ;; === Org Mode ======================================================================
 
 (use-package org
-    :hook (org-mode . visual-line-mode)
-    :custom
-	(org-directory "~/Notes/")
-	(org-agenda-files (list org-directory))
-	(org-refile-targets '((org-agenda-files :maxlevel . 5)))
-	(org-refile-use-outline-path t)
-	(org-outline-path-complete-in-steps nil)
-	(org-startup-indented t)
-	(org-hide-emphasis-markers t)
-	(org-pretty-entities t)
-	(org-todo-keywords
-	 '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
-	(org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
-)
+  :hook (org-mode . visual-line-mode)
+  :custom
+  (org-directory "~/Notes/")
+  (org-agenda-files (list org-directory))
+  (org-refile-targets '((org-agenda-files :maxlevel . 5)))
+  (org-refile-use-outline-path t)
+  (org-outline-path-complete-in-steps nil)
+  (org-startup-indented t)
+  (org-hide-emphasis-markers t)
+  (org-id-link-to-org-use-id t)
+;;  (org-pretty-entities t)
+  (org-todo-keywords
+   '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
+  (org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
+  :bind (:map org-mode-map ("C-L" . org-store-link)))
 
 (use-package org-modern
-    :hook (org-mode . global-org-modern-mode)
-    :custom (org-modern-hide-stars " ")
-)
-(use-package org-appear
-    :hook
-	(org-mode . org-appear-mode)
-	(org-mode . (lambda ()
-	    (add-hook 'evil-insert-state-entry-hook #'org-appear-manual-start nil t)
-	    (add-hook 'evil-insert-state-exit-hook #'org-appear-manual-stop nil t)))
-    :custom
-	(org-appear-trigger 'manual)
-	(org-appear-autolinks t)
-	(org-appear-autosubmarkers t)
-	(org-appear-autoentities)
-	(org-appear-autokeywords)
-	(org-appear-inside-latex)
-	)
+  :hook (org-mode . global-org-modern-mode)
+  :custom (org-modern-hide-stars " ")
+  )
 
+(use-package org-appear
+  :hook
+  (org-mode . org-appear-mode)
+  (org-mode . (lambda ()
+		(add-hook 'evil-insert-state-entry-hook #'org-appear-manual-start nil t)
+		(add-hook 'evil-insert-state-exit-hook #'org-appear-manual-stop nil t)))
+  :custom
+  (org-appear-trigger 'manual)
+  (org-appear-autolinks t)
+  (org-appear-autosubmarkers t)
+  (org-appear-autoentities)
+  (org-appear-autokeywords)
+  (org-appear-inside-latex)
+  )
+
+(use-package org-reverse-datetree
+  :custom
+ (org-reverse-datetree-level-formats
+  '("%Y"											   ; year
+    (lambda (time) (format-time-string "%Y-%m %B" (org-reverse-datetree-monday time)))		   ; month
+    "%Y W%W"											   ; week
+    "%Y-%m-%d %A"										   ; date
+    )) )
 
 ;; === Languages ====================================================================================
 
@@ -577,14 +611,17 @@
 ;; === Shells =======================================================================================
 
 (use-package exec-path-from-shell
+  :if (not (eq system-type 'windows-nt))
   :config (exec-path-from-shell-initialize))
 
+(use-package eat)
+
 (use-package vterm
-    :config (setq vterm-copy-exclude-prompt t)
-    :if (not (eq system-type 'windows-nt))
-    :bind
-        ("C-`" . vterm-toggle)
-    )
+  :if (not (eq system-type 'windows-nt))
+  :config (setq vterm-copy-exclude-prompt t)
+  :bind
+  ("C-`" . vterm-toggle)
+  )
 (use-package vterm-toggle
     :after vterm
     :config
@@ -609,9 +646,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(idlwave xref exec-path-from-shell eglot-booster))
+ '(package-selected-packages
+   '(org-reverse-datetree eat vterm-toggle vterm exec-path-from-shell dirvish treemacs-magit treemacs-evil treemacs yaml fish-mode markdown-mode eglot-booster treesit-auto org-appear org-modern magit general evil-collection evil consult orderless corfu marginalia vertico which-key tabspaces visual-fill-column doom-modeline mini-echo dashboard rainbow-delimiters indent-bars auto-dark modus-themes solarized-theme ef-themes vc-use-package))
  '(package-vc-selected-packages
-   '((eglot-booster :vc-backend Git :url "https://github.com/jdtsmith/eglot-booster"))))
+   '((vc-use-package :vc-backend Git :url "https://github.com/slotThe/vc-use-package"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
