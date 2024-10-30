@@ -7,7 +7,7 @@
     common_packaged_apps:
       - ansible
       - bat
-      - glances
+      - bottom
       - fish
       - git
       - gitui
@@ -16,18 +16,20 @@
       - lsd
       - neovim
       - pandoc
-      - pipx
-      - python
       - tmux
       - ripgrep
-      - tealdeer
-      - zoxide
       - sd
+      - tealdeer
+      - uv # Python version and package manager
+      - zoxide
+    fedora_apps:
+      - fd-find
+      - emacs
+      - util-linux-user
     brew_apps:
-      - emacs-plus@29
       - fd
+      - emacs-plus@29
       - cmake
-      - fheroes2
     brew_casks:
       - calibre
       - drawio
@@ -40,8 +42,6 @@
       - logseq
       - gimp
       - signal
-      - steam
-      - heroic
       - wireshark
       - logi-options-plus
       - linearmouse
@@ -52,11 +52,6 @@
       - kicad
       - vial
       - visual-studio-code
-
-    fedora_apps:
-      - fd-find
-      - emacs
-      - util-linux-user
 
   tasks:
 
