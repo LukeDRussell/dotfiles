@@ -6,7 +6,6 @@
 [core]
 	excludesfile = /Users/lrussell/.gitignore_global
 	editor = nvim
-	autocrlf = true
 [init]
 	defaultBranch = dev
 [pull]
