@@ -28,6 +28,8 @@
   ansible.builtin.file:
     path: ~/.config/fish/work.fish
     state: touch
+    modification_time: preserve
+    access_time: preserve
 
 - name: Link emacs init.el
   ansible.builtin.file:
@@ -59,4 +61,8 @@
     - nickeb96/puffer-fish
     - IlanCosman/tide@v6
 
-# TODO: Make fish the default shell for my user
+- name: Change default shell
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    shell: /usr/bin/fish
+
