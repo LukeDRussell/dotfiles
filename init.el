@@ -152,15 +152,15 @@
 ;; === Fonts ========================================================================================
 
 (cond
- ((find-font (font-spec :name "Hack NFM"))
+ ((find-font (font-spec :name "Hack Nerd Font"))
   (set-face-attribute 'default nil
-                      :font "Hack NFM"
+                      :font "Hack Nerd Font"
                       :height 120)))
-(cond
- ((find-font (font-spec :name "Hack Nerd Font Mono"))
-  (set-face-attribute 'default nil
-                      :font "Hack Nerd Font Mono"
-                      :height 120)))
+;; (cond
+;;  ((find-font (font-spec :name "Hack Nerd Font Mono"))
+;;   (set-face-attribute 'default nil
+;;                       :font "Hack Nerd Font Mono"
+;;                       :height 120)))
 
 
 ;; === Visuals ======================================================================================
@@ -206,19 +206,6 @@
 	)
 	)
 
-
-(use-package doom-modeline
- :init
-;;    (doom-modeline-mode 1)
- :config
-    (column-number-mode 1)
-    (line-number-mode 1)
- :custom
-    (mode-line-percent-position t)
-    (doom-modeline-buffer-encoding nil)
-    (doom-modeline-vcs-max-length 30)
-    (doom-modeline-modal-icon nil)
-)
 
 (use-package visual-fill-column
   ;; I like having text centred when the window is really wide. I don't like turning my head left to read the
@@ -458,7 +445,6 @@
 	    "e u"   '(package-menu-filter-upgradable :wk "show packages that can be upgraded")
 
 	    "o"   '(:ignore t :wk "open")
-	    "o v" '(vterm-toggle :wk "vterm")
 	    "o d" '(dirvish :wk "open dirvish")
 	    "o s" '(dirvish-side :wk "open dirvish to side")
 	    "o D" '(dashboard-open :wk "dashboard")
@@ -614,32 +600,6 @@
   :if (not (eq system-type 'windows-nt))
   :config (exec-path-from-shell-initialize))
 
-(use-package eat)
-
-(use-package vterm
-  :if (not (eq system-type 'windows-nt))
-  :config (setq vterm-copy-exclude-prompt t)
-  :bind
-  ("C-`" . vterm-toggle)
-  )
-(use-package vterm-toggle
-    :after vterm
-    :config
-	(setq vterm-toggle-hide-method 'reset-window-configration)
-	(setq vterm-toggle-fullscreen-p nil)
-	(add-to-list 'display-buffer-alist
-	    '((lambda (buffer-or-name _)
-		(let ((buffer (get-buffer buffer-or-name)))
-		    (with-current-buffer buffer
-		    (or (equal major-mode 'vterm-mode)
-			(string-prefix-p
-			vterm-buffer-name (buffer-name buffer))))))
-		(display-buffer-reuse-window display-buffer-at-bottom)
-		;;(display-buffer-reuse-window display-buffer-in-direction)
-		;;display-buffer-in-direction/direction/dedicated is added in emacs27
-		;;(direction . bottom)
-		;;(dedicated . t) ;dedicated is supported in emacs27
-		(reusable-frames . visible) (window-height . 0.3))))
 ;; === Customize Stuff ==============================================================================
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -647,7 +607,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(org-reverse-datetree eat vterm-toggle vterm exec-path-from-shell dirvish treemacs-magit treemacs-evil treemacs yaml fish-mode markdown-mode eglot-booster treesit-auto org-appear org-modern magit general evil-collection evil consult orderless corfu marginalia vertico which-key tabspaces visual-fill-column doom-modeline mini-echo dashboard rainbow-delimiters indent-bars auto-dark modus-themes solarized-theme ef-themes vc-use-package))
+   '(eat org-reverse-datetree exec-path-from-shell treemacs-magit treemacs-evil treemacs yaml fish-mode markdown-mode eglot-booster treesit-auto org-appear org-modern magit general evil-collection evil consult orderless corfu marginalia vertico which-key tabspaces visual-fill-column doom-modeline mini-echo dashboard rainbow-delimiters indent-bars auto-dark modus-themes solarized-theme ef-themes vc-use-package))
  '(package-vc-selected-packages
    '((vc-use-package :vc-backend Git :url "https://github.com/slotThe/vc-use-package"))))
 (custom-set-faces
