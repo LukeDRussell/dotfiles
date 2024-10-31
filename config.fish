@@ -1,7 +1,7 @@
 # Disable welcome
 set -U fish_greeting
 
-set EDITOR emacs
+set EDITOR nvim
 set SUDO_EDITOR $EDITOR
 
 # Enable vim-like 
@@ -12,12 +12,8 @@ set fish_cursor_replace_one underscore
 set fish_cursor_visual block
 set fish_vi_force_cursor
 
-# Add user installed binaries to path
 fish_add_path ~/.local/bin/
-fish_add_path ~/bin/
-fish_add_path "$HOME/.rye/shims"
 
-# neovim
 if command -sq nvim
   alias vi=nvim
   alias vim=nvim
@@ -29,8 +25,9 @@ end
 
 # lsd
 if command -sq lsd
+  alias l1 "lsd -1"
   alias ll="lsd --long --header --git --classify --group-directories-first"
-  alias tree="ll --level 3 --ignore-glob=.git/ --color=always"
+  alias tree="lsd --tree"
   abbr lla "ll --all"
   abbr llm "ll --sort=modified"
   abbr lls "ll --sort=size"
@@ -41,7 +38,7 @@ else
   alias lls="ls --sort=size"
 end
 
-alias play="ansible-playbook"
+alias play="uv run ansible-playbook"
 alias tm="tmux new -A -s main"
 
 # Git Abbreviations
@@ -56,6 +53,4 @@ abbr -a gitp git pull --rebase
 zoxide init fish | source
 
 source ~/.config/fish/work.fish
-
-set PATH $PATH /home/russelluk/.local/bin
 
