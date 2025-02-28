@@ -1,128 +1,109 @@
-;; -*- lexical-binding: t; -*-
+;; -*- no-byte-compile:t ; lexical-binding: t; -*-A
 
-;; === Package Management ===========================================================================
-
-; Help in info-display-manual --> use-package --> index
-; use (featurep 'builtin-package-name) to figure out the name of a builtin module / package / thingie
-; e.g. (featurep 'use-package-core) evals to t
-(require 'package)
-(use-package use-package-core
-    :ensure nil  ;; This package is built-in, don't try to download it.
-    :init
-        (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-    :config
-        (package-initialize)
-    :custom
-	(use-package-always-ensure t) ;; Always install packages listed
-	(package-install-upgrade-built-in t)  ;; Upgrade built-in packages from package-archives.
-)
-
-; use-package support for installing from source.
-; Note: was merged into emacs 2023-05-16. Should be emacs 30.
-(unless (package-installed-p 'vc-use-package)
-    (package-vc-install "https://github.com/slotThe/vc-use-package"))
-(require 'vc-use-package)
+;; Luke D Russell's emacs config
+;; =============================
 
 
 ;; === My Functions =================================================================================
 
-(defun lr/copy-current-line-position-to-clipboard ()
-    "Copy current line in file to clipboard as '</path/to/file>:<line-number>'. Stolen from https://gist.github.com/kristianhellquist/3082383"
+(defun my/copy-current-line-position-to-clipboard ()
+    "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
+    From https://gist.github.com/kristianhellquist/3082383"
     (interactive)
     (let ((path-with-line-number
            (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
       (kill-new path-with-line-number)
       (message (concat path-with-line-number " copied to clipboard"))))
 
-;; Copied originally from https://thaodan.de/org-clock-frame-title.html
-(defvar base-frame-title-format nil
-    "Like frame-title-format to be used as a base for to modify it by")
+;; From https://emacsnotes.wordpress.com/2023/07/02/migrating-to-use-package-tip-1-do-not-use-a-naive-macroexpand-to-grok-a-use-package-declaration-use-this-wrapper-instead/
 
-(setq base-frame-title-format
-	'((:eval (if (buffer-file-name)
-		    (abbreviate-file-name (buffer-file-name))
-		"%b"))
-	(:eval (if (buffer-modified-p)
-		    " •"))
-	" — Emacs"))
+;; === Package Management ===========================================================================
 
-(defun clock-in-frame-title ()
-    (if (org-clocking-p)
-	(setq frame-title-format (list  base-frame-title-format
-					" — 🕓: "
-					(org-clock-get-clock-string)
-					" — ⟳:"
-					org-timer-mode-line-string))
-    (setq frame-title-format base-frame-title-format)))
-;;(run-at-time t 1 'clock-in-frame-title)
-;;(add-hook 'org-clock-in-hook 'clock-in-frame-title)
-;;(add-hook 'org-clock-out-hook 'clock-in-frame-title)
-;;(add-hook 'org-clock-cancel-hook 'clock-in-frame-title)
+; Help in info-display-manual --> use-package --> index
+; use (featurep 'builtin-package-name) to figure out the name of a builtin module / package / thingie
+; e.g. (featurep 'use-package-core) evals to t
+
+(use-package use-package-core
+    :ensure nil  ;; This package is built-in, don't try to download it.
+    :init ;; Before the package is loaded
+        (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+    :config  ;; After the package is loaded
+    (package-initialize)
+    :custom  ;; Change variables
+        (use-package-always-ensure t) ;; Make sure all packages are installed.
+)
+
+
 ;; === Emacs core ===================================================================================
 
 (use-package emacs ;; For things without their own /feature/
-    :ensure nil
-    :hook
-        (emacs-startup . toggle-frame-maximized)
-        (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
-	(prog-mode . display-line-numbers-mode)
-    :bind (
-	([escape] . keyboard-quit)
-        ("C-=" . text-scale-increase)
-        ("C--" . text-scale-decrease)
-	:map minibuffer-local-map
-	    ([escape] . minibuffer-keyboard-quit)
-	    ([escape] . minibuffer-keyboard-quit)
-	    ([escape] . minibuffer-keyboard-quit)
-	    ([escape] . minibuffer-keyboard-quit)
-	    ([escape] . minibuffer-keyboard-quit)
-	    )
-    :config
-        (tool-bar-mode 0) ;; Tool bar is ugly
-        (scroll-bar-mode 0) ;; Scroll bar is also ugly
-        (if (eq system-type 'darwin)
-            ((setq insert-directory-program "gls")
-	    (menu-bar-mode 1)) ;; Keep the menu bar in MacOS as it integrates with the OS top panel
-        (menu-bar-mode 0))  ;; Hide menu bar in Linux and Windows
-        (electric-pair-mode t)
-        (show-paren-mode 1)
-        (savehist-mode t) ;; Save minibuffer history
-        (recentf-mode t) ;; Keep track of open files
-        (global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
-        (pixel-scroll-precision-mode)
-    :custom
-	(user-full-name "Luke D Russell")
-	(user-mail-address "LukeDRussell+git@outlook.com")
-        (window-resize-pixelwise t)
-        (frame-resize-pixelwise t)
-        (load-prefer-newer t)
-        (backup-by-copying t)
-        (backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
-        (visible-bell t)
-        (ring-bell-function 'ignore)
-	(display-line-numbers-type 'relative)
-        (vc-follow-symlinks t) ;; Stop bugging me when opening my init.el which is a symlink.
-	(use-short-answers t)
-        (inhibit-startup-screen t)
-        (inhibit-startup-message t)
-        (inhibit-startup-echo-area-message "lrussell")
-	(initial-scratch-message nil)
-        (global-auto-revert-non-file-buffers t) ;; Keep dired up-to-date with files on disk
-        (scroll-conservatively 101) ;; When scrolling top or bottom of window, don't recenter point
-        (scroll-margin 5)
-        (create-lockfiles nil) ;; Don't lock files. Causes my keyboard to restart
-        (native-comp-async-report-warnings-errors "silent")
-        (recentf-exclude ;; Ignore these regex paths from recent file list
-            '("/opt/homebrew"
-            "/usr/share/emacs/"
-            "~/.config/emacs/elpa/"
-            "~/.config/emacs/.cache/"
-            "~/Library/CloudStorage/"
-            (recentf-expand-file-name "~/.config/emacs/elpa")
-            (recentf-expand-file-name "~/.config/emacs/.cache/treemacs-persist-at-last-error")
-            "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'")
-        )
-)
+  :ensure nil
+  :hook
+  (emacs-startup . toggle-frame-maximized)
+  (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
+  (prog-mode . display-line-numbers-mode)
+  :bind (
+	 ([escape] . keyboard-quit)
+         ("C-=" . text-scale-increase)
+         ("C--" . text-scale-decrease)
+	 :map minibuffer-local-map
+	 ([escape] . minibuffer-keyboard-quit)
+	 ([escape] . minibuffer-keyboard-quit)
+	 ([escape] . minibuffer-keyboard-quit)
+	 ([escape] . minibuffer-keyboard-quit)
+	 ([escape] . minibuffer-keyboard-quit)
+	 )
+  :config
+  (tool-bar-mode -1)		 ;; Tool bar is ugly
+  (scroll-bar-mode 'right)	 ;; Scroll bar is also ugly
+  (menu-bar-mode 1)		 ;; I'm a noob, so keep the menu bar.
+  (if (eq system-type 'darwin)
+      (setq insert-directory-program "gls"))
+  (electric-pair-mode t)
+  (show-paren-mode 1)
+  (savehist-mode t)		    ;; Save minibuffer history
+  (recentf-mode t)		    ;; Keep track of open files
+  (global-auto-revert-mode t)	    ;; Keep files up-to-date when they change outside Emacs
+  (pixel-scroll-precision-mode)
+  :custom
+  (user-full-name "Luke D Russell")
+  (user-mail-address "LukeDRussell+git@outlook.com")
+  (window-resize-pixelwise t)
+  (frame-resize-pixelwise t)
+  (load-prefer-newer t)
+  (visible-bell t)
+  (ring-bell-function 'ignore)
+  (display-line-numbers-type 'relative)
+  (vc-follow-symlinks t)      ;; Stop bugging me when opening my init.el which is a symlink.
+  (use-short-answers t)	      ;; Stop insisting I type 'yes' when 'y' will do.
+  (inhibit-startup-screen t)
+  (inhibit-startup-message t)
+  (inhibit-startup-echo-area-message "Luke") ;; Must match the value of user-login-name
+  (initial-scratch-message nil)
+  (global-auto-revert-non-file-buffers t) ;; Keep dired up-to-date with files on disk
+  (scroll-conservatively 101)		  ;; When scrolling top or bottom of window, don't recenter point
+  (scroll-margin 5)
+  (create-lockfiles nil) ;; Don't lock files.
+  (make-backup-files nil)
+  (save-place-mode 1)
+  (native-comp-async-report-warnings-errors "silent")
+  (confirm-nonexistent-file-or-buffer nil)
+  (native-comp-speed 3)
+  (recentf-exclude ;; Ignore these regex paths from recent file list
+   '("/opt/homebrew"
+     "/usr/share/emacs/"
+     "~/.config/emacs/elpa/"
+     "~/.config/emacs/.cache/"
+     "~/Library/CloudStorage/"
+     (recentf-expand-file-name "~/.config/emacs/elpa")
+     (recentf-expand-file-name "~/.config/emacs/.cache/treemacs-persist-at-last-error")
+     "/\\(\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|MERGEREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\\|\\(BRANCH\\|EDIT\\)_DESCRIPTION\\)\\'")
+   )
+  (custom-safe-themes
+   '("fbf73690320aa26f8daffdd1210ef234ed1b0c59f3d001f342b9c0bbf49f531c"
+     "2e7dc2838b7941ab9cabaa3b6793286e5134f583c04bde2fba2f4e20f2617cf7"
+     default))
+  )
 
 
 ;; === Themes ======================================================================================
@@ -134,7 +115,6 @@
   :defer t)
 
 (use-package modus-themes
-  :defer t
   :custom
   (modus-themes-common-palette-overrides
    '((bg-line-number-active unspecified)
@@ -142,7 +122,7 @@
    ))
 
 (use-package auto-dark
-  :config (auto-dark-mode t)
+  :init (auto-dark-mode)
   :custom
   (auto-dark-light-theme 'modus-operandi)
   (auto-dark-dark-theme 'modus-vivendi)
@@ -152,36 +132,29 @@
 ;; === Fonts ========================================================================================
 
 (cond
- ((find-font (font-spec :name "Hack Nerd Font"))
-  (set-face-attribute 'default nil
-                      :font "Hack Nerd Font"
-                      :height 120)))
-;; (cond
-;;  ((find-font (font-spec :name "Hack Nerd Font Mono"))
-;;   (set-face-attribute 'default nil
-;;                       :font "Hack Nerd Font Mono"
-;;                       :height 120)))
+ ((find-font (font-spec :name "Hack Nerd Font Mono"))
+  (set-face-attribute 'default nil :font "Hack Nerd Font Mono")))
 
+(set-face-attribute 'default nil :height 120)
 
 ;; === Visuals ======================================================================================
+
 (use-package indent-bars
-  :vc (:fetcher github :repo jdtsmith/indent-bars)
+  :vc (:url "https://github.com/jdtsmith/indent-bars")
   :hook
   (prog-mode . indent-bars-mode)
   :custom
   (indent-bars-prefer-character t)
   (indent-bars-treesit-support t)
-  (indent-bars-color-by-depth nil)
-  (indent-bars-highlight-current-depth '(:face default :blend 0.4))
-  :defer t)
+)
  
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
-  :defer t)
+)
 
 (use-package dashboard
-    :config
-        (dashboard-setup-startup-hook)
+    :demand t
+    :init (dashboard-setup-startup-hook)
     :custom
         (dashboard-startup-banner 'official)
         (dashboard-banner-logo-title nil)
@@ -197,15 +170,8 @@
  )
 
 (use-package mini-echo
-    :config
-        (mini-echo-mode)
-    :custom
-        (mini-echo-define-segments (
-	    :long ("major-mode" "buffer-name" "vcs" "buffer-position" "flymake" "process" "selection-info" "narrow" "macro" "profiler" "repeat")
-	    :short ("buffer-name-short" "buffer-position" "process" "profiler" "selection-info" "narrow" "macro" "repeat"))
-	)
-	)
-
+    :config (mini-echo-mode)
+    )
 
 (use-package visual-fill-column
   ;; I like having text centred when the window is really wide. I don't like turning my head left to read the
@@ -214,184 +180,101 @@
       (global-visual-fill-column-mode)
   :custom
 	(visual-fill-column-center-text t)
-(fill-column 150)
+	(fill-column 150)
 )
 
 
 ;; === Workspace Management =========================================================================
 (use-package tabspaces ;; Each tab is a set of isolated buffers
-    :vc (tabspaces :url "https://github.com/mclear-tools/tabspaces")
-    :hook (after-init . tabspaces-mode)
+    :defer t
+    :custom
+	(tabspaces-initialize-project-with-todo nil)
+	(tabspaces-use-filtered-buffers-as-default t)
+	(tabspaces-session-project-session-store "~/.config/emacs")
+	(tabspaces-session t)
+	(tabspaces-session-auto-restore t)
+    :config
+	(defun my/tabspace-setup ()
+	"Set up tabspace at startup."
+	;; Add *Messages* and *splash* to Tab \`Home\'
+	(tabspaces-mode 1)
+	(progn
+	    (tab-bar-rename-tab "Home")
+	    (when (get-buffer "*Messages*")
+	    (set-frame-parameter nil
+				'buffer-list
+				(cons (get-buffer "*Messages*")
+					(frame-parameter nil 'buffer-list))))
+	    (when (get-buffer "*splash*")
+	    (set-frame-parameter nil
+				'buffer-list
+				(cons (get-buffer "*splash*")
+					(frame-parameter nil 'buffer-list))))
+	    (when (get-buffer "*scratch*")
+	    (set-frame-parameter nil
+				'buffer-list
+				(cons (get-buffer "*scratch*")
+				      (frame-parameter nil 'buffer-list))))))
+    :hook (after-init . my/tabspace-setup )
 )
-
 
 ;; === Editing Support ==============================================================================
 (use-package which-key ;; Discover keybinds with popup
-  :after evil
   :config (which-key-mode)
   :custom
   (which-key-max-display-columns 5)
   (which-key-add-column-padding 10)
   )
 
+(use-package corfu ;; Intellisense-style completion popups
+  :init
+    (global-corfu-mode)
+    (corfu-popupinfo-mode)
+  :custom
+    (corfu-auto t)
+    (corfu-cycle t)
+    (corfu-quit-at-boundary))
+
 (use-package vertico ;; Minibuffer completion UI
-    :init (vertico-mode)
-    :custom
-	(vertico-cycle t)
-	(read-buffer-completion-ignore-case t)
-	(read-file-name-completion-ignore-case t)
-)
+  :init (vertico-mode)
+  :custom
+    (vertico-cycle t)
+    (read-buffer-completion-ignore-case t)
+    (read-file-name-completion-ignore-case t))
 
 (use-package marginalia ;; Docstrings in minibuffer margin
-    :after vertico
-    :init (marginalia-mode)
-)
-
-(use-package corfu ;; Intellisense-style completion popups
-    :init
-	(global-corfu-mode)
-	(corfu-popupinfo-mode)
-    :custom
-	(corfu-auto t)
-	(corfu-cycle t)
-	(corfu-quit-at-boundary)
-)
+  :after vertico
+  :init (marginalia-mode))
 
 (use-package orderless ;; Stop caring about the order of search terms in minibuffer filtering
-    :custom
-	(completion-styles '(orderless basic)) (completion-category-overrides
-	    '((file (styles basic partial-completion))))
-)
+  :custom
+    (completion-styles '(orderless basic)) (completion-category-overrides
+	'((file (styles basic partial-completion)))))
 
-(use-package consult
-  ;; Replace bindings. Lazily loaded due by `use-package'.
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
-         ([remap Info-search] . consult-info)
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-         ;; Custom M-# bindings for fast register access
-         ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-         ("C-M-#" . consult-register)
-         ;; Other custom bindings
-         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-         ;; M-g bindings in `goto-map'
-         ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-         ("M-s c" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-  ;; The :init configuration is always executed (Not lazy)
-  :init
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
-  :config
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key "M-.")
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   ;; :preview-key "M-."
-   :preview-key '(:debounce 0.4 any))
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
-  ;; Optionally make narrowing help available in the minibuffer.
-  ;; You may want to use `embark-prefix-help-command' or which-key instead.
-  ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
-  ;; By default `consult-project-function' uses `project-root' from project.el.
-  ;; Optionally configure a different project root function.
-  ;;;; 1. project.el (the default)
-  ;; (setq consult-project-function #'consult--default-project--function)
-  ;;;; 2. vc.el (vc-root-dir)
-  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-  ;;;; 3. locate-dominating-file
-  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-  ;;;; 4. projectile.el (projectile-project-root)
-  ;; (autoload 'projectile-project-root "projectile")
-  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
-  ;;;; 5. No project support
-  ;; (setq consult-project-function nil)
-)
-
+;; (use-package ellama
+;;   :bind ("C-c e" . ellama-transient-main-menu)
+;;   ;; send last message in chat buffer with C-c C-c
+;;   :hook (org-ctrl-c-ctrl-c-final . ellama-chat-send-last-message)
+;;   :init (setopt ellama-auto-scroll t)
+;;   :config
+;;   ;; show ellama context in header line in all buffers
+;;   (ellama-context-header-line-global-mode +1))
 
 ;; === Modal editing ================================================================================
 
-
 (use-package evil
-    :init
-	(setq evil-want-integration t)
-	(setq evil-want-keybinding nil)
-    :config
-	(evil-mode 1)
-	(evil-set-undo-system 'undo-redo) ;; Only because Emacs 28+ has this built in
-    :custom
-	(evil-split-window-below t)
-	(evil-vsplit-window-right t)
-)
+  :init
+    (setq evil-want-keybinding nil)
+  :config
+    (evil-mode 1)
+  :custom
+    (evil-set-undo-system 'undo-redo)
+    (evil-split-window-below t)
+    (evil-vsplit-window-right t))
 
 (use-package evil-collection
     :after evil
-    :config (evil-collection-init)
-)
+    :config (evil-collection-init))
 
 
 ;; === Leader Key Bindings =====================================================================================
@@ -399,7 +282,7 @@
 (use-package general
     :config
 	(general-evil-setup)
-	(general-create-definer lr/leader-def
+	(general-create-definer my/leader-def
 	;; set up 'SPC' as the global leader key
 	    :states '(normal insert visual emacs)
 	    :keymaps 'override
@@ -407,7 +290,7 @@
 	    :global-prefix "M-SPC" ;; access leader in insert mode
 	)
 	;; format: off
-	(lr/leader-def ;; Leader sequences
+	(my/leader-def ;; Leader sequences
 
 	    "b"   '(:ignore t :wk "buffers")
 	    "b s" '(switch-to-buffer :wk "switch to named buffer")
@@ -452,6 +335,7 @@
 	    "o m" '(magit :wk "magit")
 	    "o f" '(consult-find :wk "file")
 	    "o a" '(org-agenda :wk "agenda")
+	    "o T" '(tabspaces-open-or-create-project-and-workspace :wk "Tabspace")
 
 	    "q" '(:ignore t :wk "quit")
 	    "q r" '(restart-emacs :wk "Restart emacs")
@@ -488,6 +372,7 @@
 ;; === Org Mode ======================================================================
 
 (use-package org
+  :defer t
   :hook (org-mode . visual-line-mode)
   :custom
   (org-directory "~/Notes/")
@@ -498,6 +383,7 @@
   (org-startup-indented t)
   (org-hide-emphasis-markers t)
   (org-id-link-to-org-use-id t)
+  (org-startup-with-inline-images t)
 ;;  (org-pretty-entities t)
   (org-todo-keywords
    '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
@@ -533,6 +419,8 @@
     "%Y-%m-%d %A"										   ; date
     )) )
 
+(use-package htmlize)
+
 ;; === Languages ====================================================================================
 
 ;; Auto install and use all tree-sitter grammars
@@ -546,18 +434,20 @@
 
 (use-package eglot
   :defer t
-  ;; Add your programming modes here to automatically start Eglot,
-  ;; assuming you have the respective LSP server installed.
-  ;; e.g. rust-analyzer to use Eglot with `rust-mode'.
-  :hook (
-	 (python-ts-mode . eglot-ensure)
-	 ))
+  :hook
+  (python-base-mode . eglot-ensure)
+  :custom (eglot-ignored-server-capabilities '(:inlayHintProvider))
+)
 
-(use-package eglot-booster
-  ;; Requires =eglot-lsp-booster= is installed and in emacs path.
-	:vc (:fetcher github :repo jdtsmith/eglot-booster)
-	:after eglot
-	:config	(eglot-booster-mode))
+;; (use-package python
+;;     :after eglot)
+
+(use-package pet
+  :defer t
+  :hook (python-base-mode))
+
+(use-package flymake-ruff
+  :hook (eglot-managed-mode . flymake-ruff-load))
 
 ;; Markdown
 (use-package markdown-mode
@@ -566,13 +456,12 @@
     ;; work with paragraphs of text. `flyspell-mode' turns on an
     ;; automatic spell checker.
     :hook
-	((markdown-mode . visual-line-mode) (markdown-mode . flyspell-mode))
+	((markdown-mode . (visual-line-mode flyspell-mode)))
     :init
 	(setq markdown-command "multimarkdown")
  )
-(use-package python
-    :after eglot
-)
+
+
 (use-package fish-mode)
 
 (use-package yaml)
@@ -584,12 +473,12 @@
 (use-package treemacs
     :config (treemacs-project-follow-mode) (treemacs-follow-mode)
     :defer t)
-(use-package treemacs-evil
-    :after (treemacs evil)
-    :defer t)
-(use-package treemacs-magit
-    :after (treemacs magit)
-    :defer t)
+;; (use-package treemacs-evil
+;;     :after (treemacs evil)
+;;     :defer t)
+;; (use-package treemacs-magit
+;;     :after (treemacs magit)
+;;     :defer t)
 (use-package dirvish
     :config (dirvish-override-dired-mode)
     :defer t)
@@ -597,22 +486,7 @@
 ;; === Shells =======================================================================================
 
 (use-package exec-path-from-shell
-  :if (not (eq system-type 'windows-nt))
+  :if (eq system-type 'darwin)
   :config (exec-path-from-shell-initialize))
 
 ;; === Customize Stuff ==============================================================================
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(eat org-reverse-datetree exec-path-from-shell treemacs-magit treemacs-evil treemacs yaml fish-mode markdown-mode eglot-booster treesit-auto org-appear org-modern magit general evil-collection evil consult orderless corfu marginalia vertico which-key tabspaces visual-fill-column doom-modeline mini-echo dashboard rainbow-delimiters indent-bars auto-dark modus-themes solarized-theme ef-themes vc-use-package))
- '(package-vc-selected-packages
-   '((vc-use-package :vc-backend Git :url "https://github.com/slotThe/vc-use-package"))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
