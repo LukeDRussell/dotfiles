@@ -17,13 +17,13 @@
 ;; === My Functions ============================================================
 
 (defun my/copy-current-line-position-to-clipboard ()
-    "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
+  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
     From https://gist.github.com/kristianhellquist/3082383"
-    (interactive)
-    (let ((path-with-line-number
-           (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
-      (kill-new path-with-line-number)
-      (message (concat path-with-line-number " copied to clipboard"))))
+  (interactive)
+  (let ((path-with-line-number
+         (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
+    (kill-new path-with-line-number)
+    (message (concat path-with-line-number " copied to clipboard"))))
 
 
 ;; === Emacs ===================================================================
@@ -46,13 +46,12 @@
   (electric-pair-mode)
   (if (eq system-type 'darwin)
       (setq insert-directory-program "gls"))
- 
+  (set-face-attribute 'default nil :height 120)
+  (if (eq system-type 'windows-nt)
+      (set-fontset-font t 'symbol "Segoe UI Symbol"))
   (cond
    ((find-font (font-spec :name "Hack Nerd Font Mono"))
     (set-face-attribute 'default nil :font "Hack Nerd Font Mono")))
-  (set-face-attribute 'default nil :height 120)
-  (if (eq system-type 'darwin)
-      (setq insert-directory-program "gls"))
   :custom
   (user-full-name "Luke D Russell")
   (user-mail-address "LukeDRussell+git@outlook.com")
@@ -71,25 +70,14 @@
   (evil-set-undo-system 'undo-redo)
   (evil-split-window-below t)
   (evil-vsplit-window-right t)
-  ;; Don't duplicate Mode in messages, it's already in the modeline.
-  (evil-insert-state-message nil)
-  (evil-visual-state-message nil)
-  ;; Customize the Mode labels to how they usually are in the bottom line thingie
-  (evil-normal-state-tag " NORMAL ")
-  (evil-insert-state-tag " INSERT ")
-  (evil-visual-state-tag " VISUAL ")
-  :custom-face
-  (doom-modeline-evil-insert-state
-   ((t (:background "olive drab" :foreground "white smoke"))))
-  (doom-modeline-evil-visual-state
-   ((t (:background "medium slate blue" :foreground "white smoke")))))
+  )
 
 (use-package evil-collection
-    :after evil
-    :config (evil-collection-init))
+  :after evil
+  :config (evil-collection-init))
 
 
-;; === Visuals ==================================================================
+;; === Colour themes ============================================================
 
 (use-package modus-themes
   :custom
@@ -108,18 +96,18 @@
   :defer t)
 
 (use-package auto-dark
-  ;; :config (auto-dark-mode)
+  :config (auto-dark-mode)
   :custom
   (auto-dark-light-theme 'modus-operandi)
   (auto-dark-dark-theme 'modus-vivendi)
   )
 
+
+;; === Visuals ==================================================================
+
 (use-package nerd-icons
   :custom
-  (nerd-icons-font-family "Hack Nerd Font Mono")
-  :custom
-    (completion-styles '(orderless basic)) (completion-category-overrides
-	'((file (styles basic partial-completion)))))
+  (nerd-icons-font-family "Hack Nerd Font Mono"))
 
 (use-package dashboard
     :demand t
@@ -139,10 +127,23 @@
         )
 
 (use-package doom-modeline
-  :hook (after-init . doom-modeline)
+  :config (doom-modeline-mode)
+  :after evil
   :custom
   (doom-modeline-buffer-file-name truncate-upto-project)
-  (doom-modeline-modal-icon nil))
+  (doom-modeline-modal-icon nil)
+  ;; Don't duplicate Mode in messages, it's already in the modeline.
+  (evil-insert-state-message nil)
+  (evil-visual-state-message nil)
+  ;; Customize the Mode labels to how they usually are in the bottom line thingie
+  (evil-normal-state-tag " NORMAL ")
+  (evil-insert-state-tag " INSERT ")
+  (evil-visual-state-tag " VISUAL ")
+  :custom-face
+  (doom-modeline-evil-insert-state
+   ((t (:background "olive drab" :foreground "white smoke"))))
+  (doom-modeline-evil-visual-state
+   ((t (:background "medium slate blue" :foreground "white smoke")))))
 
 
 ;; === Help =====================================================================
@@ -207,36 +208,34 @@
   :custom (eglot-ignored-server-capabilities '(:inlayHintProvider))
   )
 
-
 ;; === Org Mode =================================================================
 
-;; (use-package org
-;;   :defer t
-;;   :ensure nil
-;;   :hook (org-mode . visual-line-mode)
-;;   :bind (:map org-mode-map ("C-L" . org-store-link))
-;;   :custom
-;;   (org-directory "~/Notes/")
-;;   (org-agenda-files (list org-directory))
-;;   (org-refile-targets '((org-agenda-files :maxlevel . 5)))
-;;   (org-refile-use-outline-path t)
-;;   (org-outline-path-complete-in-steps nil)
-;;   (org-startup-indented t)
-;;   (org-hide-emphasis-markers t)
-;;   (org-id-link-to-org-use-id t)
-;;   (org-startup-with-inline-images t)
-;;   (org-pretty-entities t)
-;;   (org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
-;;   (org-todo-keywords
-;;    '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
-;;   )
+(use-package org
+  :defer t
+  :ensure nil
+  :hook (org-mode . visual-line-mode)
+  :bind (:map org-mode-map ("C-L" . org-store-link))
+  :custom
+  (org-directory "~/Notes/")
+  (org-agenda-files (list org-directory))
+  (org-refile-targets '((org-agenda-files :maxlevel . 5)))
+  (org-refile-use-outline-path t)
+  (org-outline-path-complete-in-steps nil)
+  (org-startup-indented t)
+  (org-hide-emphasis-markers t)
+  (org-id-link-to-org-use-id t)
+  (org-startup-with-inline-images t)
+  (org-pretty-entities t)
+  (org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
+  (org-todo-keywords
+   '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
+  )
 
 (use-package org-modern
   :hook (org-mode . global-org-modern-mode)
   :custom
   (org-modern-hide-stars " ")
-  (org-modern-star 'replace)
-  )
+)
 
 
 
