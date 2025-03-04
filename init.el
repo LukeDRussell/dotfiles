@@ -33,16 +33,16 @@
   (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
   (prog-mode . display-line-numbers-mode)
   :bind (
-	 ([escape] . keyboard-quit)
+	     ([escape] . keyboard-quit)
          ("C-=" . text-scale-increase)
          ("C--" . text-scale-decrease)
-	 :map minibuffer-local-map
-	 ([escape] . minibuffer-keyboard-quit)
-	 ([escape] . minibuffer-keyboard-quit)
-	 ([escape] . minibuffer-keyboard-quit)
-	 ([escape] . minibuffer-keyboard-quit)
-	 ([escape] . minibuffer-keyboard-quit)
-	 )
+	     :map minibuffer-local-map
+	     ([escape] . minibuffer-keyboard-quit)
+	     ([escape] . minibuffer-keyboard-quit)
+	     ([escape] . minibuffer-keyboard-quit)
+	     ([escape] . minibuffer-keyboard-quit)
+	     ([escape] . minibuffer-keyboard-quit)
+	     )
   :config
   ;; (tool-bar-mode -1)		 ;; Tool bar is ugly
   ;; (scroll-bar-mode 'right)	 ;; Scroll bar is also ugly
@@ -51,9 +51,9 @@
       (setq insert-directory-program "gls"))
   (electric-pair-mode t)
   (show-paren-mode 1)
-  (savehist-mode t)		    ;; Save minibuffer history
-  (recentf-mode t)		    ;; Keep track of open files
-  (global-auto-revert-mode t)	    ;; Keep files up-to-date when they change outside Emacs
+  (savehist-mode t)           ;; Save minibuffer history
+  (recentf-mode t)            ;; Keep track of open files
+  (global-auto-revert-mode t) ;; Keep files up-to-date when they change outside Emacs
   (pixel-scroll-precision-mode)
   :custom
   (user-full-name "Luke D Russell")
@@ -64,14 +64,14 @@
   (visible-bell t)
   (ring-bell-function 'ignore)
   (display-line-numbers-type 'relative)
-  (vc-follow-symlinks t)      ;; Stop bugging me when opening my init.el which is a symlink.
-  (use-short-answers t)	      ;; Stop insisting I type 'yes' when 'y' will do.
+  (vc-follow-symlinks t) ;; Stop bugging me when opening my init.el which is a symlink.
+  (use-short-answers t)  ;; Stop insisting I type 'yes' when 'y' will do.
   (inhibit-startup-screen t)
   (inhibit-startup-message t)
   (inhibit-startup-echo-area-message "Luke") ;; Must match the value of user-login-name
   (initial-scratch-message nil)
   (global-auto-revert-non-file-buffers t) ;; Keep dired up-to-date with files on disk
-  (scroll-conservatively 101)		  ;; When scrolling top or bottom of window, don't recenter point
+  (scroll-conservatively 101) ;; When scrolling top or bottom of window, don't recenter point
   (scroll-margin 5)
   (create-lockfiles nil) ;; Don't lock files.
   (make-backup-files nil)
@@ -137,7 +137,23 @@
 ;;   (indent-bars-prefer-character t)
 ;;   (indent-bars-treesit-support t)
 ;; )
- 
+
+(use-package dashboard
+    :demand t
+    :init (dashboard-setup-startup-hook)
+    :custom
+        (dashboard-startup-banner 'official)
+        (dashboard-banner-logo-title nil)
+        (dashboard-center-content t)
+        (dashboard-vertically-center-content t)
+        (dashboard-icon-type 'nerd-icons)
+        (dashboard-set-heading-icons t)
+        (dashboard-set-file-icons t)
+        (dashboard-set-footer nil)
+        (dashboard-projects-backend 'project-el)
+        (dashboard-display-icons-p t)
+        (dashboard-items '((recents . 10) (projects . 10) (bookmarks . 10)))
+ ) 
 (use-package mini-echo
   :config (mini-echo-mode))
 
@@ -164,7 +180,9 @@
    tabspaces-open-or-create-project-and-workspace)
   )
 
+
 ;; === Editing Support ==============================================================================
+
 (use-package which-key
   :ensure nil
   :config (which-key-mode)
@@ -208,6 +226,20 @@
 ;;   (ellama-context-header-line-global-mode +1))
 
 ;; === Modal editing ================================================================================
+
+(use-package evil
+  :init
+    (setq evil-want-keybinding nil)
+  :config
+    (evil-mode 1)
+  :custom
+    (evil-set-undo-system 'undo-redo)
+    (evil-split-window-below t)
+    (evil-vsplit-window-right t))
+
+(use-package evil-collection
+    :after evil
+    :config (evil-collection-init))
 
 
 
