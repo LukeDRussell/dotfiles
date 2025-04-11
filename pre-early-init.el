@@ -1,6 +1,6 @@
 ;;; pre-early-init.el --  -*- no-byte-compile: t; lexical-binding: t; -*-
 
-(setq minimal-emacs-ui-features '(context-menu menu-bar dialogs))
+(setq minimal-emacs-ui-features '(context-menu menu-bar scroll-bar dialogs))
 
 ;; Reducing clutter in ~/.emacs.d by redirecting files to ~/emacs.d/var/
 (setq minimal-emacs-var-dir (expand-file-name "var/" minimal-emacs-user-directory))
