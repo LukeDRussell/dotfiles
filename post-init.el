@@ -102,7 +102,6 @@
   (nerd-icons-font-family "Hack Nerd Font Mono"))
 
 (use-package dashboard
-  :demand t
   :init (dashboard-setup-startup-hook)
   :custom
   (dashboard-startup-banner 'official)
@@ -151,7 +150,8 @@
 
 (use-package evil
   :init
-  (setq evil-want-keybinding nil)
+  (setopt evil-want-integration t)
+  (setopt evil-want-keybinding nil)
   :custom
   (evil-set-undo-system 'undo-redo)
   (evil-split-window-below t)
@@ -305,6 +305,109 @@
   (completion-styles '(orderless basic)) (completion-category-overrides
 	                                      '((file (styles basic partial-completion)))))
 
+;; Example configuration for Consult
+(use-package consult
+  ;; Replace bindings. Lazily loaded by `use-package'.
+  :bind (;; C-c bindings in `mode-specific-map'
+         ("C-c M-x" . consult-mode-command)
+         ("C-c h" . consult-history)
+         ("C-c k" . consult-kmacro)
+         ("C-c m" . consult-man)
+         ("C-c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x bindings in `ctl-x-map'
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ;; M-g bindings in `goto-map'
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings in `search-map'
+         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+         ("M-s c" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Tweak the register preview for `consult-register-load',
+  ;; `consult-register-store' and the built-in commands.  This improves the
+  ;; register formatting, adds thin separator lines, register sorting and hides
+  ;; the window mode line.
+  (advice-add #'register-preview :override #'consult-register-window)
+  (setq register-preview-delay 0.5)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key "M-.")
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep consult-man
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; "C-+"
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+)
+
 
 ;; (use-package ellama
 ;;   :bind ("C-c e" . ellama-transient-main-menu)
@@ -379,6 +482,7 @@
   (calendar-intermonth-header "Wk")
   (calendar-left-margin 10)
   (calendar-intermonth-spacing 10)
+  (org-archive-location "::* Archive")
   )
 
 (use-package org
@@ -425,20 +529,15 @@
 
 
 ;; === Customizations ===================================================================
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("00d7122017db83578ef6fba39c131efdcb59910f0fac0defbe726da8072a0729" "7fea145741b3ca719ae45e6533ad1f49b2a43bf199d9afaee5b6135fd9e6f9b8"
-     "daa27dcbe26a280a9425ee90dc7458d85bd540482b93e9fa94d4f43327128077" "fbf73690320aa26f8daffdd1210ef234ed1b0c59f3d001f342b9c0bbf49f531c"
-     "721ee346f848ecdebc613eab869de3f26e25205d77b5d6e0bca161c6578ba9e6" "6ded0a405a69156fcf594300a2c73c7fcfb2746f19edf9d17fc67285e1a0fc72"
-     "24746d6cf9fd78c149761816aae6ceb248d8bd990523ce27aae6ec556c3dbda4" "c9792eaf9b7270d3331228072362e2f8dcd60a0cd43f678c470b0089e421b702"
-     "1ba19ef4cffe927eb8c8108079ef731a4894c6702aa7100541d0dd6c66248d4f" "c98e359e2ec6d95e29f006202641f7bafc9e6e204f937d4d518c3ef154ed479b"
-     "cba0922a7ed1508d3beeb797bb9932ffecf0bcc0efbeb1be3c5f31de201db407" "475251f6f8fb699a88bd5628c5f8d9ef0862a4d8063509938f7d0be0c482d1fc"
-     "4d143475f66d03177c5c0c8109954829c3efaa91a2ce304a78d20d9915851f25" "5b642c9a3a1700ead57d5569135e912ef40455be7561d77784be4cfdd3795606" default)))
+   '("440ca19d58594c116cac484ae6dc8cdcc83ef57b6b7a7042804cea1346934605" "5c49eaabbd2f1b6bdff1d2498dda0b11d2eb9aa721e41f3030eccecbe06c20b4"
+     "1a2b50bde71a2ccf4ef326eafa92aad2852396b1793b8ec1cd7192f9a9f4280f" "4d143475f66d03177c5c0c8109954829c3efaa91a2ce304a78d20d9915851f25"
+     "5281f444ca0abb175b68ec5608294f7985c936d41318a8a103ee6e43402a6587" default)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
