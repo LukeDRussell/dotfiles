@@ -24,13 +24,14 @@ if command -sq gls
 end
 
 # lsd
-if command -sq lsd
-  alias l1 "lsd -1"
+if type -q lsd
+  alias ls='lsd'
+  alias l1="lsd -1"
   alias ll="lsd --long --header --git --classify --group-directories-first"
   alias tree="lsd --tree"
   abbr lla "ll --all"
-  abbr llm "ll --sort=modified"
-  abbr lls "ll --sort=size"
+  abbr llt "ll --timesort"
+  abbr lls "ll --sizesort"
 else
   alias ll="ls -lh"
   alias lla="ls -lha"

@@ -18,7 +18,7 @@
       - pandoc
       - tmux
       - ripgrep
-      - sd
+#      - sd # Not in repo for Fedora 42
       - tealdeer
       - uv # Python version and package manager
       - zoxide
