@@ -242,7 +242,7 @@
     (kbd "<leader> w<right>") '("up" . evil-window-right)
 
     (kbd "<leader> om") '("magit" . magit)
-    (kbd "<leader> od") '("dired" . dired)
+    (kbd "<leader> od") '("dired" . dired-sidebar-toggle-sidebar)
     (kbd "<leader> oD") '("Dashboard". dashboard-open)
 
     (kbd "<leader> qr") '("restart" . restart-emacs)
@@ -343,6 +343,14 @@
   :custom
   (completion-styles '(orderless basic)) (completion-category-overrides
 	                                      '((file (styles basic partial-completion)))))
+(use-package dired-sidebar
+  :commands
+  (dired-sidebar-toggle-sidebar)
+  :custom
+  (dired-sidebar-theme 'nerd-icons)
+  (dired-sidebar-should-follow-file t)
+  (dired-sidebar-follow-file-timer 0.02)
+  )
 
 ;; === IDE ======================================================================
 
