@@ -4,10 +4,23 @@
 ;; === Load Compile Angel first, so everything else goes faster ================
 
 (use-package compile-angel
-  :ensure t
   :demand t
   :custom
-  (compile-angel-verbose t)
+  (compile-angel-verbose nil)
+  (compile-angel-excluded-files
+   '("/post-early-init.el"
+     "/pre-early-init.el"
+     "/post-init.el"
+     "/pre-init.el"
+     "/early-init.el"
+     "/init.el"
+     "loaddefs.el"
+     "autoloads.el"
+     "lisp/subdirs.el"
+     "/lisp/leim/leim-list.el"
+     "/lisp/org/org-version.el"
+     "/lisp/cus-load.el"
+     "/lisp/finder-inf.el"))
   :config
   (compile-angel-on-load-mode)
   :hook (emacs-lisp-mode . compile-angel-on-save-local-mode)
@@ -26,20 +39,32 @@
     (message (concat path-with-line-number " copied to clipboard"))))
 
 
+;; Function to install missing treesitter grammars
+;; source: https://github.com/renzmann/treesit-auto/issues/128#issuecomment-2637842635
+(defun my/install-treesit-grammars ()
+  (interactive)
+  (dolist (grammar treesit-language-source-alist)
+    (let ((lang (car grammar)))
+      (unless (treesit-language-available-p lang)
+        (treesit-install-language-grammar lang)))))
+
+
 ;; === Emacs ===================================================================
 
 (use-package emacs
   :ensure nil
   :hook
   (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
-  (prog-mode . display-line-numbers-mode)
-  (kill-emacs . recentf-cleanup)
+  ((prog-mode emacs-lisp-mode) . display-line-numbers-mode)
+  (prog-mode . electric-pair-mode)
   (after-init . global-auto-revert-mode)
   (after-init . save-place-mode)
   (after-init . savehist-mode)
   (after-init . (lambda()
                   (let ((inhibit-message t))
                     (recentf-mode 1))))
+  (after-init . global-tree-sitter-mode)
+  (kill-emacs . recentf-cleanup)
   :bind (
 	     ([escape] . keyboard-quit)
          ("C-=" . text-scale-increase)
@@ -47,9 +72,7 @@
 	     :map minibuffer-local-map
 	     ([escape] . abort-minibuffers)
 	     )
-
   :config
-  (electric-pair-mode)
   (if (eq system-type 'darwin)
       (setq insert-directory-program "gls"))
   (set-face-attribute 'default nil :height 120)
@@ -58,33 +81,26 @@
   (cond
    ((find-font (font-spec :name "Hack Nerd Font Mono"))
     (set-face-attribute 'default nil :font "Hack Nerd Font Mono")))
-
   :custom
   (user-full-name "Luke D Russell")
   (user-mail-address "LukeDRussell+git@outlook.com")
   (display-line-numbers-type 'relative)
   (scroll-margin 5)
-  ;; (completion-styles '(basic flex initials))
+  (package-install-upgrade-built-in t)
+  (custom-safe-themes
+   '("6fbe13f5f21eb3e959edfaa0185301d15309224116cc5e6f0ab3b2a40ee3bd3b" "8717434774f34f325aca6fedb24b572026a0e61dca6e3fe5c03f8c3af8f412f6" default))
   )
 
 ;; === Colour themes ============================================================
 
 (use-package modus-themes
   :defer t
+  :ensure nil
   :custom
   (modus-themes-common-palette-overrides
    '((bg-line-number-active unspecified)
      (bg-line-number-inactive unspecified))
    ))
-
-(use-package ef-themes
-  :defer t)
-
-(use-package solarized-theme
-  :defer t)
-
-(use-package kanagawa-themes
-  :defer t)
 
 (use-package auto-dark
   :config (auto-dark-mode)
@@ -95,11 +111,6 @@
 
 
 ;; === Visuals ==================================================================
-
-(use-package nerd-icons
-  :defer t
-  :custom
-  (nerd-icons-font-family "Hack Nerd Font Mono"))
 
 (use-package dashboard
   :init (dashboard-setup-startup-hook)
@@ -123,6 +134,8 @@
   :custom
   (doom-modeline-buffer-file-name truncate-upto-project)
   (doom-modeline-modal-icon nil)
+  (doom-modeline-buffer-encoding nil)
+  (display-time-mode t)
   ;; Don't duplicate Mode in messages, it's already in the modeline.
   (evil-insert-state-message nil)
   (evil-visual-state-message nil)
@@ -144,6 +157,32 @@
   :custom
   (visual-fill-column-center-text t)
   (fill-column 150))
+
+(use-package nerd-icons
+  :defer t
+  :custom
+  (nerd-icons-font-family "Hack Nerd Font Mono"))
+
+(use-package nerd-icons-dired
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package nerd-icons-ibuffer
+  :hook
+  (ibuffer-mode . nerd-icons-ibuffer-mode)
+  )
+
+(use-package nerd-icons-completion
+  :after marginalia
+  :hook
+  (marginalia-mode . nerd-icons-completion-marginalia-setup)
+  )
+
+(use-package nerd-icons-corfu
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+  )
 
 
 ;; === Modal Editing=============================================================
@@ -167,6 +206,7 @@
     "SPC q" "quit"
     )
   (evil-define-key nil 'global
+    (kbd "<leader> bi") '("ibuffer" . ibuffer)
     (kbd "<leader> bn") '("Next buffer" . evil-next-buffer)
     (kbd "<leader> bp") '("Prev buffer" . evil-prev-buffer)
     (kbd "<leader> bs") '("Switch buffer" . switch-to-buffer)
@@ -241,7 +281,6 @@
 ;; === Help =====================================================================
 
 (use-package which-key
-  :ensure nil
   :config
   (which-key-mode)
   :custom
@@ -305,126 +344,11 @@
   (completion-styles '(orderless basic)) (completion-category-overrides
 	                                      '((file (styles basic partial-completion)))))
 
-;; Example configuration for Consult
-(use-package consult
-  ;; Replace bindings. Lazily loaded by `use-package'.
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
-         ([remap Info-search] . consult-info)
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-         ;; Custom M-# bindings for fast register access
-         ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-         ("C-M-#" . consult-register)
-         ;; Other custom bindings
-         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-         ;; M-g bindings in `goto-map'
-         ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-         ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-         ("M-s c" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
-
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-
-  ;; The :init configuration is always executed (Not lazy)
-  :init
-
-  ;; Tweak the register preview for `consult-register-load',
-  ;; `consult-register-store' and the built-in commands.  This improves the
-  ;; register formatting, adds thin separator lines, register sorting and hides
-  ;; the window mode line.
-  (advice-add #'register-preview :override #'consult-register-window)
-  (setq register-preview-delay 0.5)
-
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-
-  ;; Configure other variables and modes in the :config section,
-  ;; after lazily loading the package.
-  :config
-
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key "M-.")
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep consult-man
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   ;; :preview-key "M-."
-   :preview-key '(:debounce 0.4 any))
-
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
-
-  ;; Optionally make narrowing help available in the minibuffer.
-  ;; You may want to use `embark-prefix-help-command' or which-key instead.
-  ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-)
-
-
-;; (use-package ellama
-;;   :bind ("C-c e" . ellama-transient-main-menu)
-;;   ;; send last message in chat buffer with C-c C-c
-;;   :hook (org-ctrl-c-ctrl-c-final . ellama-chat-send-last-message)
-;;   :init (setopt ellama-auto-scroll t)
-;;   :config
-;;   ;; show ellama context in header line in all buffers
-;;   (ellama-context-header-line-global-mode +1))
-
-
 ;; === IDE ======================================================================
 
 ;; Auto install and use all tree-sitter grammars
 ;; Run =treesit-auto-install-all= to install the grammars
 (use-package treesit-auto
-  :defer t
   :custom
   (treesit-auto-install t)
   :config
@@ -432,18 +356,10 @@
   (treesit-auto-add-to-auto-mode-alist 'all))
 
 (use-package eglot
-  :ensure nil
   :hook
   (python-base-mode . eglot-ensure)
   :custom (eglot-ignored-server-capabilities '(:inlayHintProvider))
   )
-
-(use-package apheleia
-  :ensure t
-  :defer t
-  :commands (apheleia-mode
-             apheleia-global-mode)
-  :hook ((prog-mode . apheleia-mode)))
 
 (use-package yaml
   :hook yaml-pro-mode
@@ -467,7 +383,6 @@
 
 (use-package calendar
   :defer t
-  :ensure nil
   :custom
   (calendar-date-style 'iso)
   (calendar-week-start-day 1)
@@ -487,7 +402,6 @@
 
 (use-package org
   :defer t
-  :ensure nil
   :hook (org-mode . visual-line-mode)
   :bind (:map org-mode-map ("C-L" . org-store-link))
   :custom
@@ -517,27 +431,29 @@
   :custom
   ;; Check function =format-time-string= for syntax.
   (org-reverse-datetree-level-formats
-   '("%Y"											   ; year
-     (lambda (time) (format-time-string "%Y-%m %B" (org-reverse-datetree-monday time)))		   ; month
-     "%Y W%V"											   ; week
-     "%Y-%m-%d %A"										   ; date
-     )) )
+   '("Journal"
+     "%Y"                                                                               ; year
+     (lambda (time) (format-time-string "%Y-%m %B" (org-reverse-datetree-monday time))) ; month
+     "%Y W%V"                                                                           ; week
+     "%Y-%m-%d %A"                                                                      ; date
+     ))
+  )
 
 (use-package htmlize
   :defer t)
 
 
-
 ;; === Customizations ===================================================================
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("440ca19d58594c116cac484ae6dc8cdcc83ef57b6b7a7042804cea1346934605" "5c49eaabbd2f1b6bdff1d2498dda0b11d2eb9aa721e41f3030eccecbe06c20b4"
-     "1a2b50bde71a2ccf4ef326eafa92aad2852396b1793b8ec1cd7192f9a9f4280f" "4d143475f66d03177c5c0c8109954829c3efaa91a2ce304a78d20d9915851f25"
-     "5281f444ca0abb175b68ec5608294f7985c936d41318a8a103ee6e43402a6587" default)))
+ '(package-selected-packages
+   '(auto-dark compile-angel corfu dashboard dirvish doom-modeline elisp-mode evil-collection helpful htmlize magit marginalia markdown-mode modus-themes
+               nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-modern org-reverse-datetree pet treesit-auto
+               vertico visual-fill-column yaml-pro)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
