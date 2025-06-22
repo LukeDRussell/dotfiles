@@ -1,33 +1,5 @@
-;;; post-init.el --- Post Init file -*- no-byte-compile: t; lexical-binding: t; -*-
+;; -*- no-byte-compile: t; lexical-binding: t; -*-
 
-
-;; === Load Compile Angel first, so everything else goes faster ================
-
-(use-package compile-angel
-  :demand t
-  :custom
-  (compile-angel-verbose nil)
-  (compile-angel-excluded-files
-   '("/post-early-init.el"
-     "/pre-early-init.el"
-     "/post-init.el"
-     "/pre-init.el"
-     "/early-init.el"
-     "/init.el"
-     "loaddefs.el"
-     "autoloads.el"
-     "lisp/subdirs.el"
-     "/lisp/leim/leim-list.el"
-     "/lisp/org/org-version.el"
-     "/lisp/cus-load.el"
-     "/lisp/finder-inf.el"))
-  :config
-  (compile-angel-on-load-mode)
-  :hook (emacs-lisp-mode . compile-angel-on-save-local-mode)
-  )
-
-
-;; === My Functions ============================================================
 
 (defun my/copy-current-line-position-to-clipboard ()
   "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
@@ -38,15 +10,21 @@
     (kill-new path-with-line-number)
     (message (concat path-with-line-number " copied to clipboard"))))
 
-
-;; Function to install missing treesitter grammars
-;; source: https://github.com/renzmann/treesit-auto/issues/128#issuecomment-2637842635
 (defun my/install-treesit-grammars ()
+  "Install any missing tree-sitter grammars.
+    From https://github.com/renzmann/treesit-auto/issues/128#issuecomment-2637842635"
   (interactive)
   (dolist (grammar treesit-language-source-alist)
     (let ((lang (car grammar)))
       (unless (treesit-language-available-p lang)
         (treesit-install-language-grammar lang)))))
+
+(defun my/native-recompile ()
+  "Prune eln cache and native recompile everything on `package-user-dir'.
+    From https://www.reddit.com/r/emacs/comments/1gmjpn1/comment/lw4kgya"
+  (interactive)
+  (native-compile-prune-cache)
+  (native-compile-async package-user-dir 'recursively))
 
 
 ;; === Emacs ===================================================================
@@ -55,7 +33,7 @@
   :ensure nil
   :hook
   (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
-  ((prog-mode emacs-lisp-mode) . display-line-numbers-mode)
+  (prog-mode . display-line-numbers-mode)
   (prog-mode . electric-pair-mode)
   (after-init . global-auto-revert-mode)
   (after-init . save-place-mode)
@@ -63,7 +41,6 @@
   (after-init . (lambda()
                   (let ((inhibit-message t))
                     (recentf-mode 1))))
-  (after-init . global-tree-sitter-mode)
   (kill-emacs . recentf-cleanup)
   :bind (
 	     ([escape] . keyboard-quit)
@@ -87,6 +64,7 @@
   (display-line-numbers-type 'relative)
   (scroll-margin 5)
   (package-install-upgrade-built-in t)
+  (package-native-compile t)
   (custom-safe-themes
    '("6fbe13f5f21eb3e959edfaa0185301d15309224116cc5e6f0ab3b2a40ee3bd3b" "8717434774f34f325aca6fedb24b572026a0e61dca6e3fe5c03f8c3af8f412f6" default))
   )
@@ -122,10 +100,12 @@
   (dashboard-icon-type 'nerd-icons)
   (dashboard-set-heading-icons t)
   (dashboard-set-file-icons t)
-  (dashboard-set-footer nil)
   (dashboard-projects-backend 'project-el)
   (dashboard-display-icons-p t)
   (dashboard-items '((recents . 10) (projects . 10) (bookmarks . 10)))
+  (dashboard-startupify-list
+   '(dashboard-insert-banner dashboard-insert-newline dashboard-insert-banner-title dashboard-insert-newline dashboard-insert-init-info
+                             dashboard-insert-items dashboard-insert-newline))
   )
 
 (use-package doom-modeline
@@ -460,8 +440,8 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    '(auto-dark compile-angel corfu dashboard dirvish doom-modeline elisp-mode evil-collection helpful htmlize magit marginalia markdown-mode modus-themes
-               nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-modern org-reverse-datetree pet treesit-auto
-               vertico visual-fill-column yaml-pro)))
+               nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-modern org-reverse-datetree pet vertico
+               visual-fill-column yaml-pro)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
