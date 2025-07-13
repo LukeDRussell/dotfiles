@@ -1,5 +1,33 @@
-;; -*- no-byte-compile: t; lexical-binding: t; -*-
+;;; --- Post Init file -*- no-byte-compile: t; lexical-binding: t; -*-
 
+
+;; === Load Compile Angel first, so everything else goes faster ================
+
+(use-package compile-angel
+  :demand t
+  :custom
+  (compile-angel-verbose nil)
+  (compile-angel-excluded-files
+   '("/post-early-init.el"
+     "/pre-early-init.el"
+     "/post-init.el"
+     "/pre-init.el"
+     "/early-init.el"
+     "/init.el"
+     "loaddefs.el"
+     "autoloads.el"
+     "lisp/subdirs.el"
+     "/lisp/leim/leim-list.el"
+     "/lisp/org/org-version.el"
+     "/lisp/cus-load.el"
+     "/lisp/finder-inf.el"))
+  :config
+  (compile-angel-on-load-mode)
+  :hook (emacs-lisp-mode-hook . compile-angel-on-save-local-mode)
+  )
+
+
+;; === My Functions ============================================================
 
 (defun my/copy-current-line-position-to-clipboard ()
   "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
@@ -10,6 +38,8 @@
     (kill-new path-with-line-number)
     (message (concat path-with-line-number " copied to clipboard"))))
 
+;; Function to install missing treesitter grammars
+;; source: https://github.com/renzmann/treesit-auto/issues/128#issuecomment-2637842635
 (defun my/install-treesit-grammars ()
   "Install any missing tree-sitter grammars.
     From https://github.com/renzmann/treesit-auto/issues/128#issuecomment-2637842635"
@@ -26,47 +56,91 @@
   (native-compile-prune-cache)
   (native-compile-async package-user-dir 'recursively))
 
+(defun my/open-shell ()
+  (interactive)
+  (evil-window-split 12)
+  (shell)
+  )
+
+
+;; === Customizations ===================================================================
+;;
+;; Place before everything else because init files are executed sequentially.
+;; Read: custom-safe-themes should execute before setting themes, otherwise have to approve it with 'y'.
+;;
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("6bf350570e023cd6e5b4337a6571c0325cec3f575963ac7de6832803df4d210a" "77f281064ea1c8b14938866e21c4e51e4168e05db98863bd7430f1352cab294a"
+     "5e39e95c703e17a743fb05a132d727aa1d69d9d2c9cde9353f5350e545c793d4" "6fbe13f5f21eb3e959edfaa0185301d15309224116cc5e6f0ab3b2a40ee3bd3b"
+     "8717434774f34f325aca6fedb24b572026a0e61dca6e3fe5c03f8c3af8f412f6" default))
+ '(package-selected-packages
+   '(auto-dark compile-angel corfu dashboard dired-sidebar dirvish doom-modeline emacs-lisp evil-collection helpful htmlize magit marginalia
+               markdown-mode modus-themes nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear org-modern
+               org-reverse-datetree pet prog-mode treesit-auto vertico visual-fill-column yaml-pro))
+ '(use-package-compute-statistics t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;; === use-package =============================================================
+
+(use-package use-package
+  :ensure nil
+  :custom
+  (use-package-hook-name-suffix nil)
+  (use-package-always-ensure t)
+  (use-package-co)
+  )
 
 ;; === Emacs ===================================================================
 
 (use-package emacs
   :ensure nil
+
   :hook
-  (prog-mode . hs-minor-mode) ;; Enable code folding with inbuilt hs
-  (prog-mode . display-line-numbers-mode)
-  (prog-mode . electric-pair-mode)
-  (after-init . global-auto-revert-mode)
-  (after-init . save-place-mode)
-  (after-init . savehist-mode)
-  (after-init . (lambda()
-                  (let ((inhibit-message t))
-                    (recentf-mode 1))))
-  (kill-emacs . recentf-cleanup)
+  (after-init-hook . global-auto-revert-mode)
+  (after-init-hook . save-place-mode)
+  (after-init-hook . savehist-mode)
+  (after-init-hook . (lambda()
+                       (let ((inhibit-message t))
+                         (recentf-mode 1))))
+  (kill-emacs-hook . recentf-cleanup)
+
   :bind (
-	     ([escape] . keyboard-quit)
+         ([escape] . keyboard-quit)
          ("C-=" . text-scale-increase)
          ("C--" . text-scale-decrease)
-	     :map minibuffer-local-map
-	     ([escape] . abort-minibuffers)
-	     )
+         ("C-`" . my/open-shell)
+         :map minibuffer-local-map
+         ([escape] . abort-minibuffers)
+         )
+
   :config
   (if (eq system-type 'darwin)
-      (setq insert-directory-program "gls"))
-  (set-face-attribute 'default nil :height 120)
+      (setopt insert-directory-program "gls"))
   (if (eq system-type 'windows-nt)
-      (set-fontset-font t 'symbol "Segoe UI Symbol"))
+      (setopt shell-file-name "C:/Program Files/PowerShell/7/pwsh.exe")
+    (set-fontset-font t 'symbol "Segoe UI Symbol")
+    )
+  (set-face-attribute 'default nil :height 120)
   (cond
    ((find-font (font-spec :name "Hack Nerd Font Mono"))
     (set-face-attribute 'default nil :font "Hack Nerd Font Mono")))
+
   :custom
   (user-full-name "Luke D Russell")
   (user-mail-address "LukeDRussell+git@outlook.com")
   (display-line-numbers-type 'relative)
   (scroll-margin 5)
   (package-install-upgrade-built-in t)
-  (package-native-compile t)
-  (custom-safe-themes
-   '("6fbe13f5f21eb3e959edfaa0185301d15309224116cc5e6f0ab3b2a40ee3bd3b" "8717434774f34f325aca6fedb24b572026a0e61dca6e3fe5c03f8c3af8f412f6" default))
   )
 
 ;; === Colour themes ============================================================
@@ -145,17 +219,17 @@
 
 (use-package nerd-icons-dired
   :hook
-  (dired-mode . nerd-icons-dired-mode))
+  (dired-mode-hook . nerd-icons-dired-mode))
 
 (use-package nerd-icons-ibuffer
   :hook
-  (ibuffer-mode . nerd-icons-ibuffer-mode)
+  (ibuffer-mode-hook . nerd-icons-ibuffer-mode)
   )
 
 (use-package nerd-icons-completion
   :after marginalia
   :hook
-  (marginalia-mode . nerd-icons-completion-marginalia-setup)
+  (marginalia-mode-hook . nerd-icons-completion-marginalia-setup)
   )
 
 (use-package nerd-icons-corfu
@@ -300,6 +374,14 @@
 
 ;; === Tooling ==================================================================
 
+(use-package prog-mode
+  :ensure nil
+  :hook
+  (prog-mode-hook . hs-minor-mode)
+  (prog-mode-hook . display-line-numbers-mode)
+  (prog-mode-hook . electric-pair-mode)
+)
+
 (use-package corfu
   ;; Intellisense-style completion popups
   :init
@@ -308,7 +390,8 @@
   :custom
   (corfu-auto t)
   (corfu-cycle t)
-  (corfu-quit-at-boundary))
+  (corfu-quit-at-boundary)
+  )
 
 (use-package vertico
   ;; Minibuffer completion UI
@@ -330,7 +413,8 @@
   (dired-sidebar-theme 'nerd-icons)
   (dired-sidebar-should-follow-file t)
   (dired-sidebar-follow-file-timer 0.02)
-  )
+  (dired-sidebar-display-alist '((side . right) (slot . -1)))
+)
 
 ;; === IDE ======================================================================
 
@@ -345,15 +429,15 @@
 
 (use-package eglot
   :hook
-  (python-base-mode . eglot-ensure)
+  (python-base-mode-hook . eglot-ensure)
   :custom (eglot-ignored-server-capabilities '(:inlayHintProvider))
   )
 
 (use-package yaml
-  :hook yaml-pro-mode
-  )
+  :defer t)
 
 (use-package yaml-pro
+  :hook (yaml-mode-hook . yaml-pro-mode)
   :defer t)
 
 ;; Markdown
@@ -365,7 +449,11 @@
 ;; Python
 (use-package pet
   :defer t
-  :hook (python-base-mode))
+  :hook (python-base-mode-hook . pet-mode)
+  )
+
+(use-package elisp-mode
+  :ensure nil)
 
 ;; === Org and Calendar =========================================================
 
@@ -385,17 +473,17 @@
   (calendar-intermonth-header "Wk")
   (calendar-left-margin 10)
   (calendar-intermonth-spacing 10)
-  (org-archive-location "::* Archive")
   )
 
 (use-package org
   :defer t
-  :hook (org-mode . visual-line-mode)
+  :hook (org-mode-hook . visual-line-mode)
   :bind (:map org-mode-map ("C-L" . org-store-link))
   :custom
   (org-directory "~/Notes/")
   (org-agenda-files (list org-directory))
   (org-refile-targets '((org-agenda-files :maxlevel . 5)))
+  (org-archive-location "::* Archive")
   (org-refile-use-outline-path t)
   (org-outline-path-complete-in-steps nil)
   (org-startup-indented t)
@@ -405,11 +493,27 @@
   (org-pretty-entities t)
   (org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
   (org-todo-keywords
-   '((sequence "TODO(t!)" "SOMEDAY(s!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
+   '((sequence "TODO(t!)" "SOMEDAY(s!)" "WIP(i!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
+  )
+
+(use-package org-appear
+  :hook
+  (org-mode-hook . org-appear-mode)
+  (org-mode-hook . (lambda ()
+                     (add-hook 'evil-insert-state-entry-hook
+                               #'org-appear-manual-start
+                               nil
+                               t)
+                     (add-hook 'evil-insert-state-exit-hook
+                               #'org-appear-manual-stop
+                               nil
+                               t)))
+  :custom
+  (org-appear-trigger 'manual)
   )
 
 (use-package org-modern
-  :hook (org-mode . global-org-modern-mode)
+  :hook (org-mode-hook . global-org-modern-mode)
   :custom
   (org-modern-hide-stars " ")
   )
@@ -430,21 +534,3 @@
 (use-package htmlize
   :defer t)
 
-
-;; === Customizations ===================================================================
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(auto-dark compile-angel corfu dashboard dirvish doom-modeline elisp-mode evil-collection helpful htmlize magit marginalia markdown-mode modus-themes
-               nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-modern org-reverse-datetree pet vertico
-               visual-fill-column yaml-pro)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
