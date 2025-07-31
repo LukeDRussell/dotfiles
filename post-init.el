@@ -79,9 +79,9 @@
      "5e39e95c703e17a743fb05a132d727aa1d69d9d2c9cde9353f5350e545c793d4" "6fbe13f5f21eb3e959edfaa0185301d15309224116cc5e6f0ab3b2a40ee3bd3b"
      "8717434774f34f325aca6fedb24b572026a0e61dca6e3fe5c03f8c3af8f412f6" default))
  '(package-selected-packages
-   '(auto-dark compile-angel corfu dashboard dired-sidebar dirvish doom-modeline emacs-lisp evil-collection helpful htmlize magit marginalia
-               markdown-mode modus-themes nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear org-modern
-               org-reverse-datetree pet prog-mode treesit-auto vertico visual-fill-column yaml-pro))
+   '(auto-dark compile-angel corfu dashboard dired-sidebar dirvish doom-modeline eldoc-box emacs-lisp evil-collection helpful htmlize indent-bars magit
+               marginalia markdown-mode modus-themes nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear
+               org-modern org-reverse-datetree pet prog-mode tabspaces treesit-auto vertico visual-fill-column yaml-pro))
  '(use-package-compute-statistics t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -127,19 +127,28 @@
   (if (eq system-type 'darwin)
       (setopt insert-directory-program "gls"))
   (if (eq system-type 'windows-nt)
-      (setopt shell-file-name "C:/Program Files/PowerShell/7/pwsh.exe")
-    (set-fontset-font t 'symbol "Segoe UI Symbol")
+      (setopt shell-file-name "C:/Program Files/PowerShell/7/pwsh.exe"))
+  (if (eq system-type 'windows-nt)
+      (set-fontset-font t 'symbol "Segoe UI Symbol")
     )
   (set-face-attribute 'default nil :height 120)
   (cond
    ((find-font (font-spec :name "Hack Nerd Font Mono"))
-    (set-face-attribute 'default nil :font "Hack Nerd Font Mono")))
+    (set-face-attribute 'default nil :font "Hack Nerd Font Mono")
+    (set-face-attribute 'fixed-pitch nil :font "Hack Nerd Font Mono" )))
+  (cond
+   (
+    (find-font (font-spec :name "Atkinson Hyperlegible Next"))
+    (set-face-attribute 'variable-pitch nil :font "Atkinson Hyperlegible Next")
+    )
+   )
 
   :custom
   (user-full-name "Luke D Russell")
   (user-mail-address "LukeDRussell+git@outlook.com")
   (display-line-numbers-type 'relative)
   (scroll-margin 5)
+  (dired-kill-when-opening-new-dired-buffer t)
   (package-install-upgrade-built-in t)
   )
 
@@ -238,98 +247,8 @@
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
   )
 
-
-;; === Modal Editing=============================================================
-
-(use-package evil
-  :init
-  (setopt evil-want-integration t)
-  (setopt evil-want-keybinding nil)
-  :custom
-  (evil-set-undo-system 'undo-redo)
-  (evil-split-window-below t)
-  (evil-vsplit-window-right t)
-  :config
-  (evil-mode 1)
-  (evil-set-leader 'normal (kbd "SPC"))
-  (which-key-add-key-based-replacements
-    "SPC b" "buffers"
-    "SPC e" "emacs"
-    "SPC h" "help"
-    "SPC o" "open"
-    "SPC q" "quit"
-    )
-  (evil-define-key nil 'global
-    (kbd "<leader> bi") '("ibuffer" . ibuffer)
-    (kbd "<leader> bn") '("Next buffer" . evil-next-buffer)
-    (kbd "<leader> bp") '("Prev buffer" . evil-prev-buffer)
-    (kbd "<leader> bs") '("Switch buffer" . switch-to-buffer)
-    (kbd "<leader> bk") '("Kill current buffer" . kill-current-buffer)
-    (kbd "<leader> bK") '("Kill a buffer" . kill-buffer)
-    (kbd "<leader> bP") '("Project switch buffer" . project-switch-to-buffer)
-
-    (kbd "<leader> ha") '("apropos" . apropos)
-    (kbd "<leader> h@") '("at point" . helpful-at-point)
-    (kbd "<leader> hc") '("describe command" . helpful-command)
-    (kbd "<leader> he") '("emacs manual" . info-emacs-manual)
-    (kbd "<leader> hf") '("function" . helpful-function)
-    (kbd "<leader> hF") '("Face" . describe-face)
-    (kbd "<leader> hk") '("key" . helpful-key)
-    (kbd "<leader> hm") '("manuals" . info-display-manual)
-    (kbd "<leader> hM") '("macro" . helpful-macro)
-    (kbd "<leader> ho") '("org-mode manual" . org-info)
-    (kbd "<leader> hq") '("quick help" . help-quick-toggle)
-    (kbd "<leader> hs") '("symbol" . helpful-symbol)
-    (kbd "<leader> hu") '("use-package" . (lambda () (interactive) (info-display-manual "use-package")))
-    (kbd "<leader> hv") '("variable" . helpful-variable)
-    (kbd "<leader> hw") '("which-key" . which-key-show-top-level)
-
-    (kbd "<leader> wv") '("vertical new" . evil-window-vnew)
-    (kbd "<leader> wh") '("horizontal new" . evil-window-new)
-    (kbd "<leader> wc") '("close window" . evil-window-delete)
-    (kbd "<leader> wm") '("maximise current" . delete-other-windows)
-    (kbd "<leader> wr") '("rotate" . evil-window-rotate-upwards)
-    (kbd "<leader> wT") '("Tear off" . tear-off-window)
-    (kbd "<leader> w<up>") '("up" . evil-window-up)
-    (kbd "<leader> w<down>") '("up" . evil-window-down)
-    (kbd "<leader> w<left>") '("up" . evil-window-left)
-    (kbd "<leader> w<right>") '("up" . evil-window-right)
-
-    (kbd "<leader> om") '("magit" . magit)
-    (kbd "<leader> od") '("dired" . dired-sidebar-toggle-sidebar)
-    (kbd "<leader> oD") '("Dashboard". dashboard-open)
-
-    (kbd "<leader> qr") '("restart" . restart-emacs)
-    (kbd "<leader> qq") '("quit" . save-buffers-kill-emacs)
-    )
-  )
-
-;;    "e"   '(:ignore t :wk "emacs")
-;;    "e c" '((lambda () (interactive) (find-file user-init-file)) :wk "open user config")
-;;    "e o" '((lambda () (interactive) (describe-variable 'system-configuration-options)) :wk "emacs build options")
-;;    "e p" '(elpaca-manager :wk "packages")
-;;    "e r" '((lambda () (interactive) (find-file )))
-;;    "e u" '(package-menu-filter-upgradable :wk "show packages that can be upgraded")
-;; 
-;;    "o f" '(consult-find :wk "file")
-;;    "o a" '(org-agenda :wk "agenda")
-;;    "o T" '(tabspaces-open-or-create-project-and-workspace :wk "Tabspace"
-;; 
-;;    "q" '(:ignore t :wk "quit")
-;;    "q r" '(restart-emacs :wk "Restart emacs")
-;;    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
-;;    "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
-;; 
-;;    "u" '(:ignore t :wk "ui")
-;;    "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
-;;    "u M" '(org-modern-mode :wk "Org-Modern mode")
-;;    "u l" '(lr/cycle-line-number-style :wk "Line numbers")
-;;    "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
-;;    "u t" '(consult-theme :wk "theme preview / change")
-
-(use-package evil-collection
-  :after evil
-  :config (evil-collection-init))
+(use-package indent-bars
+  :hook ((python-base-mode yaml-ts-mode) . indent-bars-mode))
 
 
 ;; === Help =====================================================================
@@ -363,6 +282,99 @@
   :custom
   (helpful-max-buffers 7))
 
+;; === Modal Editing=============================================================
+
+(use-package evil
+  :after which-key
+  :init
+  (setopt evil-want-integration t)
+  (setopt evil-want-keybinding nil)
+  :custom
+  (evil-set-undo-system 'undo-redo)
+  (evil-split-window-below t)
+  (evil-vsplit-window-right t)
+  :config
+  (evil-mode 1)
+  (evil-set-leader 'normal (kbd "SPC"))
+  (which-key-add-key-based-replacements
+    "<leader> b" "buffers"
+    "<leader> e" "emacs"
+    "<leader> h" "help"
+    "<leader> o" "open"
+    "<leader> q" "quit"
+    )
+  (evil-define-key nil 'global
+    (kbd "<leader> bi") '("ibuffer" . ibuffer)
+    (kbd "<leader> bn") '("Next buffer" . evil-next-buffer)
+    (kbd "<leader> bp") '("Prev buffer" . evil-prev-buffer)
+    (kbd "<leader> bs") '("Switch buffer" . switch-to-buffer)
+    (kbd "<leader> bk") '("Kill current buffer" . kill-current-buffer)
+    (kbd "<leader> bK") '("Kill a buffer" . kill-buffer)
+    (kbd "<leader> bP") '("Project switch buffer" . project-switch-to-buffer)
+
+    (kbd "<leader> ec") '("open user config" . (lambda () (interactive) (find-file user-init-file)))
+    (kbd "<leader> eo") '("emacs config options" . (lambda () (interactive) (helpful-variable 'system-configuration-options)))
+    (kbd "<leader> ep") '("packages" . list-packages)
+    (kbd "<leader> eu") '("show packages that can be upgraded" . package-menu-filter-upgradable)
+
+    (kbd "<leader> ha") '("apropos" . apropos)
+    (kbd "<leader> h@") '("at point" . eldoc-box-help-at-point)
+    (kbd "<leader> hc") '("describe command" . helpful-command)
+    (kbd "<leader> he") '("emacs manual" . info-emacs-manual)
+    (kbd "<leader> hf") '("function" . helpful-function)
+    (kbd "<leader> hF") '("Face" . describe-face)
+    (kbd "<leader> hk") '("key" . helpful-key)
+    (kbd "<leader> hm") '("manuals" . info-display-manual)
+    (kbd "<leader> hM") '("macro" . helpful-macro)
+    (kbd "<leader> ho") '("org-mode manual" . org-info)
+    (kbd "<leader> hq") '("quick help" . help-quick-toggle)
+    (kbd "<leader> hs") '("symbol" . helpful-symbol)
+    (kbd "<leader> hu") '("use-package manual" . (lambda () (interactive) (info-display-manual "use-package")))
+    (kbd "<leader> hv") '("variable" . helpful-variable)
+    (kbd "<leader> hw") '("which-key" . which-key-show-top-level)
+
+    (kbd "<leader> wv") '("vertical new" . evil-window-vnew)
+    (kbd "<leader> wh") '("horizontal new" . evil-window-new)
+    (kbd "<leader> wc") '("close window" . evil-window-delete)
+    (kbd "<leader> wm") '("maximise current" . delete-other-windows)
+    (kbd "<leader> wr") '("rotate" . evil-window-rotate-upwards)
+    (kbd "<leader> wT") '("Tear off" . tear-off-window)
+    (kbd "<leader> w<up>") '("up" . evil-window-up)
+    (kbd "<leader> w<down>") '("up" . evil-window-down)
+    (kbd "<leader> w<left>") '("up" . evil-window-left)
+    (kbd "<leader> w<right>") '("up" . evil-window-right)
+
+    (kbd "<leader> om") '("magit" . magit)
+    (kbd "<leader> od") '("dired" . dired-sidebar-toggle-sidebar)
+    (kbd "<leader> oD") '("Dashboard". dashboard-open)
+
+    (kbd "<leader> qr") '("restart" . restart-emacs)
+    (kbd "<leader> qq") '("quit" . save-buffers-kill-emacs)
+    )
+  )
+
+;; 
+;;    "o f" '(consult-find :wk "file")
+;;    "o a" '(org-agenda :wk "agenda")
+;;    "o T" '(tabspaces-open-or-create-project-and-workspace :wk "Tabspace"
+;; 
+;;    "q" '(:ignore t :wk "quit")
+;;    "q r" '(restart-emacs :wk "Restart emacs")
+;;    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
+;;    "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
+;; 
+;;    "u" '(:ignore t :wk "ui")
+;;    "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
+;;    "u M" '(org-modern-mode :wk "Org-Modern mode")
+;;    "u l" '(lr/cycle-line-number-style :wk "Line numbers")
+;;    "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
+;;    "u t" '(consult-theme :wk "theme preview / change")
+
+(use-package evil-collection
+  :after evil
+  :config (evil-collection-init))
+
+
 ;; === Version Control =========================================================
 
 (use-package transient
@@ -373,14 +385,6 @@
 
 
 ;; === Tooling ==================================================================
-
-(use-package prog-mode
-  :ensure nil
-  :hook
-  (prog-mode-hook . hs-minor-mode)
-  (prog-mode-hook . display-line-numbers-mode)
-  (prog-mode-hook . electric-pair-mode)
-)
 
 (use-package corfu
   ;; Intellisense-style completion popups
@@ -416,6 +420,8 @@
   (dired-sidebar-display-alist '((side . right) (slot . -1)))
 )
 
+(use-package tabspaces)
+
 ;; === IDE ======================================================================
 
 ;; Auto install and use all tree-sitter grammars
@@ -433,8 +439,18 @@
   :custom (eglot-ignored-server-capabilities '(:inlayHintProvider))
   )
 
+(use-package prog-mode
+  :ensure nil
+  :hook
+  (prog-mode-hook . hs-minor-mode)
+  (prog-mode-hook . display-line-numbers-mode)
+  (prog-mode-hook . electric-pair-mode)
+)
+
 (use-package yaml
-  :defer t)
+  :defer t
+  :hook
+  (yaml-mode-hook . hs-minor-mode))
 
 (use-package yaml-pro
   :hook (yaml-mode-hook . yaml-pro-mode)
@@ -451,6 +467,9 @@
   :defer t
   :hook (python-base-mode-hook . pet-mode)
   )
+
+(use-package eldoc-box
+  :defer t)
 
 (use-package elisp-mode
   :ensure nil)
