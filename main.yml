@@ -20,7 +20,7 @@
       - ripgrep
 #      - sd # Not in repo for Fedora 42
       - tealdeer
-      - uv # Python version and package manager
+      - uv
       - zoxide
     fedora_apps:
       - fd-find

@@ -7,8 +7,19 @@
     - tmux
     - fish
     - emacs
-  # - nvim - exclude as I'm using Astronvim instead
     - zoxide
+
+- name: Link emacs config files (minimal-emacs)
+  ansible.builtin.file:
+    dest: "~/.config/emacs/{{ item }}"
+    src: "{{ playbook_dir }}/{{ item }}"
+    state: link
+    force: true
+  loop:
+    - pre-early-init.el
+    - post-early-init.el
+    - pre-init.el
+    - post-init.el
 
 - name: Link Tmux settings
   ansible.builtin.file:
@@ -30,13 +41,6 @@
     state: touch
     modification_time: preserve
     access_time: preserve
-
-- name: Link emacs init.el
-  ansible.builtin.file:
-    dest: ~/.config/emacs/init.el
-    src: "{{ playbook_dir }}/init.el"
-    state: link
-    force: true
 
 - name: Link Global Git Config settings
   ansible.builtin.file:
