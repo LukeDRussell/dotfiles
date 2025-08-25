@@ -418,7 +418,6 @@
   :custom
   (completion-styles '(orderless basic)) (completion-category-overrides
 	                                      '((file (styles basic partial-completion)))))
-<<<<<<< HEAD
 (use-package dired-sidebar
   :commands
   (dired-sidebar-toggle-sidebar)
@@ -428,7 +427,6 @@
   (dired-sidebar-follow-file-timer 0.02)
   (dired-sidebar-display-alist '((side . right) (slot . -1)))
 )
-=======
 
 ;; Example configuration for Consult
 (use-package consult
@@ -532,7 +530,6 @@
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
   )
->>>>>>> ca1bd63 (Updates on Linux, using minimal emacs)
 
 (use-package tabspaces)
 
