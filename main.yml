@@ -7,7 +7,6 @@
     common_packaged_apps:
       - ansible
       - bat
-      - bottom
       - fish
       - git
       - gitui
