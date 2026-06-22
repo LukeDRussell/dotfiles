@@ -1,5 +1,4 @@
-;;; --- Post Init file -*- no-byte-compile: t; lexical-binding: t; -*-
-
+;;; --- Post Init file -*- no-byte-compile: t; lexical-binding: nil; -*-
 
 ;; === Load Compile Angel first, so everything else goes faster ================
 
@@ -46,24 +45,6 @@
     (kill-new path-with-line-number)
     (message (concat path-with-line-number " copied to clipboard"))))
 
-;; Function to install missing treesitter grammars
-;; source: https://github.com/renzmann/treesit-auto/issues/128#issuecomment-2637842635
-(defun my/install-treesit-grammars ()
-  "Install any missing tree-sitter grammars.
-    From https://github.com/renzmann/treesit-auto/issues/128#issuecomment-2637842635"
-  (interactive)
-  (dolist (grammar treesit-language-source-alist)
-    (let ((lang (car grammar)))
-      (unless (treesit-language-available-p lang)
-        (treesit-install-language-grammar lang)))))
-
-(defun my/native-recompile ()
-  "Prune eln cache and native recompile everything on `package-user-dir'.
-    From https://www.reddit.com/r/emacs/comments/1gmjpn1/comment/lw4kgya"
-  (interactive)
-  (native-compile-prune-cache)
-  (native-compile-async package-user-dir 'recursively))
-
 (defun my/open-shell ()
   (interactive)
   (evil-window-split 12)
@@ -82,15 +63,15 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("6bf350570e023cd6e5b4337a6571c0325cec3f575963ac7de6832803df4d210a" "77f281064ea1c8b14938866e21c4e51e4168e05db98863bd7430f1352cab294a"
-     "5e39e95c703e17a743fb05a132d727aa1d69d9d2c9cde9353f5350e545c793d4" "6fbe13f5f21eb3e959edfaa0185301d15309224116cc5e6f0ab3b2a40ee3bd3b"
-     "8717434774f34f325aca6fedb24b572026a0e61dca6e3fe5c03f8c3af8f412f6" default))
+ '(package-gnupghome-dir "/c/Users/luke/.emacs.d/var/elpa/gnupg")
  '(package-selected-packages
-   '(auto-dark compile-angel corfu dashboard dired-sidebar dirvish doom-modeline eldoc-box emacs-lisp evil-collection helpful htmlize indent-bars magit
-               marginalia markdown-mode modus-themes nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear
-               org-modern org-reverse-datetree pet prog-mode tabspaces treesit-auto vertico visual-fill-column yaml-pro))
- '(use-package-compute-statistics t))
+   '(auto-dark compile-angel consult corfu dashboard dired-sidebar doom-modeline eldoc-box evil evil-collection helpful htmlize indent-bars magit
+               marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear org-modern
+               org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
+ '(package-vc-selected-packages
+   '((org-modern-indent :url "https://github.com/jdtsmith/org-modern-indent.git"))))
+
+ 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -105,7 +86,6 @@
   :custom
   (use-package-hook-name-suffix nil)
   (use-package-always-ensure t)
-  (use-package-co)
   )
 
 ;; === Emacs ===================================================================
@@ -135,19 +115,16 @@
   (if (eq system-type 'darwin)
       (setopt insert-directory-program "gls"))
   (if (eq system-type 'windows-nt)
-      (setopt shell-file-name "C:/Program Files/PowerShell/7/pwsh.exe"))
-  (if (eq system-type 'windows-nt)
-      (set-fontset-font t 'symbol "Segoe UI Symbol")
+      (setopt shell-file-name "C:/Program Files/PowerShell/7/pwsh.exe")
     )
+  (load-theme 'modus-operandi)
   (set-face-attribute 'default nil :height 120)
   (cond
    ((find-font (font-spec :name "Hack Nerd Font Mono"))
     (set-face-attribute 'default nil :font "Hack Nerd Font Mono")
-    (set-face-attribute 'fixed-pitch nil :font "Hack Nerd Font Mono" )))
-  (cond
-   (
-    (find-font (font-spec :name "Atkinson Hyperlegible Next"))
-    (set-face-attribute 'variable-pitch nil :font "Atkinson Hyperlegible Next")
+    (set-face-attribute 'fixed-pitch nil :font "Hack Nerd Font Mono")
+    (set-fontset-font t 'symbol "Hack Nerd Font Mono")
+    (set-fontset-font t 'unicode "Hack Nerd Font Mono")
     )
    )
 
@@ -157,7 +134,8 @@
   (display-line-numbers-type 'relative)
   (scroll-margin 5)
   (dired-kill-when-opening-new-dired-buffer t)
-  (package-install-upgrade-built-in t)
+  (package-install-upgrade-built-in nil)
+  (treesit-auto-install-grammar 'always)
   )
 
 ;; === Colour themes ============================================================
@@ -165,11 +143,12 @@
 (use-package modus-themes
   :defer t
   :ensure nil
-  :custom
-  (modus-themes-common-palette-overrides
-   '((bg-line-number-active unspecified)
-     (bg-line-number-inactive unspecified))
-   ))
+  ;; :custom
+  ;; (modus-themes-common-palette-overrides
+  ;;  '((bg-line-number-active unspecified)
+  ;;    (bg-line-number-inactive unspecified))
+  ;;  )
+  )
 
 (use-package auto-dark
   :config (auto-dark-mode)
@@ -292,6 +271,8 @@
 
 ;; === Modal Editing=============================================================
 
+(defvar evil-mode-buffers nil) ;; https://github.com/emacs-evil/evil/issues/1983
+ 
 (use-package evil
   :after which-key
   :init
@@ -310,15 +291,16 @@
     "<leader> h" "help"
     "<leader> o" "open"
     "<leader> q" "quit"
+    "<leader> w" "window"
     )
   (evil-define-key nil 'global
     (kbd "<leader> bi") '("ibuffer" . ibuffer)
     (kbd "<leader> bn") '("Next buffer" . evil-next-buffer)
     (kbd "<leader> bp") '("Prev buffer" . evil-prev-buffer)
-    (kbd "<leader> bs") '("Switch buffer" . switch-to-buffer)
+    (kbd "<leader> bs") '("Switch buffer" . consult-buffer)
     (kbd "<leader> bk") '("Kill current buffer" . kill-current-buffer)
     (kbd "<leader> bK") '("Kill a buffer" . kill-buffer)
-    (kbd "<leader> bP") '("Project switch buffer" . project-switch-to-buffer)
+    (kbd "<leader> bP") '("Project switch buffer" . consult-project-buffer)
 
     (kbd "<leader> ec") '("open user config" . (lambda () (interactive) (find-file user-init-file)))
     (kbd "<leader> eo") '("emacs config options" . (lambda () (interactive) (helpful-variable 'system-configuration-options)))
@@ -456,7 +438,7 @@
          ("M-g e" . consult-compile-error)
          ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
          ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
          ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
          ("M-g m" . consult-mark)
          ("M-g k" . consult-global-mark)
@@ -535,15 +517,6 @@
 
 ;; === IDE ======================================================================
 
-;; Auto install and use all tree-sitter grammars
-;; Run =treesit-auto-install-all= to install the grammars
-(use-package treesit-auto
-  :custom
-  (treesit-auto-install t)
-  :config
-  (global-treesit-auto-mode)
-  (treesit-auto-add-to-auto-mode-alist 'all))
-
 (use-package eglot
   :hook
   (python-base-mode-hook . eglot-ensure)
@@ -577,6 +550,7 @@
 (use-package pet
   :defer t
   :hook (python-base-mode-hook . pet-mode)
+  :after tomlparse
   )
 
 (use-package eldoc-box
@@ -615,7 +589,7 @@
   (org-refile-targets '((org-agenda-files :maxlevel . 5)))
   (org-archive-location "::* Archive")
   (org-refile-use-outline-path t)
-  (org-outline-path-complete-in-steps nil)
+  (org-outline-path-complete-in-steps t)
   (org-startup-indented t)
   (org-hide-emphasis-markers t)
   (org-id-link-to-org-use-id t)
@@ -645,7 +619,15 @@
 (use-package org-modern
   :hook (org-mode-hook . global-org-modern-mode)
   :custom
-  (org-modern-hide-stars " ")
+  ;; (org-modern-hide-stars " ")
+  (org-modern-fold-stars
+   '(("▶" . "▼") ("▷" . "▽") ("▹" . "▿") ("▹" . "▿") ("▸" . "▾")))
+  )
+
+(use-package org-modern-indent
+  :vc "https://github.com/jdtsmith/org-modern-indent.git"
+  :hook
+  (org-mode-hook . org-modern-indent-mode)
   )
 
 (use-package org-reverse-datetree

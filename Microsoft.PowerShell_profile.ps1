@@ -11,3 +11,7 @@ Import-Module -Name Microsoft.WinGet.CommandNotFound
 function pip {
   uv pip
 }
+
+function python {
+  uv run python
+}
