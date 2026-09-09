@@ -9,7 +9,7 @@
   :custom
   ;; Set `compile-angel-verbose` to nil to suppress output from compile-angel.
   ;; Drawback: The minibuffer will not display compile-angel's actions.
-  (compile-angel-verbose t)
+  (compile-angel-verbose nil)
 
   :config
   ;; The following directive prevents compile-angel from compiling your init
@@ -31,25 +31,7 @@
   ;; A global mode that compiles .el files before they are loaded.
   (compile-angel-on-load-mode))
 
-(setopt use-package-hook-name-suffix nil)
-
-
-;; === My Functions ============================================================
-
-(defun my/copy-current-line-position-to-clipboard ()
-  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
-    From https://gist.github.com/kristianhellquist/3082383"
-  (interactive)
-  (let ((path-with-line-number
-         (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
-    (kill-new path-with-line-number)
-    (message (concat path-with-line-number " copied to clipboard"))))
-
-(defun my/open-shell ()
-  (interactive)
-  (evil-window-split 12)
-  (shell)
-  )
+;; (setopt use-package-hook-name-suffix nil)
 
 
 ;; === Customizations ===================================================================
@@ -65,9 +47,9 @@
  ;; If there is more than one, they won't work right.
  '(package-gnupghome-dir "/c/Users/luke/.emacs.d/var/elpa/gnupg")
  '(package-selected-packages
-   '(auto-dark compile-angel consult corfu dashboard dired-sidebar doom-modeline eldoc-box evil evil-collection helpful htmlize indent-bars magit
-               marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear org-modern
-               org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
+   '(auto-dark compile-angel consult corfu dired-sidebar doom-modeline eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize indent-bars
+               magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear
+               org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
  '(package-vc-selected-packages
    '((org-modern-indent :url "https://github.com/jdtsmith/org-modern-indent.git"))))
 
@@ -78,6 +60,18 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;; === My Functions ============================================================
+
+(defun my/copy-current-line-position-to-clipboard ()
+  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
+    From https://gist.github.com/kristianhellquist/3082383"
+  (interactive)
+  (let ((path-with-line-number
+         (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
+    (kill-new path-with-line-number)
+    (message (concat path-with-line-number " copied to clipboard"))))
+
 
 ;; === use-package =============================================================
 
@@ -143,11 +137,11 @@
 (use-package modus-themes
   :defer t
   :ensure nil
-  ;; :custom
-  ;; (modus-themes-common-palette-overrides
-  ;;  '((bg-line-number-active unspecified)
-  ;;    (bg-line-number-inactive unspecified))
-  ;;  )
+  :custom
+  (modus-themes-common-palette-overrides
+   '((bg-line-number-active unspecified)
+     (bg-line-number-inactive unspecified))
+   )
   )
 
 (use-package auto-dark
@@ -185,11 +179,10 @@
   (doom-modeline-buffer-file-name truncate-upto-project)
   (doom-modeline-modal-icon nil)
   (doom-modeline-buffer-encoding nil)
-  (display-time-mode t)
   ;; Don't duplicate Mode in messages, it's already in the modeline.
   (evil-insert-state-message nil)
   (evil-visual-state-message nil)
-  ;; Customize the Mode labels to how they usually are in the bottom line thingie
+  ;; Customize the Mode labels to how they look in vim
   (evil-normal-state-tag " NORMAL ")
   (evil-insert-state-tag " INSERT ")
   (evil-visual-state-tag " VISUAL ")
@@ -292,6 +285,7 @@
     "<leader> o" "open"
     "<leader> q" "quit"
     "<leader> w" "window"
+    "<leader> u" "ui")
     )
   (evil-define-key nil 'global
     (kbd "<leader> bi") '("ibuffer" . ibuffer)
@@ -340,8 +334,13 @@
 
     (kbd "<leader> qr") '("restart" . restart-emacs)
     (kbd "<leader> qq") '("quit" . save-buffers-kill-emacs)
+
+    (kbd "<leader> um") '("menu bar" . toggle-menu-bar-mode-from-frame)
+    (kbd "<leader> uM") '("org modern" . org-modern-mode)
+    (kbd "<leader> uF") '("full screen" . toggle-frame-fullscreen)
+    (kbd "<leader> uT") '("theme" . consult-theme)
+    (kbd "<leader> uC") '("centre text" . visual-fill-column-mode)
     )
-  )
 
 ;; 
 ;;    "o f" '(consult-find :wk "file")
@@ -353,13 +352,6 @@
 ;;    "q n" '(restart-emacs-start-new-emacs :wk "restart to New emacs")
 ;;    "q q" '(save-buffers-kill-terminal :wk "Quit emacs")
 ;; 
-;;    "u" '(:ignore t :wk "ui")
-;;    "u m" '(toggle-menu-bar-mode-from-frame :wk "Menu bar")
-;;    "u M" '(org-modern-mode :wk "Org-Modern mode")
-;;    "u l" '(lr/cycle-line-number-style :wk "Line numbers")
-;;    "u F" '(toggle-frame-fullscreen :wk "Fullscreen")
-;;    "u t" '(consult-theme :wk "theme preview / change")
-
 (use-package evil-collection
   :after evil
   :config (evil-collection-init))
@@ -646,3 +638,12 @@
 (use-package htmlize
   :defer t)
 
+;; === Terminal =========================================================
+
+(use-package ghostel
+  :custom
+  (ghostel-shell "C:/Program Files/PowerShell/7/pwsh.exe"))
+
+(use-package evil-ghostel
+  :after (ghostel evil)
+  :hook (ghostel-mode . evil-ghostel-mode))
