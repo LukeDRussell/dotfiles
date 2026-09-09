@@ -6,7 +6,10 @@ New-Alias -name wget -Value Invoke-WebRequest
 New-Alias -name docker -Value podman
 
 Remove-Alias diff -Force
-Import-Module -Name Microsoft.WinGet.CommandNotFound
+
+if (Get-Module -ListAvailable -Name Microsoft.WinGet.CommandNotFound) {
+    Import-Module -Name Microsoft.WinGet.CommandNotFound
+}
 
 function pip {
   uv pip

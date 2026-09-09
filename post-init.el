@@ -26,7 +26,7 @@
   (push "/post-early-init.el" compile-angel-excluded-files)
 
   ;; A local mode that compiles .el files whenever the user saves them.
-  ;; (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
+  (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
 
   ;; A global mode that compiles .el files before they are loaded.
   (compile-angel-on-load-mode))
