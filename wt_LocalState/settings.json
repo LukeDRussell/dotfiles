@@ -1,0 +1,230 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": [],
+    "compatibility.enableUnfocusedAcrylic": false,
+    "copyFormatting": "none",
+    "copyOnSelect": true,
+    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    "disableAnimations": true,
+    "disabledProfileSources": [],
+    "focusFollowMouse": true,
+    "keybindings": 
+    [
+        {
+            "id": "Terminal.CopyToClipboard",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "Terminal.FindText",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "Terminal.DuplicatePaneAuto",
+            "keys": "alt+shift+d"
+        }
+    ],
+    "newTabMenu": 
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "profiles": 
+    {
+        "defaults": 
+        {
+            "colorScheme": "Modus Operandi",
+            "font": 
+            {
+                "builtinGlyphs": false,
+                "colorGlyphs": true,
+                "face": "Hack Nerd Font Mono"
+            },
+            "startingDirectory": "~"
+        },
+        "list": 
+        [
+            {
+                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "hidden": true,
+                "name": "Windows PowerShell"
+            },
+            {
+                "commandline": "%SystemRoot%\\System32\\cmd.exe",
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
+            },
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+                "hidden": true,
+                "name": "Azure Cloud Shell",
+                "source": "Windows.Terminal.Azure"
+            },
+            {
+                "antialiasingMode": "cleartype",
+                "commandline": "\"C:\\Users\\Luke\\AppData\\Local\\Microsoft\\WindowsApps\\Microsoft.PowerShell_8wekyb3d8bbwe\\pwsh.exe\"  -nologo",
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "historySize": 10000,
+                "name": "pwsh",
+                "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "colorScheme": "Modus Operandi",
+                "commandline": "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\"",
+                "elevate": true,
+                "guid": "{a2463d96-e4df-4339-82e5-d59a7c30e6b4}",
+                "hidden": false,
+                "icon": "ms-appx:///ProfileIcons/pwsh.png",
+                "name": "pwsh (admin)",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64",
+                "guid": "{48982dd0-e9b2-55be-92ad-11ccd6e5805c}",
+                "hidden": false,
+                "icon": "C:/msys64/ucrt64.ico",
+                "name": "MSYS2 / UCRT",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "guid": "{2ece5bfe-50ed-5f3a-ab87-5cd4baafed2b}",
+                "hidden": false,
+                "name": "Git Bash",
+                "source": "Git"
+            },
+            {
+                "guid": "{5fb123f1-af88-5b5c-8953-d14a8def1978}",
+                "hidden": true,
+                "name": "Powershell 7",
+                "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "guid": "{49aca192-7f0a-5f1b-94a2-1dbce10b020e}",
+                "hidden": false,
+                "name": "Fedora-WSL",
+                "source": "Microsoft.WSL",
+                "tabTitle": "Fedora-WSL"
+            },
+            {
+                "guid": "{c903f81f-08e1-5c37-88e8-33f3f0395e56}",
+                "hidden": false,
+                "name": "podman-machine-default",
+                "source": "Microsoft.WSL",
+                "tabTitle": "Podman"
+            },
+            {
+                "commandline": "ssh luke@100.123.188.41",
+                "guid": "{23935de3-42f9-4f3d-a484-65bd06720585}",
+                "hidden": false,
+                "icon": "\ue83b",
+                "name": "Home VirtHost"
+            }
+        ]
+    },
+    "schemes": 
+    [
+        {
+            "background": "#FFFFFF",
+            "black": "#000000",
+            "blue": "#0031A9",
+            "brightBlack": "#595959",
+            "brightBlue": "#0000FF",
+            "brightCyan": "#008899",
+            "brightGreen": "#008900",
+            "brightPurple": "#DD22DD",
+            "brightRed": "#D00000",
+            "brightWhite": "#595959",
+            "brightYellow": "#808000",
+            "cursorColor": "#000000",
+            "cyan": "#005E8B",
+            "foreground": "#000000",
+            "green": "#006800",
+            "name": "Modus Operandi",
+            "purple": "#721045",
+            "red": "#A60000",
+            "selectionBackground": "#F2F2F2",
+            "white": "#0C0C0C",
+            "yellow": "#6F5500"
+        },
+        {
+            "background": "#000000",
+            "black": "#000000",
+            "blue": "#2FAFFF",
+            "brightBlack": "#595959",
+            "brightBlue": "#338FFF",
+            "brightCyan": "#00EFF0",
+            "brightGreen": "#44DF44",
+            "brightPurple": "#FF66FF",
+            "brightRed": "#FF5F5F",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#EFEF00",
+            "cursorColor": "#FFFFFF",
+            "cyan": "#00D3D0",
+            "foreground": "#FFFFFF",
+            "green": "#44BC44",
+            "name": "Modus Vivendi",
+            "purple": "#FEACD0",
+            "red": "#FF5F59",
+            "selectionBackground": "#595959",
+            "white": "#A6A6A6",
+            "yellow": "#D0BC00"
+        },
+        {
+            "background": "#002B36",
+            "black": "#003F4F",
+            "blue": "#268BD2",
+            "brightBlack": "#0A4D5E",
+            "brightBlue": "#839496",
+            "brightCyan": "#93A1A1",
+            "brightGreen": "#586E75",
+            "brightPurple": "#6C71C4",
+            "brightRed": "#CB4B16",
+            "brightWhite": "#FDF6E3",
+            "brightYellow": "#657B83",
+            "cursorColor": "#FFFFFF",
+            "cyan": "#2AA198",
+            "foreground": "#839496",
+            "green": "#859900",
+            "name": "Solarized Dark (Copy)",
+            "purple": "#D33682",
+            "red": "#DC322F",
+            "selectionBackground": "#FFFFFF",
+            "white": "#EEE8D5",
+            "yellow": "#B58900"
+        },
+        {
+            "background": "#FDF6E3",
+            "black": "#002B36",
+            "blue": "#268BD2",
+            "brightBlack": "#073642",
+            "brightBlue": "#839496",
+            "brightCyan": "#93A1A1",
+            "brightGreen": "#586E75",
+            "brightPurple": "#6C71C4",
+            "brightRed": "#CB4B16",
+            "brightWhite": "#7A786E",
+            "brightYellow": "#657B83",
+            "cursorColor": "#002B36",
+            "cyan": "#2AA198",
+            "foreground": "#657B83",
+            "green": "#859900",
+            "name": "Solarized Light (Copy)",
+            "purple": "#D33682",
+            "red": "#DC322F",
+            "selectionBackground": "#2C4D57",
+            "white": "#45433D",
+            "yellow": "#B58900"
+        }
+    ],
+    "showTerminalTitleInTitlebar": false,
+    "theme": "system",
+    "themes": []
+}

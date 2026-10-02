@@ -1,5 +1,61 @@
 ;;; --- Post Init file -*- no-byte-compile: t; lexical-binding: nil; -*-
 
+
+;; === Customizations ===================================================================
+;;
+;; Place before everything else because init files are executed sequentially.
+;; Read: custom-safe-themes should execute before setting themes, otherwise have to approve it with 'y'.
+;;
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("10e330880269244ae45ae9e02fe6f55766da9e15036e7c7f07d7ce228195deb5" "967c23e9ba179b80560774419f081df22e7674aac23c5c550b817e4a1ce7d058" default))
+ '(package-gnupghome-dir "/c/Users/luke/.emacs.d/var/elpa/gnupg")
+ '(package-selected-packages
+   '(auto-dark compile-angel consult corfu dired-sidebar doom-modeline eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize indent-bars
+               magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear
+               org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
+ '(package-vc-selected-packages
+   '((org-modern-indent :url "https://github.com/jdtsmith/org-modern-indent.git"))))
+
+ 
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;; === My Functions ============================================================
+
+(defun my/copy-current-line-position-to-clipboard ()
+  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
+    From https://gist.github.com/kristianhellquist/3082383"
+  (interactive)
+  (let ((path-with-line-number
+         (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
+    (kill-new path-with-line-number)
+    (message (concat path-with-line-number " copied to clipboard"))))
+
+(defun my/setup-fonts (&optional frame)
+  (with-selected-frame (or frame (selected-frame))
+    (set-face-attribute 'default nil :height 120)
+    (when (eq system-type 'windows-nt)
+      (set-fontset-font t 'symbol "Segoe UI Symbol")
+      (set-fontset-font t 'emoji "Segoe UI Emoji"))
+    (when (find-font (font-spec :name "Hack Nerd Font Mono"))
+      (set-face-attribute 'default nil :font "Hack Nerd Font Mono")
+      (set-face-attribute 'fixed-pitch nil :font "Hack Nerd Font Mono"))
+    (when (find-font (font-spec :name "Atkinson Hyperlegible Next"))
+      (set-face-attribute 'variable-pitch nil :font "Atkinson Hyperlegible Next"))
+    )
+  )
+
+
 ;; === Load Compile Angel first, so everything else goes faster ================
 
 ;; Ensure adding the following compile-angel code at the very beginning
@@ -31,47 +87,6 @@
   ;; A global mode that compiles .el files before they are loaded.
   (compile-angel-on-load-mode))
 
-;; (setopt use-package-hook-name-suffix nil)
-
-
-;; === Customizations ===================================================================
-;;
-;; Place before everything else because init files are executed sequentially.
-;; Read: custom-safe-themes should execute before setting themes, otherwise have to approve it with 'y'.
-;;
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-gnupghome-dir "/c/Users/luke/.emacs.d/var/elpa/gnupg")
- '(package-selected-packages
-   '(auto-dark compile-angel consult corfu dired-sidebar doom-modeline eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize indent-bars
-               magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear
-               org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
- '(package-vc-selected-packages
-   '((org-modern-indent :url "https://github.com/jdtsmith/org-modern-indent.git"))))
-
- 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
-;; === My Functions ============================================================
-
-(defun my/copy-current-line-position-to-clipboard ()
-  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'.
-    From https://gist.github.com/kristianhellquist/3082383"
-  (interactive)
-  (let ((path-with-line-number
-         (concat (dired-replace-in-string (getenv "HOME") "~" (buffer-file-name)) ":" (number-to-string (line-number-at-pos)))))
-    (kill-new path-with-line-number)
-    (message (concat path-with-line-number " copied to clipboard"))))
-
 
 ;; === use-package =============================================================
 
@@ -95,6 +110,7 @@
                        (let ((inhibit-message t))
                          (recentf-mode 1))))
   (kill-emacs-hook . recentf-cleanup)
+  (after-make-frame-functions . my/setup-fonts)
 
   :bind (
          ([escape] . keyboard-quit)
@@ -111,17 +127,7 @@
   (if (eq system-type 'windows-nt)
       (setopt shell-file-name "C:/Program Files/PowerShell/7/pwsh.exe")
     )
-  (load-theme 'modus-operandi)
-  (set-face-attribute 'default nil :height 120)
-  (cond
-   ((find-font (font-spec :name "Hack Nerd Font Mono"))
-    (set-face-attribute 'default nil :font "Hack Nerd Font Mono")
-    (set-face-attribute 'fixed-pitch nil :font "Hack Nerd Font Mono")
-    (set-fontset-font t 'symbol "Hack Nerd Font Mono")
-    (set-fontset-font t 'unicode "Hack Nerd Font Mono")
-    )
-   )
-
+  (my/setup-fonts)
   :custom
   (user-full-name "Luke D Russell")
   (user-mail-address "LukeDRussell+git@outlook.com")
@@ -132,23 +138,39 @@
   (treesit-auto-install-grammar 'always)
   )
 
+
 ;; === Colour themes ============================================================
 
 (use-package modus-themes
   :defer t
-  :ensure nil
   :custom
+  (modus-themes-headings
+   '((1 . (1.5))
+     (2 . (1.3))
+     (3 . (1.15))
+     (4 . (1.1))
+     (t . (1.0))))
   (modus-themes-common-palette-overrides
    '((bg-line-number-active unspecified)
-     (bg-line-number-inactive unspecified))
+     (bg-line-number-inactive unspecified)
+     (fg-heading-0 fg-main)
+     (fg-heading-1 fg-main)
+     (fg-heading-2 fg-main)
+     (fg-heading-3 fg-main)
+     (fg-heading-4 fg-main)
+     (fg-heading-5 fg-main)
+     (fg-heading-6 fg-main)
+     (fg-heading-7 fg-main)
+     (fg-heading-8 fg-main)
+     (prose-done fg-dim)
+     )
    )
   )
 
 (use-package auto-dark
-  :config (auto-dark-mode)
+  :config (auto-dark-mode t)
   :custom
-  (auto-dark-light-theme 'modus-operandi)
-  (auto-dark-dark-theme 'modus-vivendi)
+  (auto-dark-themes '((modus-vivendi) (modus-operandi)))
   )
 
 
@@ -510,6 +532,7 @@
 ;; === IDE ======================================================================
 
 (use-package eglot
+  :ensure nil
   :hook
   (python-base-mode-hook . eglot-ensure)
   :custom (eglot-ignored-server-capabilities '(:inlayHintProvider))
@@ -573,7 +596,9 @@
 
 (use-package org
   :defer t
-  :hook (org-mode-hook . visual-line-mode)
+  :hook
+  (org-mode-hook . visual-line-mode)
+  (org-mode-hook . variable-pitch-mode)
   :bind (:map org-mode-map ("C-L" . org-store-link))
   :custom
   (org-directory "~/Notes/")
@@ -584,6 +609,7 @@
   (org-outline-path-complete-in-steps t)
   (org-startup-indented t)
   (org-hide-emphasis-markers t)
+  (org-blank-beefore)
   (org-id-link-to-org-use-id t)
   (org-startup-with-inline-images t)
   (org-pretty-entities t)
