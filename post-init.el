@@ -250,7 +250,18 @@
   )
 
 (use-package indent-bars
-  :hook ((python-base-mode yaml-ts-mode) . indent-bars-mode))
+  :vc "https://github.com/jdtsmith/indent-bars.git"
+  :hook ((python-base-mode yaml-ts-mode) . indent-bars-mode)
+  :custom
+  (indent-bars-color '(highlight :face-bg t :blend 0.2))
+  (indent-bars-pattern ".")
+  (indent-bars-width-frac 0.1)
+  (indent-bars-pad-frac 0.1)
+  (indent-bars-zigzag nil)
+  (indent-bars-color-by-depth nil)
+  (indent-bars-highlight-current-depth nil)
+  (indent-bars-display-on-blank-lines nil)
+  )
 
 
 ;; === Help =====================================================================
@@ -562,6 +573,17 @@
   )
 
 ;; Python
+(use-package python
+  :ensure nil
+  :custom
+  (python-indent-offset 4)
+  (python-indent-guess-indent-offset nil)
+  :hook (python-base-mode-hook . (lambda ()
+                                   (setq-local evil-shift-width 4
+                                               tab-width 4
+                                               indent-tabs-mode nil)))
+  )
+
 (use-package pet
   :defer t
   :hook (python-base-mode-hook . pet-mode)
