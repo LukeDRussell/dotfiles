@@ -15,11 +15,11 @@ My settings for fish, tmux, neovim, etc.
 ```pwsh
 New-Item -ItemType Junction `
     -Path "~\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\" `
-    -Target "C:\Users\Luke\Repos\dotfiles\wt_LocalState\"
+    -Target "C:\Users\Luke\Repos\dotfiles\wt_LocalState\" `
     -Force
 New-Item -ItemType SymbolicLink `
     -Path $PROFILE `
-    -Target "$HOME\Repos\dotfiles\Microsoft.PowerShell_profile.ps1"
+    -Target "$HOME\Repos\dotfiles\Microsoft.PowerShell_profile.ps1" `
     -Force
 New-Item -ItemType SymbolicLink `
     -Path ~\.emacs.d\pre-early-init.el `
