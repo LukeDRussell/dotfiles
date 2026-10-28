@@ -9,7 +9,7 @@
     "disableAnimations": true,
     "disabledProfileSources": [],
     "focusFollowMouse": true,
-    "keybindings": 
+    "keybindings":
     [
         {
             "id": "Terminal.CopyToClipboard",
@@ -28,18 +28,18 @@
             "keys": "alt+shift+d"
         }
     ],
-    "newTabMenu": 
+    "newTabMenu":
     [
         {
             "type": "remainingProfiles"
         }
     ],
-    "profiles": 
+    "profiles":
     {
-        "defaults": 
+        "defaults":
         {
             "colorScheme": "Modus Operandi",
-            "font": 
+            "font":
             {
                 "builtinGlyphs": false,
                 "colorGlyphs": true,
@@ -47,7 +47,7 @@
             },
             "startingDirectory": "~"
         },
-        "list": 
+        "list":
         [
             {
                 "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
@@ -126,10 +126,24 @@
                 "hidden": false,
                 "icon": "\ue83b",
                 "name": "Home VirtHost"
+            },
+            {
+                "commandline": "ssh luke@100.107.156.21",
+                "guid": "{b4c84949-db28-4f15-b6ac-0a14c702562d}",
+                "hidden": false,
+                "icon": "\ue83b",
+                "name": "Luke-Desktop"
+            },
+            {
+                "commandline": "ssh luke@10.0.0.17",
+                "guid": "{65d5f67a-36b8-4759-adac-a6891a2e7085}",
+                "hidden": false,
+                "icon": "\ue83b",
+                "name": "nas1"
             }
         ]
     },
-    "schemes": 
+    "schemes":
     [
         {
             "background": "#FFFFFF",

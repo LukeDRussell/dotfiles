@@ -20,7 +20,7 @@ alias mv='mv -i'
 alias ..='cd ..'
 alias ...='cd ../../../'
 alias ....='cd ../../../../'
-alias .....='cd ../../../../'
+alias .....='cd ../../../../../'
 
 # get current branch in git repo
 function parse_git_branch() {

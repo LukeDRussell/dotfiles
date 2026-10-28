@@ -1,13 +1,13 @@
 {
-	"dismissedBadges" : 
+	"dismissedBadges" :
 	[
 		"page.extensions"
 	],
-	"dismissedMessages" : 
+	"dismissedMessages" :
 	[
 		"closeOnExitInfo"
 	],
-	"generatedProfiles" : 
+	"generatedProfiles" :
 	[
 		"{574e775e-4f2a-5b96-ac1e-a2962a402336}",
 		"{5fb123f1-af88-5b5c-8953-d14a8def1978}",
@@ -17,6 +17,6 @@
 		"{2ece5bfe-50ed-5f3a-ab87-5cd4baafed2b}",
 		"{c903f81f-08e1-5c37-88e8-33f3f0395e56}"
 	],
-	"settingsHash" : "2da5e03595a4871e-01dd521b3f3029ad",
+	"settingsHash" : "6e26575acfe0ded8-01dd66962307449d",
 	"sshFolderGenerated" : false
 }

@@ -16,9 +16,9 @@
    '("10e330880269244ae45ae9e02fe6f55766da9e15036e7c7f07d7ce228195deb5" "967c23e9ba179b80560774419f081df22e7674aac23c5c550b817e4a1ce7d058" default))
  '(package-gnupghome-dir "/c/Users/luke/.emacs.d/var/elpa/gnupg")
  '(package-selected-packages
-   '(auto-dark compile-angel consult corfu dired-sidebar doom-modeline eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize indent-bars
-               magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless org-appear
-               org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
+   '(auto-dark compile-angel consult corfu dired-sidebar doom-modeline eca eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize
+               indent-bars magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless
+               org-appear org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
  '(package-vc-selected-packages
    '((org-modern-indent :url "https://github.com/jdtsmith/org-modern-indent.git"))))
 
@@ -596,6 +596,8 @@
 (use-package elisp-mode
   :ensure nil)
 
+;; Powershell TODO
+
 ;; === Org and Calendar =========================================================
 
 (use-package calendar
@@ -635,6 +637,7 @@
   (org-id-link-to-org-use-id t)
   (org-startup-with-inline-images t)
   (org-pretty-entities t)
+  (org-startup-folded fold)
   (org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
   (org-todo-keywords
    '((sequence "TODO(t!)" "SOMEDAY(s!)" "WIP(i!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
@@ -695,3 +698,8 @@
 (use-package evil-ghostel
   :after (ghostel evil)
   :hook (ghostel-mode . evil-ghostel-mode))
+
+;; === AI ===============================================================
+
+(use-package eca
+  :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest))
