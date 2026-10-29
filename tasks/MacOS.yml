@@ -28,3 +28,19 @@
     - NSAutomaticQuoteSubstitutionEnabled
     - NSAutomaticSpellingCorrectionEnabled
     - QuitMenuItem
+
+- name: Use Homebrew bash as the login shell
+  vars:
+    brew_bash: "{{ '/opt/homebrew' if ansible_facts['architecture'] == 'arm64' else '/usr/local' }}/bin/bash"
+  block:
+    - name: Allow Homebrew bash in /etc/shells
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/shells
+        line: "{{ brew_bash }}"
+
+    - name: Set Homebrew bash as the login shell
+      become: true
+      ansible.builtin.user:
+        name: "{{ ansible_facts['user_id'] }}"
+        shell: "{{ brew_bash }}"

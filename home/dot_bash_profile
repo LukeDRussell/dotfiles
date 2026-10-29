@@ -1,0 +1,5 @@
+# .bash_profile: login shells (macOS Terminal, ssh) read this, not .bashrc
+
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+fi
