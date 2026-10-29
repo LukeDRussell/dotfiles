@@ -58,7 +58,11 @@
     {
         "defaults":
         {
-            "colorScheme": "Modus Operandi",
+            "colorScheme":
+            {
+                "dark": "Modus Vivendi",
+                "light": "Modus Operandi"
+            },
             "font":
             {
                 "builtinGlyphs": false,
@@ -79,7 +83,6 @@
                 "source": "Windows.Terminal.PowershellCore"
             },
             {
-                "colorScheme": "Modus Operandi",
                 "commandline": "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -nologo",
                 "elevate": true,
                 "guid": "{a2463d96-e4df-4339-82e5-d59a7c30e6b4}",
@@ -170,13 +173,13 @@
             "black": "#000000",
             "blue": "#0031A9",
             "brightBlack": "#595959",
-            "brightBlue": "#0000FF",
-            "brightCyan": "#008899",
-            "brightGreen": "#008900",
-            "brightPurple": "#DD22DD",
-            "brightRed": "#D00000",
-            "brightWhite": "#595959",
-            "brightYellow": "#808000",
+            "brightBlue": "#3548CF",
+            "brightCyan": "#005F5F",
+            "brightGreen": "#00663F",
+            "brightPurple": "#531AB6",
+            "brightRed": "#972500",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#884900",
             "cursorColor": "#000000",
             "cyan": "#005E8B",
             "foreground": "#000000",
@@ -184,8 +187,8 @@
             "name": "Modus Operandi",
             "purple": "#721045",
             "red": "#A60000",
-            "selectionBackground": "#F2F2F2",
-            "white": "#0C0C0C",
+            "selectionBackground": "#BDBDBD",
+            "white": "#A6A6A6",
             "yellow": "#6F5500"
         },
         {
@@ -193,13 +196,13 @@
             "black": "#000000",
             "blue": "#2FAFFF",
             "brightBlack": "#595959",
-            "brightBlue": "#338FFF",
-            "brightCyan": "#00EFF0",
-            "brightGreen": "#44DF44",
-            "brightPurple": "#FF66FF",
-            "brightRed": "#FF5F5F",
+            "brightBlue": "#79A8FF",
+            "brightCyan": "#6AE4B9",
+            "brightGreen": "#00C06F",
+            "brightPurple": "#B6A0FF",
+            "brightRed": "#FF6B55",
             "brightWhite": "#FFFFFF",
-            "brightYellow": "#EFEF00",
+            "brightYellow": "#FEC43F",
             "cursorColor": "#FFFFFF",
             "cyan": "#00D3D0",
             "foreground": "#FFFFFF",
@@ -207,7 +210,7 @@
             "name": "Modus Vivendi",
             "purple": "#FEACD0",
             "red": "#FF5F59",
-            "selectionBackground": "#595959",
+            "selectionBackground": "#5A5A5A",
             "white": "#A6A6A6",
             "yellow": "#D0BC00"
         },
