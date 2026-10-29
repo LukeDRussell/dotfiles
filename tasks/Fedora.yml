@@ -17,3 +17,15 @@
     state: latest
     update_only: true
     update_cache: true
+
+# WSL adds every Windows PATH folder to Linux's PATH, which slows command lookup
+# and lets Windows tools shadow Linux ones. Takes effect after `wsl --shutdown`.
+- name: Keep Windows folders off PATH in WSL
+  when: "'microsoft' in (ansible_facts['kernel'] | lower)"
+  become: true
+  community.general.ini_file:
+    path: /etc/wsl.conf
+    section: interop
+    option: appendWindowsPath
+    value: "false"
+    mode: "0644"

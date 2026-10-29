@@ -69,6 +69,9 @@ check it passed. Before pushing, verify the change by hand:
 - `wsl.exe -- <cmd>` passes the command through the login shell, which expands
   `$` first. Write the commands to a script file
   and run `wsl.exe -d FedoraLinux-44 --cd ~ -- bash /mnt/c/.../script.sh`.
+- Windows folders are deliberately kept off WSL's PATH (`appendWindowsPath =
+  false` in `/etc/wsl.conf`, set by Ansible). Call Windows tools by full path,
+  e.g. `/mnt/c/Windows/explorer.exe`.
 - The Fedora WSL image is minimal: tools like `awk` may be missing, so don't
   rely on them in scripts. Missing tools Luke wants go into `fedora_apps`.
 
