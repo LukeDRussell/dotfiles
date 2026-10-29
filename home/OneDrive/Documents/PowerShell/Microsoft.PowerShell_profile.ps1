@@ -21,12 +21,12 @@ if (Test-Path -LiteralPath $localBin -PathType Container) {
 Import-Module PSReadLine
 $OnViModeChange = [scriptblock]{
     if ($args[0] -eq 'Command') {
-        # Set the cursor to a blinking block.
+        # Steady block in normal mode, as in bash
         Write-Host -NoNewLine "`e[2 q"
     }
     else {
-        # Set the cursor to a blinking line.
-        Write-Host -NoNewLine "`e[5 q"
+        # Steady bar in insert mode, as in bash
+        Write-Host -NoNewLine "`e[6 q"
     }
 }
 
