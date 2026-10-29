@@ -30,6 +30,7 @@
     brew_apps:
       - fd
       - emacs-plus@29
+      - bash  # macOS /bin/bash is 3.2
       - jandedobbeleer/oh-my-posh/oh-my-posh
       - cmake
     brew_casks:
