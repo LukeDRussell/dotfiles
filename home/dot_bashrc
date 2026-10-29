@@ -148,6 +148,28 @@ unset rc
 # Prompt: same oh-my-posh config as pwsh; plain PS1 if it's missing
 if command -v oh-my-posh >/dev/null 2>&1; then
 	eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/config.omp.json)"
+
+	# oh-my-posh can't draw its right-hand block (status, git, time) in bash, but
+	# ble.sh can: render it with oh-my-posh's own status variables.
+	if [[ ${BLE_VERSION-} ]]; then
+		function _omp_get_right {
+			local right
+			right=$(
+				oh-my-posh print right \
+					--config ~/.config/oh-my-posh/config.omp.json \
+					--shell=bash \
+					--shell-version="$BASH_VERSION" \
+					--status="$_omp_status" \
+					--pipestatus="${_omp_pipestatus[*]}" \
+					--no-status="$_omp_no_status" \
+					--execution-time="$_omp_execution_time" \
+					--terminal-width="${COLUMNS-0}" |
+					tr -d '\0'
+			)
+			printf '%s' "${right@P}"
+		}
+		bleopt prompt_rps1='$(_omp_get_right)'
+	fi
 else
 	export PS1="\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[m\] \[\e[36m\]\`parse_git_branch\`\[\e[m\] \[\e[37m\]\\$\[\e[m\] "
 fi
