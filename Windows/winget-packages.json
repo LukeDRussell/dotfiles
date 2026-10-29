@@ -64,7 +64,13 @@
           "PackageIdentifier": "jqlang.jq"
         },
         {
+          "PackageIdentifier": "junegunn.fzf"
+        },
+        {
           "PackageIdentifier": "KiCad.KiCad"
+        },
+        {
+          "PackageIdentifier": "lsd-rs.lsd"
         },
         {
           "PackageIdentifier": "Microsoft.PowerShell"
