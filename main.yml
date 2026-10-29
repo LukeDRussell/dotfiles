@@ -8,7 +8,6 @@
       - ansible
       - bat
       - chezmoi
-      - fish
       - git
       - gitui
       - git-filter-repo

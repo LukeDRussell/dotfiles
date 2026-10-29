@@ -1,8 +1,8 @@
 # dotfiles
-My settings for emacs, pwsh, tmux, fish, etc.
+My settings for emacs, bash, pwsh, tmux, etc.
 
 - **Dotfiles** are managed by [chezmoi](https://chezmoi.io). Everything under
-  `home/` maps onto `~` (`dot_config/fish/config.fish` → `~/.config/fish/config.fish`).
+  `home/` maps onto `~` (`dot_config/tmux/tmux.conf` → `~/.config/tmux/tmux.conf`).
   Plain files are deployed as symlinks back into this repo, so editing either copy
   is live. `*.tmpl` files are rendered per OS.
   `home/.chezmoiignore` decides which files each OS gets.
@@ -61,11 +61,3 @@ To see what upstream has changed since, clone it somewhere and diff:
 git clone https://github.com/jamescherti/minimal-emacs.d /tmp/minimal-emacs.d
 git -C /tmp/minimal-emacs.d diff 7a15d5b -- init.el early-init.el
 ```
-
-## Fish
-
-`home/dot_config/fish/functions/_puffer_fish_*.fish` and
-`conf.d/puffer_fish_key_bindings.fish` are vendored from
-[puffer-fish](https://github.com/nickeb96/puffer-fish) v1.1.0 (commit `83174b0`,
-MIT, licence in `LICENSE-puffer-fish`). It expands `...` to `../..`, `!!` to the
-last command, and `!$` to its last argument.

@@ -22,7 +22,10 @@ and the day-to-day commands; this file is the working conventions.
   (version and commit in the README). Only change them deliberately; Luke's own
   settings go in `pre-*.el` and `post-*.el`. Same `~/.config/emacs` on every OS.
 - **Prompt:** oh-my-posh with one shared config
-  (`home/dot_config/oh-my-posh/config.omp.json`) in pwsh, bash, zsh and fish.
+  (`home/dot_config/oh-my-posh/config.omp.json`) in pwsh and bash.
+- **Shells:** only bash (Linux/macOS) and pwsh (Windows). Fish and zsh were
+  dropped on purpose; don't add them back. Machine-specific bash settings go in
+  `~/.bashrc.d/`, not the repo.
 - **Fonts** are installed by hand (listed in the README), not by any tool.
 
 ## Machines, in priority order
@@ -48,15 +51,15 @@ There are no automated tests. Before pushing, verify the change by hand:
   empty and links should point into the repo. Load what changed (for example
   pwsh with the profile, or Emacs with `emacs --batch` loading `early-init.el`
   and `init.el`).
-- **Shell configs:** start each affected shell interactively (`bash -ic`,
-  `zsh -ic`, `fish -i -c`) and check the setting took effect.
+- **Shell configs:** start the shell interactively (`bash -ic '...'`, or `pwsh`
+  with the profile) and check the setting took effect.
 - To try unpushed commits on Fedora 44, fetch straight from the Windows repo:
   `git fetch /mnt/c/Users/Luke/Repos/dotfiles main && git merge --ff-only FETCH_HEAD`.
 - Say plainly what was and wasn't checked.
 
 ## WSL gotchas
-- The Fedora 44 login shell is fish, and `wsl.exe -- <cmd>` passes the command
-  through a shell that expands `$` first. Write the commands to a script file
+- `wsl.exe -- <cmd>` passes the command through the login shell, which expands
+  `$` first. Write the commands to a script file
   and run `wsl.exe -d FedoraLinux-44 --cd ~ -- bash /mnt/c/.../script.sh`.
 - The Fedora WSL image is minimal: tools like `awk` may be missing, so don't
   rely on them in scripts. Missing tools Luke wants go into `fedora_apps`.

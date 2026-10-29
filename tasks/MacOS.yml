@@ -28,8 +28,3 @@
     - NSAutomaticQuoteSubstitutionEnabled
     - NSAutomaticSpellingCorrectionEnabled
     - QuitMenuItem
-
-      # - name: Change default shell
-      #  ansible.builtin.user:
-      #    user: "{{ ansible_facts['user_id'] }}"
-      #    shell: "/opt/homebrew/bin/fish"

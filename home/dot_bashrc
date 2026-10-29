@@ -14,17 +14,6 @@ export PATH
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=
 
-# User specific aliases and functions
-# Machine-local additions (installer PATH lines etc.) go in ~/.bashrc.d/
-if [ -d ~/.bashrc.d ]; then
-	for rc in ~/.bashrc.d/*; do
-		if [ -f "$rc" ]; then
-			. "$rc"
-		fi
-	done
-fi
-unset rc
-
 # Enable vim-like; cursor is a line in insert mode and a block in normal mode
 if [[ $- == *i* ]]; then
 	set -o vi
@@ -35,17 +24,59 @@ if [[ $- == *i* ]]; then
 	bind 'set keyseq-timeout 10'
 fi
 
-alias play='ansible-playbook -e @~/.secrets.yml'
-alias ll='ls -lh'
-alias lla='ls -lah'
+export EDITOR=nvim
+export SUDO_EDITOR=$EDITOR
+
+if command -v nvim >/dev/null 2>&1; then
+	alias vi=nvim
+	alias vim=nvim
+fi
+
+# GNU ls on macOS
+if command -v gls >/dev/null 2>&1; then
+	alias ls='gls'
+fi
+
+# lsd
+if command -v lsd >/dev/null 2>&1; then
+	alias ls='lsd'
+	alias l1='lsd -1'
+	alias ll='lsd --long --header --git --classify --group-directories-first'
+	alias tree='lsd --tree'
+	alias lla='ll --all'
+	alias llt='ll --timesort'
+	alias lls='ll --sizesort'
+else
+	alias ll='ls -lh'
+	alias lla='ls -lah'
+	alias llm='ls -lh --sort=time'
+	alias lls='ls -lh --sort=size'
+fi
+
 alias df='df -h'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 alias ..='cd ..'
-alias ...='cd ../../../'
-alias ....='cd ../../../../'
-alias .....='cd ../../../../../'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+
+alias play='uv run ansible-playbook'
+alias tm='tmux new -A -s main'
+
+# Git
+alias gitco='git checkout'
+alias gita='git add'
+alias gitaa='git add .'
+alias gitca='git commit -a -m'
+alias gits='git status'
+alias gitl='git log --oneline --decorate --all --graph'
+alias gitp='git pull --rebase'
+
+if command -v zoxide >/dev/null 2>&1; then
+	eval "$(zoxide init bash)"
+fi
 
 # get current branch in git repo
 function parse_git_branch() {
@@ -94,7 +125,18 @@ function parse_git_dirty {
 	fi
 }
 
-# Prompt: same oh-my-posh config as pwsh, fish and zsh; plain PS1 if it's missing
+# Machine-local additions (work settings, installer PATH lines etc.) go in
+# ~/.bashrc.d/; loaded last so they can override anything above
+if [ -d ~/.bashrc.d ]; then
+	for rc in ~/.bashrc.d/*; do
+		if [ -f "$rc" ]; then
+			. "$rc"
+		fi
+	done
+fi
+unset rc
+
+# Prompt: same oh-my-posh config as pwsh; plain PS1 if it's missing
 if command -v oh-my-posh >/dev/null 2>&1; then
 	eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/config.omp.json)"
 else
