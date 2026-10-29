@@ -24,7 +24,7 @@
       - zoxide
     fedora_apps:
       - fd-find
-      - gawk # Not in the minimal Fedora WSL image
+      - gawk  # Not in the minimal Fedora WSL image
       - emacs
       - util-linux-user
     brew_apps:
