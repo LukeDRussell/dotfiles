@@ -25,6 +25,15 @@ My settings for emacs, pwsh, tmux, fish, etc.
 1. Turn on Developer Mode (Settings → System → For developers) so symlinks work.
 2. Clone to `~\Repos\dotfiles` and run `.\install.ps1` from PowerShell 7.
 
+### Fonts
+Install fonts by hand; neither Ansible nor chezmoi does it. The configs expect:
+
+- **Hack Nerd Font Mono** (Windows Terminal, Emacs, prompt icons) from
+  [nerdfonts.com](https://www.nerdfonts.com/font-downloads)
+- **Atkinson Hyperlegible Next** (Emacs variable-pitch text)
+
+For WSL, install them on Windows: the terminal draws the text, not Linux.
+
 ## Day to day
 
 ```sh
