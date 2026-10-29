@@ -43,8 +43,10 @@ and the day-to-day commands; this file is the working conventions.
 4. macOS: unused for 2.5 years. Keep its tasks, lowest priority.
 
 ## Git
-- Commit straight to `main` and push. Use a branch and PR only for something
-  major (on the scale of adopting chezmoi).
+- Don't commit or push until Luke has tried the change and said he likes it.
+  Make the change, tell him what to try, and wait for his OK.
+- Then commit straight to `main` and push. Use a branch and PR only for
+  something major (on the scale of adopting chezmoi).
 - The remote is called `Github`, not `origin`.
 - Never force-push or rewrite pushed history; fix with a follow-up commit.
 - `.gitattributes` normalises to LF (`*.ps1` is CRLF); expect line-ending warnings.
