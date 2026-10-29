@@ -23,20 +23,6 @@
   args:
     executable: /usr/bin/fish
 
-- name: List fish plugins
-  ansible.builtin.command:
-    cmd: fish -c "fisher list"
-  register: fisher_list
-  changed_when: false
-
-- name: Install fish plugins
-  ansible.builtin.command:
-    cmd: fish -c "fisher install {{ item }}"
-  loop:
-    - nickeb96/puffer-fish
-  when: (item | lower) not in (fisher_list.stdout | lower)
-  changed_when: true
-
 - name: Change default shell
   become: true
   ansible.builtin.user:
