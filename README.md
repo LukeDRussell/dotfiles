@@ -61,3 +61,11 @@ To see what upstream has changed since, clone it somewhere and diff:
 git clone https://github.com/jamescherti/minimal-emacs.d /tmp/minimal-emacs.d
 git -C /tmp/minimal-emacs.d diff 7a15d5b -- init.el early-init.el
 ```
+
+## Fish
+
+`home/dot_config/fish/functions/_puffer_fish_*.fish` and
+`conf.d/puffer_fish_key_bindings.fish` are vendored from
+[puffer-fish](https://github.com/nickeb96/puffer-fish) v1.1.0 (commit `83174b0`,
+MIT, licence in `LICENSE-puffer-fish`). It expands `...` to `../..`, `!!` to the
+last command, and `!$` to its last argument.

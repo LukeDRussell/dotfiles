@@ -1,5 +1,6 @@
 README.md
 .config/emacs/LICENSE-minimal-emacs.d
+.config/fish/LICENSE-puffer-fish
 
 {{- if eq .chezmoi.os "windows" }}
 .bashrc
