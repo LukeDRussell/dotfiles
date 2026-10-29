@@ -10,19 +10,6 @@
   register: chezmoi_apply
   changed_when: chezmoi_apply.stdout | length > 0
 
-- name: Download fisher
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish
-    dest: /tmp/fisher.fish
-    mode: "0644"
-
-- name: Install fisher
-  ansible.builtin.shell:
-    cmd: source /tmp/fisher.fish && fisher install jorgebucaran/fisher
-    creates: ~/.config/fish/functions/fisher.fish
-  args:
-    executable: /usr/bin/fish
-
 - name: Change default shell
   become: true
   ansible.builtin.user:
