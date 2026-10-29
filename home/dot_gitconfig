@@ -11,6 +11,24 @@
 [push]
 	default = simple
 	autoSetupRemote = true
+[fetch]
+	# Forget remote branches that were deleted on the server
+	prune = true
+[rebase]
+	# Stash and restore uncommitted changes around a rebase (and so git pull)
+	autoStash = true
+[rerere]
+	# Remember how a conflict was resolved and reuse it next time
+	enabled = true
+[diff]
+	# Clearer diffs when code moves around
+	algorithm = histogram
+[merge]
+	# Show the original text as well as both sides in conflict markers
+	conflictStyle = zdiff3
+[branch]
+	# git branch lists the most recently used first
+	sort = -committerdate
 [filter "lfs"]
 	process = git-lfs filter-process
 	required = true
