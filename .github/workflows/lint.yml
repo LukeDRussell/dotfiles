@@ -12,7 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          # Not "3.x": ansible-core lags the newest Python release
+          python-version: "3.13"
       # "ansible" (not just ansible-core) brings community.general, which the
       # macOS tasks use
       - run: pip install ansible ansible-lint
