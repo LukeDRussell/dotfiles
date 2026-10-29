@@ -25,6 +25,13 @@ if (-not $SkipApps -and $PSCmdlet.ShouldProcess($apps, 'winget import')) {
     Update-Path
 }
 
+# PSFzf (fzf key bindings for the profile) comes from the PowerShell Gallery,
+# and must be installed by PowerShell 7 so it lands in 7's module folder
+$pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
+if (-not $SkipApps -and $pwsh -and $PSCmdlet.ShouldProcess('PSFzf', 'Install-Module')) {
+    & $pwsh.Source -NoProfile -Command 'if (-not (Get-Module -ListAvailable PSFzf)) { Install-Module PSFzf -Scope CurrentUser -Repository PSGallery -Force }'
+}
+
 if (-not (Get-Command chezmoi -ErrorAction SilentlyContinue)) {
     winget install --id twpayne.chezmoi --exact --source winget --accept-package-agreements
     Update-Path

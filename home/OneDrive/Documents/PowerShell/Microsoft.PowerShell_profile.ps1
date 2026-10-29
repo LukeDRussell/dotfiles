@@ -47,7 +47,6 @@ if (Get-Command podman -ErrorAction SilentlyContinue) {
 }
 
 Set-Alias -name which -Value Get-Command
-Set-Alias -name ll -Value Get-ChildItem
 Set-Alias -name wget -Value Invoke-WebRequest
 
 $localBin = "$HOME/.local/bin"
@@ -73,6 +72,70 @@ $OnViModeChange = [scriptblock]{
 Set-PsReadLineOption -EditMode Vi
 Set-PSReadLineOption -ViModeIndicator Script -ViModeChangeHandler $OnViModeChange
 
+# --- Keys and history, matching .bashrc (EditMode resets bindings, so after it)
+# Up/Down search history for lines starting with what's already typed
+foreach ($mode in 'Insert', 'Command') {
+    Set-PSReadLineKeyHandler -ViMode $mode -Key UpArrow -Function HistorySearchBackward
+    Set-PSReadLineKeyHandler -ViMode $mode -Key DownArrow -Function HistorySearchForward
+}
+# Tab lists every match to pick from, like bash's first-Tab listing
+Set-PSReadLineKeyHandler -ViMode Insert -Key Tab -Function MenuComplete
+# Ctrl-D on an empty line exits, as in bash
+Set-PSReadLineKeyHandler -ViMode Insert -Chord Ctrl+d -Function DeleteCharOrExit
+
+# History: large and without duplicates (PSReadLine saves each line as you go).
+# Like HISTCONTROL/HISTIGNORE, skip lines starting with a space and a few
+# commands; everything else gets PSReadLine's default handling, which keeps
+# lines that look like passwords or tokens out of the history file.
+Set-PSReadLineOption -MaximumHistoryCount 100000 -HistoryNoDuplicates
+$global:HistoryIgnore = 'ls', 'exit', 'bg', 'fg', 'history', 'clear', 'cls'
+Set-PSReadLineOption -AddToHistoryHandler {
+    param([string]$line)
+    if ($line -match '^\s' -or $global:HistoryIgnore -contains $line.Trim()) {
+        return [Microsoft.PowerShell.AddToHistoryOption]::SkipAdding
+    }
+    [Microsoft.PowerShell.PSConsoleReadLine]::GetDefaultAddToHistoryOption($line)
+}
+
+# --- Same short commands as .bashrc
+$env:EDITOR = 'nvim'
+
+# ls stays PowerShell's own (it returns file objects for pipelines such as
+# ls *.log | Remove-Item); the ll family uses lsd, as in bash
+if (Get-Command lsd -ErrorAction SilentlyContinue) {
+    function global:l1 { lsd -1 @args }
+    function global:ll { lsd --long --header --git --classify --group-directories-first @args }
+    function global:lla { ll --all @args }
+    function global:llt { ll --timesort @args }
+    function global:lls { ll --sizesort @args }
+    function global:tree { lsd --tree @args }
+}
+else {
+    Set-Alias -Name ll -Value Get-ChildItem
+}
+
+function global:.. { Set-Location .. }
+function global:... { Set-Location ../.. }
+function global:.... { Set-Location ../../.. }
+function global:..... { Set-Location ../../../.. }
+
+function global:gitco { git checkout @args }
+function global:gita { git add @args }
+function global:gitaa { git add . }
+function global:gitca { git commit -a -m @args }
+function global:gits { git status @args }
+function global:gitl { git log --oneline --decorate --all --graph @args }
+function global:gitp { git pull --rebase @args }
+
+# --- fzf: Ctrl-R fuzzy history, Ctrl-T insert a file path, Alt-C cd into a
+# folder (same keys as bash). PSFzf is installed by install.ps1. Importing it
+# costs ~370 ms, so the keys call its functions directly and PowerShell loads
+# the module the first time one is pressed.
+if ((Get-Command fzf -ErrorAction SilentlyContinue) -and (Get-Module -ListAvailable PSFzf)) {
+    Set-PSReadLineKeyHandler -ViMode Insert -Chord Ctrl+r -BriefDescription 'fzf history' -ScriptBlock { Invoke-FzfPsReadlineHandlerHistory }
+    Set-PSReadLineKeyHandler -ViMode Insert -Chord Ctrl+t -BriefDescription 'fzf file path' -ScriptBlock { Invoke-FzfPsReadlineHandlerProvider }
+    Set-PSReadLineKeyHandler -ViMode Insert -Chord Alt+c -BriefDescription 'fzf cd' -ScriptBlock { Invoke-FzfPsReadlineHandlerSetLocation }
+}
 function Convert-ToLF {
     [CmdletBinding(SupportsShouldProcess)]
     param(
