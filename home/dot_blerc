@@ -20,11 +20,13 @@ function blerc/vim-load-hook {
   ble-bind -m vi_xmap --cursor 2
   ble-bind -m vi_cmap --cursor 0   # terminal default on the : command line
 
-  # Up/Down search history for lines starting with what's typed (as in .bashrc)
-  ble-bind -m vi_imap -f up history-search-backward
-  ble-bind -m vi_imap -f down history-search-forward
-  ble-bind -m vi_nmap -f up history-search-backward
-  ble-bind -m vi_nmap -f down history-search-forward
+  # Up/Down search history for lines starting with what's typed (as in .bashrc).
+  # The options make it behave like readline: no search mode, Enter runs it.
+  local opts=hide-status:immediate-accept:empty=emulate-readline:point=end
+  ble-bind -m vi_imap -f up "history-search-backward $opts"
+  ble-bind -m vi_imap -f down "history-search-forward $opts"
+  ble-bind -m vi_nmap -f up "history-search-backward $opts"
+  ble-bind -m vi_nmap -f down "history-search-forward $opts"
   # Space expands !! and !$ on screen before you press Enter
   ble-bind -m vi_imap -f SP magic-space
 }
