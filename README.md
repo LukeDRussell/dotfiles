@@ -47,6 +47,16 @@ ansible-lint              # check the playbook (config in .ansible-lint)
 Windows Terminal settings are in `Windows/TerminalLocalState` and are linked as a
 whole directory. `Windows/*.reg` and `keyboard_manager.json` are applied by hand.
 
+## SSH
+
+`~/.ssh/config` has shared defaults only; this repo is public. Each machine's
+hosts go in `~/.ssh/config.d/hosts`, which isn't tracked:
+
+```
+Host example
+    HostName 192.0.2.10
+```
+
 ## Emacs
 
 `home/dot_config/emacs/init.el` and `early-init.el` are vendored from
