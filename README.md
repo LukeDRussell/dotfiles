@@ -41,6 +41,7 @@ chezmoi status            # what differs between the repo and ~
 chezmoi diff              # show the differences
 chezmoi apply             # deploy (needed for new files and template changes)
 chezmoi add ~/.config/foo # start tracking a new config
+ansible-lint              # check the playbook (config in .ansible-lint)
 ```
 
 Windows Terminal settings are in `Windows/TerminalLocalState` and are linked as a

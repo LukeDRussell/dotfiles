@@ -1,0 +1,5 @@
+# https://docs.ansible.com/projects/lint/configuring/
+# Only the playbook is Ansible; home/ is chezmoi's and Windows/ is hand-applied.
+exclude_paths:
+  - home/
+  - Windows/

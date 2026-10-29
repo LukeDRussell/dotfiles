@@ -10,21 +10,33 @@
   register: chezmoi_apply
   changed_when: chezmoi_apply.stdout | length > 0
 
-# TODO: Make this idempotent and return accurate changed value
+- name: Download fisher
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish
+    dest: /tmp/fisher.fish
+    mode: "0644"
+
 - name: Install fisher
   ansible.builtin.shell:
-    cmd: curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+    cmd: source /tmp/fisher.fish && fisher install jorgebucaran/fisher
+    creates: ~/.config/fish/functions/fisher.fish
   args:
     executable: /usr/bin/fish
 
+- name: List fish plugins
+  ansible.builtin.command:
+    cmd: fish -c "fisher list"
+  register: fisher_list
+  changed_when: false
+
 - name: Install fish plugins
-  ansible.builtin.shell:
-    cmd: "fisher install  {{ item }}"
-  args:
-    executable: /usr/bin/fish
+  ansible.builtin.command:
+    cmd: fish -c "fisher install {{ item }}"
   loop:
     - nickeb96/puffer-fish
     - IlanCosman/tide@v6
+  when: (item | lower) not in (fisher_list.stdout | lower)
+  changed_when: true
 
 - name: Change default shell
   become: true
