@@ -23,7 +23,16 @@ My settings for emacs, bash, pwsh, tmux, etc.
 
 ### Windows
 1. Turn on Developer Mode (Settings → System → For developers) so symlinks work.
-2. Clone to `~\Repos\dotfiles` and run `.\install.ps1` from PowerShell 7.
+2. Install git (`winget install --id Git.Git -e`), open a new terminal, and clone
+   to `~\Repos\dotfiles`.
+3. Run `powershell -ExecutionPolicy Bypass -File .\install.ps1`. It installs the
+   apps in `Windows\winget-packages.json` (PowerShell 7 among them), then chezmoi,
+   then applies the dotfiles. `-SkipApps` skips the apps.
+
+To refresh the app list after installing something new, run
+`winget export -o new.json --source winget` and copy the new entries across.
+Runtimes and libraries (Visual C++, .NET, Windows App Runtime, VCLibs, UI.Xaml)
+and apps that ship with Windows are left out on purpose.
 
 ### Fonts
 Install fonts by hand; neither Ansible nor chezmoi does it. The configs expect:
