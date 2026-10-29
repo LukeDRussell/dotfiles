@@ -134,6 +134,7 @@ fi
 
 # Escape characters that PS1 would otherwise expand (a branch named $(cmd))
 _prompt_escape() {
+	# shellcheck disable=SC1003  # bs is a single backslash, on purpose
 	local s=$1 bs='\'
 	s=${s//"$bs"/"$bs$bs"}
 	s=${s//'$'/"$bs\$"}

@@ -21,8 +21,11 @@ and the day-to-day commands; this file is the working conventions.
 - **Emacs:** `init.el` and `early-init.el` are vendored from minimal-emacs.d
   (version and commit in the README). Only change them deliberately; Luke's own
   settings go in `pre-*.el` and `post-*.el`. Same `~/.config/emacs` on every OS.
-- **Prompt:** oh-my-posh with one shared config
-  (`home/dot_config/oh-my-posh/config.omp.json`) in pwsh and bash.
+- **Prompt:** native, in the style of the Aphrodite theme, written separately in
+  `dot_bashrc` (`_prompt_update`) and the pwsh profile (`prompt`); keep the two
+  looking the same. oh-my-posh was dropped because it added ~0.8 s to pwsh
+  startup. One `git status --porcelain --branch` call per prompt; anything
+  shown from git must be escaped in bash (`_prompt_escape`).
 - **Shells:** only bash (Linux/macOS) and pwsh (Windows). Fish and zsh were
   dropped on purpose; don't add them back. Machine-specific bash settings go in
   `~/.bashrc.d/`, not the repo.
