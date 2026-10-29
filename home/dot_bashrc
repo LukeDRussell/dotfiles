@@ -118,53 +118,51 @@ if [ -d ~/.bashrc.d ]; then
 fi
 unset rc
 
-# Prompt: same oh-my-posh config as pwsh; plain PS1 if it's missing
-if command -v oh-my-posh >/dev/null 2>&1; then
-	eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/config.omp.json)"
-
-	# oh-my-posh can't draw its right-hand block (status, git, time) in bash, but
-	# ble.sh can: render it with oh-my-posh's own status variables.
-	if [[ ${BLE_VERSION-} ]]; then
-		# shellcheck disable=SC2154  # _omp_* are set by oh-my-posh before each prompt
-		function _omp_get_right {
-			local right
-			right=$(
-				oh-my-posh print right \
-					--config ~/.config/oh-my-posh/config.omp.json \
-					--shell=bash \
-					--shell-version="$BASH_VERSION" \
-					--status="$_omp_status" \
-					--pipestatus="${_omp_pipestatus[*]}" \
-					--no-status="$_omp_no_status" \
-					--execution-time="$_omp_execution_time" \
-					--terminal-width="${COLUMNS-0}" |
-					tr -d '\0'
-			)
-			printf '%s' "${right@P}"
-		}
-		# shellcheck disable=SC2016  # run at each prompt, not now
-		bleopt prompt_rps1='$(_omp_get_right)'
-	fi
+# Prompt, in the style of Aphrodite (github.com/win0err/aphrodite-terminal-theme)
+# plus an OS icon:
+#     WSL [venv] user@host:~/dir <branch> 12:34:56
+#   $
+# The branch is green when clean, yellow with changes; $ turns red after a
+# failed command. Icons need a Nerd Font.
+if [[ $(uname -r) == *[Mm]icrosoft* ]]; then
+	_prompt_os=$' WSL'
+elif [[ $(uname -s) == Darwin ]]; then
+	_prompt_os=$''
 else
-	# Fallback: user@host:dir, plus the git branch if git's prompt helper exists
-	for git_prompt in /usr/share/git-core/contrib/completion/git-prompt.sh \
-		/opt/homebrew/etc/bash_completion.d/git-prompt.sh \
-		/usr/local/etc/bash_completion.d/git-prompt.sh; do
-		if [[ -f $git_prompt ]]; then
-			. "$git_prompt"
-			break
-		fi
-	done
-	unset git_prompt
-	if declare -F __git_ps1 >/dev/null; then
-		# Read by __git_ps1
-		# shellcheck disable=SC2034
-		GIT_PS1_SHOWDIRTYSTATE=1 GIT_PS1_SHOWUNTRACKEDFILES=1
-		PS1='\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[36m\]$(__git_ps1 " [%s]")\[\e[m\] \$ '
-	else
-		PS1='\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[m\] \$ '
-	fi
+	_prompt_os=$''
 fi
+
+# Escape characters that PS1 would otherwise expand (a branch named $(cmd))
+_prompt_escape() {
+	local s=${1//\/\\}
+	s=${s//\$/\\$}
+	printf '%s' "${s//\`/\\`}"
+}
+
+_prompt_update() {
+	local status=$? line branch git='' venv='' ssh='' char='\[\e[0m\]'
+
+	# One git call gives both the branch (first line) and whether anything changed
+	if line=$(git --no-optional-locks status --porcelain --branch 2>/dev/null); then
+		branch=${line%%$'\n'*}
+		branch=${branch#'## '}
+		branch=${branch%%...*}
+		branch=${branch##* }          # "No commits yet on main" -> main
+		[[ $branch == *'(no'* || $branch == 'branch)' ]] && branch=HEAD
+		if [[ $line == *$'\n'* ]]; then
+			git=" \[\e[93m\]<$(_prompt_escape "$branch")>"
+		else
+			git=" \[\e[92m\]<$(_prompt_escape "$branch")>"
+		fi
+	fi
+	[[ -n ${VIRTUAL_ENV-} ]] && venv="\[\e[37m\][$(_prompt_escape "${VIRTUAL_ENV##*/}")] "
+	[[ -n ${SSH_CONNECTION-} ]] && ssh='\[\e[90m\][\[\e[95m\]ssh\[\e[90m\]]'
+	((status)) && char='\[\e[31m\]'
+
+	PS1="\[\e[94m\]${_prompt_os}\[\e[0m\] ${venv}\[\e[36m\]\u\[\e[90m\]@\[\e[94m\]\h${ssh}\[\e[90m\]:\[\e[0m\]\w${git} \[\e[90m\]\t\[\e[0m\]\n${char}\\$\[\e[0m\] "
+}
+# First in PROMPT_COMMAND, so $? is still the last command's status
+PROMPT_COMMAND="_prompt_update${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 
 # ble.sh: attach last, after the prompt and everything else is set up
 [[ ! ${BLE_VERSION-} ]] || ble-attach
