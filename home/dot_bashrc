@@ -134,13 +134,15 @@ fi
 
 # Escape characters that PS1 would otherwise expand (a branch named $(cmd))
 _prompt_escape() {
-	local s=${1//\/\\}
-	s=${s//\$/\\$}
-	printf '%s' "${s//\`/\\`}"
+	local s=$1 bs='\'
+	s=${s//"$bs"/"$bs$bs"}
+	s=${s//'$'/"$bs\$"}
+	s=${s//'`'/"$bs\`"}
+	printf '%s' "$s"
 }
 
 _prompt_update() {
-	local status=$? line branch git='' venv='' ssh='' char='\[\e[0m\]'
+	local status=$? line branch git='' venv='' ssh='' char='\[\e[0m\]' dollar='\$'
 
 	# One git call gives both the branch (first line) and whether anything changed
 	if line=$(git --no-optional-locks status --porcelain --branch 2>/dev/null); then
@@ -159,7 +161,7 @@ _prompt_update() {
 	[[ -n ${SSH_CONNECTION-} ]] && ssh='\[\e[90m\][\[\e[95m\]ssh\[\e[90m\]]'
 	((status)) && char='\[\e[31m\]'
 
-	PS1="\[\e[94m\]${_prompt_os}\[\e[0m\] ${venv}\[\e[36m\]\u\[\e[90m\]@\[\e[94m\]\h${ssh}\[\e[90m\]:\[\e[0m\]\w${git} \[\e[90m\]\t\[\e[0m\]\n${char}\\$\[\e[0m\] "
+	PS1="\[\e[94m\]${_prompt_os}\[\e[0m\] ${venv}\[\e[36m\]\u\[\e[90m\]@\[\e[94m\]\h${ssh}\[\e[90m\]:\[\e[0m\]\w${git} \[\e[90m\]\t\[\e[0m\]\n${char}${dollar}\[\e[0m\] "
 }
 # First in PROMPT_COMMAND, so $? is still the last command's status
 PROMPT_COMMAND="_prompt_update${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
