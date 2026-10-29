@@ -61,3 +61,19 @@ To see what upstream has changed since, clone it somewhere and diff:
 git clone https://github.com/jamescherti/minimal-emacs.d /tmp/minimal-emacs.d
 git -C /tmp/minimal-emacs.d diff 7a15d5b -- init.el early-init.el
 ```
+
+## ble.sh (trial)
+
+[ble.sh](https://github.com/akinomyoga/ble.sh) gives bash fish-like
+autosuggestions, syntax highlighting and a fuller vim mode. `.bashrc` loads it
+only if `~/.local/share/blesh/ble.sh` exists; settings are in `.blerc`. Start a
+shell with `BLE_DISABLE=1` to skip it. Not installed by Ansible yet; on Fedora 44
+it was installed by hand from the nightly build (`0.4.0-nightly+aeabb1a`):
+
+```sh
+sudo dnf install xz
+curl -fsSL https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar -xJ -C /tmp
+bash /tmp/ble-nightly/ble.sh --install ~/.local/share
+```
+
+Run the same commands again to update it.
