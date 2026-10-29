@@ -17,26 +17,3 @@
     state: latest
     update_only: true
     update_cache: true
-
-- name: Install Nerd Fonts
-  when:
-    - ansible_facts.distribution == "Fedora"
-  block:
-
-    - name: Ensure fonts directory exists
-      ansible.builtin.file:
-        path: "~/.fonts"
-        state: directory
-        mode: "0700"
-
-    - name: Check if Hack NF exists
-      ansible.builtin.stat:
-        path: "~/.fonts/HackNerdFontMono-Regular.ttf"
-      register: font_hack_exists
-
-    - name: Download Hack
-      when: not font_hack_exists.stat.exists
-      ansible.builtin.unarchive:
-        src: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Hack.tar.xz
-        dest: "{{ lookup('env', 'HOME') }}/.fonts/"
-        remote_src: true
