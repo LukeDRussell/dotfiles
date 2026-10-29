@@ -40,7 +40,31 @@ HISTSIZE=100000
 HISTFILESIZE=100000
 HISTCONTROL=ignoreboth:erasedups
 HISTTIMEFORMAT='%F %T  '
+HISTIGNORE='&:[ ]*:exit:ls:bg:fg:history:clear'
 shopt -s histappend cmdhist
+
+# Mostly from bash-sensible (github.com/mrzool/bash-sensible)
+if [[ $- == *i* ]]; then
+	# Don't let > overwrite an existing file; use >| when you mean it
+	set -o noclobber
+	# ** matches any depth of folders, e.g. ls **/*.yml
+	shopt -s globstar
+	# Tab completion: ignore case, treat - and _ alike, list matches on first Tab
+	bind 'set completion-ignore-case on'
+	bind 'set completion-map-case on'
+	bind 'set show-all-if-ambiguous on'
+	# Plain readline only; ble.sh binds these in ~/.blerc
+	if [[ -z ${BLE_VERSION-} ]]; then
+		# Up/Down search history for lines starting with what's already typed
+		for keymap in vi-insert vi-command; do
+			bind -m "$keymap" '"\e[A": history-search-backward'
+			bind -m "$keymap" '"\e[B": history-search-forward'
+		done
+		unset keymap
+		# Space expands !! and !$ on screen before you press Enter
+		bind -m vi-insert 'Space: magic-space'
+	fi
+fi
 
 export EDITOR=nvim
 export SUDO_EDITOR=$EDITOR
@@ -72,6 +96,8 @@ else
 fi
 
 alias df='df -h'
+# Create missing parent folders too (and don't complain if it exists)
+alias mkdir='mkdir -p'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
@@ -144,6 +170,10 @@ _prompt_escape() {
 
 _prompt_update() {
 	local status=$? line branch git='' venv='' ssh='' char='\[\e[0m\]' dollar='\$'
+
+	# Save each command to the history file straight away, so a closed tmux pane
+	# or crashed terminal doesn't lose it
+	history -a
 
 	# One git call gives both the branch (first line) and whether anything changed
 	if line=$(git --no-optional-locks status --porcelain --branch 2>/dev/null); then
