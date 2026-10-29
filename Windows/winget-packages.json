@@ -58,9 +58,6 @@
           "PackageIdentifier": "Insecure.Nmap"
         },
         {
-          "PackageIdentifier": "JanDeDobbeleer.OhMyPosh"
-        },
-        {
           "PackageIdentifier": "JohnMacFarlane.Pandoc"
         },
         {

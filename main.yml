@@ -25,14 +25,12 @@
     fedora_apps:
       - fd-find
       - gawk  # Not in the minimal Fedora WSL image
-      - oh-my-posh
       - emacs
       - util-linux-user
     brew_apps:
       - fd
       - emacs-plus@29
       - bash  # macOS /bin/bash is 3.2
-      - jandedobbeleer/oh-my-posh/oh-my-posh
       - cmake
     brew_casks:
       - calibre
