@@ -1,7 +1,45 @@
 $PSStyle.FileInfo.Directory = $PSStyle.Foreground.BrightBlue
 
-if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
-    oh-my-posh init pwsh --config '~/.config/oh-my-posh/config.omp.json' | Invoke-Expression
+# Prompt, in the style of Aphrodite (github.com/win0err/aphrodite-terminal-theme)
+# plus an OS icon:
+#    [venv] user@host:~\dir <branch> 12:34:56
+#   $
+# The branch is green when clean, yellow with changes; $ turns red after a
+# failed command (# instead of $ when elevated). Icons need a Nerd Font.
+$global:PromptHost = [Net.Dns]::GetHostName()
+$global:PromptHasGit = [bool](Get-Command git -ErrorAction SilentlyContinue)
+$global:PromptChar = if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { '#' } else { '$' }
+
+function global:prompt {
+    $ok = $?
+    $exitCode = $global:LASTEXITCODE
+    $e = [char]27
+
+    $path = $PWD.ProviderPath
+    if ($path -and $path.StartsWith($HOME, [StringComparison]::OrdinalIgnoreCase)) {
+        $path = '~' + $path.Substring($HOME.Length)
+    }
+    if (-not $path) { $path = $PWD.Path }   # e.g. registry locations
+
+    $git = ''
+    if ($global:PromptHasGit -and $PWD.Provider.Name -eq 'FileSystem') {
+        # One git call gives both the branch (first line) and whether anything changed
+        $lines = @(git --no-optional-locks status --porcelain --branch 2>$null)
+        if ($LASTEXITCODE -eq 0 -and $lines.Count -gt 0) {
+            $branch = ($lines[0] -replace '^## ', '' -replace '\.\.\..*$', '') -split ' ' | Select-Object -Last 1
+            if ($branch -eq 'branch)') { $branch = 'HEAD' }   # "HEAD (no branch)"
+            $colour = if ($lines.Count -gt 1) { 93 } else { 92 }
+            $git = " $e[${colour}m<$branch>"
+        }
+    }
+
+    $venv = if ($env:VIRTUAL_ENV) { "$e[37m[$(Split-Path -Leaf $env:VIRTUAL_ENV)] " } else { '' }
+    $ssh = if ($env:SSH_CONNECTION) { "$e[90m[$e[95mssh$e[90m]" } else { '' }
+    $charColour = if ($ok) { 0 } else { 31 }
+    $time = Get-Date -Format 'HH:mm:ss'
+
+    $global:LASTEXITCODE = $exitCode
+    "$e[94m`u{e70f}$e[0m $venv$e[36m$env:USERNAME$e[90m@$e[94m$global:PromptHost$ssh$e[90m:$e[0m$path$git $e[90m$time$e[0m`n$e[${charColour}m$global:PromptChar$e[0m "
 }
 
 if (Get-Command podman -ErrorAction SilentlyContinue) {
@@ -19,6 +57,8 @@ if (Test-Path -LiteralPath $localBin -PathType Container) {
 
 # enable vi motions on the shell and as editor
 Import-Module PSReadLine
+# The prompt is two lines; tell PSReadLine so redraws line up
+Set-PSReadLineOption -ExtraPromptLineCount 1
 $OnViModeChange = [scriptblock]{
     if ($args[0] -eq 'Command') {
         # Steady block in normal mode, as in bash
