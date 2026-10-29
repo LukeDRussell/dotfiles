@@ -1,0 +1,12 @@
+# Shared SSH defaults. This repo is public, so no hosts or addresses here:
+# per-host entries go in ~/.ssh/config.d/ on each machine (not tracked).
+
+# Host entries first: ssh uses the first value it finds for each setting
+Include config.d/*
+
+Host *
+    User luke
+    IdentityFile ~/.ssh/pers_key
+    # Keep idle sessions alive and notice dead ones within ~90 seconds
+    ServerAliveInterval 30
+    ServerAliveCountMax 3

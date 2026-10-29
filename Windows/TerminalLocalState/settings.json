@@ -121,21 +121,21 @@
                 "tabTitle": "Podman"
             },
             {
-                "commandline": "ssh luke@100.123.188.41",
+                "commandline": "ssh virthost",
                 "guid": "{23935de3-42f9-4f3d-a484-65bd06720585}",
                 "hidden": false,
                 "icon": "\ue83b",
                 "name": "Home VirtHost"
             },
             {
-                "commandline": "ssh luke@100.107.156.21",
+                "commandline": "ssh luke-desktop",
                 "guid": "{b4c84949-db28-4f15-b6ac-0a14c702562d}",
                 "hidden": false,
                 "icon": "\ue83b",
                 "name": "Luke-Desktop"
             },
             {
-                "commandline": "ssh luke@10.0.0.17",
+                "commandline": "ssh nas1",
                 "guid": "{65d5f67a-36b8-4759-adac-a6891a2e7085}",
                 "hidden": false,
                 "icon": "\ue83b",
