@@ -1,13 +1,20 @@
 # ble.sh settings (https://github.com/akinomyoga/ble.sh), trial on Fedora 44.
 # Full list of options: blerc.template in the ble.sh repo.
 
-# vim mode: no "-- INSERT --" line; the cursor shape shows the mode instead
-bleopt keymap_vi_mode_show=
-ble-bind -m vi_imap --cursor 6   # steady bar in insert mode
-ble-bind -m vi_nmap --cursor 2   # steady block in normal mode
-ble-bind -m vi_omap --cursor 2
-ble-bind -m vi_xmap --cursor 2
-ble-bind -m vi_cmap --cursor 0   # terminal default on the : command line
-
 # A lone Esc is Esc straight away, not the start of a key sequence
 bleopt decode_isolated_esc=esc
+
+# vim mode settings only exist once ble.sh loads its vi keymap, so set them then
+function blerc/vim-load-hook {
+  # Don't wait after Esc for a longer key sequence
+  ((_ble_bash>=40300)) && builtin bind 'set keyseq-timeout 1'
+
+  # No "-- INSERT --" line; the cursor shape shows the mode instead
+  bleopt keymap_vi_mode_show=
+  ble-bind -m vi_imap --cursor 6   # steady bar in insert mode
+  ble-bind -m vi_nmap --cursor 2   # steady block in normal mode
+  ble-bind -m vi_omap --cursor 2
+  ble-bind -m vi_xmap --cursor 2
+  ble-bind -m vi_cmap --cursor 0   # terminal default on the : command line
+}
+blehook/eval-after-load keymap_vi blerc/vim-load-hook
