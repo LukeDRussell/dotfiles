@@ -1,44 +1,39 @@
 #!/usr/bin/env bash
+# Make sure Ansible is installed, so the playbook (main.yml) can run.
+set -euo pipefail
 
-# This script uses ansible to install dotfiles, so make sure it's installed.
-
-if command -v ansible &> /dev/null ; then
+if command -v ansible-playbook >/dev/null 2>&1; then
 	echo "Ansible is ready."
 	exit 0
 fi
 
 echo "Installing Ansible..."
 
-# Set OS & Distro variables
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-	DISTRO="sed -n -e 's/^ID_LIKE=//p' /etc/os-release"
-	if [[ "$DISTRO" == "fedora" ]]; then
-		CMD_PKG_INSTALL="dnf"
-	elif [[ "$DISTRO" == "centos"||"redhat" ]]; then
-		CMD_PKG_INSTALL="yum"
-	elif [[ "$DISTRO" == "debian"||"ubuntu" ]]; then
-		CMD_PKG_INSTALL="apt"
-	else
-		echo "This script wasn't written for your distro: $DISTRO"
-	fi
-
-	if [[ "id -u" != 0 ]]; then
-		SUDO="sudo"
-	else
-		SUDO=""
-	fi
-
-elif [[ "$OSTYPE" == "darwin".* ]]; then
-	CMD_PKG_INSTALL="brew"
-	# Makes sure Homebrew is ready to go
-	if [[ ! "command -v brew" ]]; then
-		echo "Installing homebrew..."
-		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-	fi
-	SUDO = ""
+if [[ $(id -u) -eq 0 ]]; then
+	sudo=()
 else
-	echo "Can't determine package installer. Check your OS is in the list"
+	sudo=(sudo)
+fi
+
+if command -v dnf >/dev/null 2>&1; then
+	"${sudo[@]}" dnf install -y ansible
+elif [[ $(uname -s) == Darwin ]]; then
+	if ! command -v brew >/dev/null 2>&1; then
+		echo "Installing Homebrew..."
+		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+		# Homebrew isn't on PATH until the shell is set up; do it for this script
+		for brew in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+			if [[ -x $brew ]]; then
+				eval "$("$brew" shellenv)"
+				break
+			fi
+		done
+	fi
+	brew install ansible
+else
+	echo "Don't know how to install Ansible on this system (only dnf and Homebrew)." >&2
+	echo "Install it yourself, then run: ansible-playbook -K main.yml" >&2
 	exit 1
 fi
 
-$SUDO $CMD_PKG_INSTALL install ansible -y
+echo "Ansible is ready."
