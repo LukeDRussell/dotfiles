@@ -17,7 +17,7 @@ if (Test-Path -LiteralPath $localBin -PathType Container) {
     $env:PATH += [IO.Path]::PathSeparator + $localBin
 }
 
-# enable Vim on the shell and as editor
+# enable vi motions on the shell and as editor
 Import-Module PSReadLine
 $OnViModeChange = [scriptblock]{
     if ($args[0] -eq 'Command') {
@@ -32,6 +32,55 @@ $OnViModeChange = [scriptblock]{
 
 Set-PsReadLineOption -EditMode Vi
 Set-PSReadLineOption -ViModeIndicator Script -ViModeChangeHandler $OnViModeChange
+
+function Convert-ToLF {
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('FullName')]
+        [string[]]$Path
+    )
+    process {
+        foreach ($p in $Path) {
+            foreach ($file in (Resolve-Path -LiteralPath $p -ErrorAction Stop).ProviderPath) {
+                $bytes = [IO.File]::ReadAllBytes($file)
+                $n = $bytes.Length
+
+                # Detect encoding from BOM, then fall back to a null-byte heuristic
+                if     ($n -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+                    $name = 'UTF-8 (BOM)';    $enc = [Text.UTF8Encoding]::new($false);          $skip = 3
+                }
+                elseif ($n -ge 4 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE -and $bytes[2] -eq 0 -and $bytes[3] -eq 0) {
+                    Write-Warning "$file looks like UTF-32; skipping."; continue
+                }
+                elseif ($n -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) {
+                    $name = 'UTF-16 LE (BOM)'; $enc = [Text.UnicodeEncoding]::new($false, $false); $skip = 2
+                }
+                elseif ($n -ge 2 -and $bytes[0] -eq 0xFE -and $bytes[1] -eq 0xFF) {
+                    $name = 'UTF-16 BE (BOM)'; $enc = [Text.UnicodeEncoding]::new($true, $false);  $skip = 2
+                }
+                elseif ($n -ge 2 -and $bytes[0] -ne 0 -and $bytes[1] -eq 0) {
+                    $name = 'UTF-16 LE (no BOM)'; $enc = [Text.UnicodeEncoding]::new($false, $false); $skip = 0
+                }
+                elseif ($n -ge 2 -and $bytes[0] -eq 0 -and $bytes[1] -ne 0) {
+                    $name = 'UTF-16 BE (no BOM)'; $enc = [Text.UnicodeEncoding]::new($true, $false);  $skip = 0
+                }
+                else {
+                    $name = 'UTF-8';          $enc = [Text.UTF8Encoding]::new($false);          $skip = 0
+                }
+
+                if ($PSCmdlet.ShouldProcess($file, "Convert from $name to UTF-8 (no BOM) with LF endings")) {
+                    $text  = $enc.GetString($bytes, $skip, $n - $skip)
+                    $fixed = ($text -replace "`r`n", "`n" -replace "`r", "`n").TrimEnd("`n") + "`n"
+                    [IO.File]::WriteAllText($file, $fixed, [Text.UTF8Encoding]::new($false))
+                    Write-Host "Fixed: $file  [$name -> UTF-8, LF]"
+                }
+            }
+        }
+    }
+}
+Set-Alias crlf2lf Convert-ToLF
+
 
 
 # =============================================================================
