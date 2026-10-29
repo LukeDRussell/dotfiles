@@ -11,17 +11,26 @@ if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
 fi
 export PATH
 
+# ble.sh (trial): fish-like autosuggestions, highlighting and a fuller vim
+# mode. Settings in ~/.blerc. Start a shell with BLE_DISABLE=1 to skip it.
+if [[ $- == *i* && -z ${BLE_DISABLE-} && -f ~/.local/share/blesh/ble.sh ]]; then
+	source ~/.local/share/blesh/ble.sh --noattach
+fi
+
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=
 
 # Enable vim-like; cursor is a line in insert mode and a block in normal mode
 if [[ $- == *i* ]]; then
 	set -o vi
-	bind 'set show-mode-in-prompt on'
-	bind 'set vi-ins-mode-string \1\e[6 q\2'
-	bind 'set vi-cmd-mode-string \1\e[2 q\2'
-	# Don't wait 500ms after Esc for a longer key sequence
-	bind 'set keyseq-timeout 10'
+	# Plain readline only; ble.sh does these in ~/.blerc
+	if [[ -z ${BLE_VERSION-} ]]; then
+		bind 'set show-mode-in-prompt on'
+		bind 'set vi-ins-mode-string \1\e[6 q\2'
+		bind 'set vi-cmd-mode-string \1\e[2 q\2'
+		# Don't wait 500ms after Esc for a longer key sequence
+		bind 'set keyseq-timeout 10'
+	fi
 fi
 
 export EDITOR=nvim
@@ -142,3 +151,6 @@ if command -v oh-my-posh >/dev/null 2>&1; then
 else
 	export PS1="\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[m\] \[\e[36m\]\`parse_git_branch\`\[\e[m\] \[\e[37m\]\\$\[\e[m\] "
 fi
+
+# ble.sh: attach last, after the prompt and everything else is set up
+[[ ! ${BLE_VERSION-} ]] || ble-attach
