@@ -84,4 +84,9 @@ function parse_git_dirty {
 	fi
 }
 
-export PS1="\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[m\] \[\e[36m\]\`parse_git_branch\`\[\e[m\] \[\e[37m\]\\$\[\e[m\] "
+# Prompt: same oh-my-posh config as pwsh, fish and zsh; plain PS1 if it's missing
+if command -v oh-my-posh >/dev/null 2>&1; then
+	eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/config.omp.json)"
+else
+	export PS1="\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[m\] \[\e[36m\]\`parse_git_branch\`\[\e[m\] \[\e[37m\]\\$\[\e[m\] "
+fi

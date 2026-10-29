@@ -14,6 +14,11 @@ set fish_vi_force_cursor
 
 fish_add_path ~/.local/bin/
 
+# Prompt: same oh-my-posh config as pwsh, bash and zsh
+if type -q oh-my-posh
+  oh-my-posh init fish --config ~/.config/oh-my-posh/config.omp.json | source
+end
+
 if command -sq nvim
   alias vi=nvim
   alias vim=nvim

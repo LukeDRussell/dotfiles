@@ -30,6 +30,7 @@
     brew_apps:
       - fd
       - emacs-plus@29
+      - jandedobbeleer/oh-my-posh/oh-my-posh
       - cmake
     brew_casks:
       - calibre
