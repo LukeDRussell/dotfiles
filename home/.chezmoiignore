@@ -2,12 +2,10 @@ README.md
 
 {{- if eq .chezmoi.os "windows" }}
 .bashrc
-.config/emacs
 .config/fish
 .config/nvim
 .config/tmux
 {{- else }}
-.emacs.d
 AppData
 OneDrive
 {{- end }}
