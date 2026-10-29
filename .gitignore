@@ -2,3 +2,6 @@
 *.*~
 .config/nvim/plugged/
 .vscode/
+
+# Windows Terminal runtime state (window positions, dismissed tips), not settings
+Windows/TerminalLocalState/state.json
