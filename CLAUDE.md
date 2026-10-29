@@ -47,7 +47,11 @@ and the day-to-day commands; this file is the working conventions.
 - `.gitattributes` normalises to LF (`*.ps1` is CRLF); expect line-ending warnings.
 
 ## Checking a change
-There are no automated tests. Before pushing, verify the change by hand:
+There are no automated tests. A GitHub Actions workflow
+(`.github/workflows/lint.yml`) runs ansible-lint and shellcheck on every push;
+check it passed. Before pushing, verify the change by hand:
+- **Shell scripts and bashrc:** shellcheck must pass (repo-wide exceptions in
+  `.shellcheckrc`). On Windows: `uvx --from shellcheck-py shellcheck --shell=bash <files>`.
 - **Ansible:** `ansible-lint` must pass (config in `.ansible-lint`; it skips
   `home/` and `Windows/`). Run the playbook on Fedora 44 twice: the second run
   must report `changed=0`.
