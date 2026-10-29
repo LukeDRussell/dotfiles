@@ -26,6 +26,10 @@ and the day-to-day commands; this file is the working conventions.
 - **Shells:** only bash (Linux/macOS) and pwsh (Windows). Fish and zsh were
   dropped on purpose; don't add them back. Machine-specific bash settings go in
   `~/.bashrc.d/`, not the repo.
+- **SSH:** `home/private_dot_ssh/config` has general defaults only and includes
+  `~/.ssh/config.d/*`. The repo is public: host names, addresses and anything
+  host-specific go in `~/.ssh/config.d/hosts` on each machine, never the repo.
+  Windows Terminal SSH profiles use those host names (`ssh nas1`), not IPs.
 - **Fonts** are installed by hand (listed in the README), not by any tool.
 
 ## Machines, in priority order
