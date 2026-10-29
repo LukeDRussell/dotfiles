@@ -13,13 +13,12 @@ My settings for emacs, bash, pwsh, tmux, etc.
 
 ### Linux / macOS
 1. Clone to `~/Repos/dotfiles`.
-2. Run `install-ansible.sh` to make sure ansible is available.
-3. On Linux, enable passwordless sudo:
-  1. `sudo visudo`
-  2. Comment the `%wheel       ALL=(ALL)     ALL` line.
-  3. Uncomment the `%wheel      ALL=(ALL)      NOPASSWD: ALL` line.
-  4. Reboot `systemctl reboot` or from Windows, `wsl --shutdown`
-4. Run the playbook `ansible-playbook -K main.yml`
+2. Run `./bootstrap.sh`. It installs Ansible if needed (dnf or Homebrew), then
+   runs the playbook. It asks for your sudo password once, if sudo needs one, and
+   uses it for both. Arguments are passed to `ansible-playbook`, e.g.
+   `./bootstrap.sh --check`.
+
+Later runs can use `./bootstrap.sh` again, or `ansible-playbook -K main.yml`.
 
 ### Windows
 1. Turn on Developer Mode (Settings → System → For developers) so symlinks work.
