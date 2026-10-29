@@ -320,13 +320,13 @@
   (evil-mode 1)
   (evil-set-leader 'normal (kbd "SPC"))
   (which-key-add-key-based-replacements
-    "SPC b" "+buffers"
-    "SPC e" "+emacs"
-    "SPC h" "+help"
-    "SPC o" "+open"
-    "SPC q" "+quit"
-    "SPC w" "+window"
-    "SPC u" "+ui")
+    "SPC b" "buffers"
+    "SPC e" "emacs"
+    "SPC h" "help"
+    "SPC o" "open"
+    "SPC q" "quit"
+    "SPC w" "window"
+    "SPC u" "ui")
     )
   (evil-define-key nil 'global
     (kbd "<leader> bi") '("ibuffer" . ibuffer)
