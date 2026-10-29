@@ -32,6 +32,26 @@
     [
         {
             "type": "remainingProfiles"
+        },
+        {
+            "entries":
+            [
+                {
+                    "profile": "{65d5f67a-36b8-4759-adac-a6891a2e7085}",
+                    "type": "profile"
+                },
+                {
+                    "profile": "{5bacbbde-e675-4562-8fb1-201490ef618a}",
+                    "type": "profile"
+                },
+                {
+                    "profile": "{bef111f8-fcc7-4ff6-9211-89c8043e3b65}",
+                    "type": "profile"
+                }
+            ],
+            "icon": "",
+            "name": "SSH",
+            "type": "folder"
         }
     ],
     "profiles":
@@ -126,6 +146,20 @@
                 "hidden": false,
                 "icon": "\ue83b",
                 "name": "Home NAS"
+            },
+            {
+                "commandline": "ssh virthost",
+                "guid": "{5bacbbde-e675-4562-8fb1-201490ef618a}",
+                "hidden": false,
+                "icon": "\ue83b",
+                "name": "Home VirtHost"
+            },
+            {
+                "commandline": "ssh luke-desktop",
+                "guid": "{bef111f8-fcc7-4ff6-9211-89c8043e3b65}",
+                "hidden": false,
+                "icon": "\ue83b",
+                "name": "Luke-Desktop"
             }
         ]
     },
