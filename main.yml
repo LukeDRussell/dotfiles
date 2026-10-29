@@ -25,6 +25,7 @@
     fedora_apps:
       - fd-find
       - gawk  # Not in the minimal Fedora WSL image
+      - oh-my-posh
       - emacs
       - util-linux-user
     brew_apps:
