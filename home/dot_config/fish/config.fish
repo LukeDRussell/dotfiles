@@ -11,6 +11,8 @@ set fish_cursor_insert line
 set fish_cursor_replace_one underscore
 set fish_cursor_visual block
 set fish_vi_force_cursor
+# No [I]/[N] indicator before the prompt; the cursor shape shows the mode
+function fish_mode_prompt; end
 
 fish_add_path ~/.local/bin/
 

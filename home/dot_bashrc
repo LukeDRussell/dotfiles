@@ -25,6 +25,14 @@ if [ -d ~/.bashrc.d ]; then
 fi
 unset rc
 
+# Enable vim-like; cursor is a line in insert mode and a block in normal mode
+if [[ $- == *i* ]]; then
+	set -o vi
+	bind 'set show-mode-in-prompt on'
+	bind 'set vi-ins-mode-string \1\e[6 q\2'
+	bind 'set vi-cmd-mode-string \1\e[2 q\2'
+fi
+
 alias play='ansible-playbook -e @~/.secrets.yml'
 alias ll='ls -lh'
 alias lla='ls -lah'
