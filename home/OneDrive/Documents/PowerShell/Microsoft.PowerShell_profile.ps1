@@ -1,7 +1,7 @@
 $PSStyle.FileInfo.Directory = $PSStyle.Foreground.BrightBlue
 
 if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
-    oh-my-posh init pwsh --config '~/Repos/dotfiles/config.omp.json' | Invoke-Expression
+    oh-my-posh init pwsh --config '~/.config/oh-my-posh/config.omp.json' | Invoke-Expression
 }
 
 if (Get-Command podman -ErrorAction SilentlyContinue) {

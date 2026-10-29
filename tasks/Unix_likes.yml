@@ -1,53 +1,14 @@
-- name: Create .config folders
-  ansible.builtin.file:
-    dest: "~/.config/{{ item }}/"
-    state: directory
-    recurse: true
-  loop:
-    - tmux
-    - fish
-    - emacs
-    - zoxide
+# Dotfiles themselves are managed by chezmoi (see home/); this just runs it.
+- name: Point chezmoi at this repo
+  ansible.builtin.command:
+    cmd: "chezmoi init --source {{ playbook_dir }}"
+  changed_when: false
 
-- name: Link emacs config files (minimal-emacs)
-  ansible.builtin.file:
-    dest: "~/.config/emacs/{{ item }}"
-    src: "{{ playbook_dir }}/{{ item }}"
-    state: link
-    force: true
-  loop:
-    - pre-early-init.el
-    - post-early-init.el
-    - pre-init.el
-    - post-init.el
-
-- name: Link Tmux settings
-  ansible.builtin.file:
-    dest: ~/.config/tmux/tmux.conf
-    src: "{{ playbook_dir }}/tmux.conf"
-    state: link
-    force: true
-
-- name: Link Fish settings
-  ansible.builtin.file:
-    dest: ~/.config/fish/config.fish
-    src: "{{ playbook_dir }}/config.fish"
-    state: link
-    force: true
-
-- name: Ensure work.fish exists
-  ansible.builtin.file:
-    path: ~/.config/fish/work.fish
-    state: touch
-    modification_time: preserve
-    access_time: preserve
-
-- name: Link Global Git Config settings
-  ansible.builtin.file:
-    dest: ~/.gitconfig
-    src: "{{ playbook_dir }}/gitconfig"
-    state: link
-    force: true
+- name: Apply dotfiles with chezmoi
+  ansible.builtin.command:
+    cmd: chezmoi apply --verbose --force
+  register: chezmoi_apply
+  changed_when: chezmoi_apply.stdout | length > 0
 
 # TODO: Make this idempotent and return accurate changed value
 - name: Install fisher
@@ -70,4 +31,3 @@
   ansible.builtin.user:
     name: "{{ ansible_user_id }}"
     shell: /usr/bin/fish
-

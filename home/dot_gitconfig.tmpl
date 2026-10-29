@@ -2,9 +2,15 @@
 	name = Luke D Russell
 	email = lukedrussell+git@outlook.com
 [credential]
+{{- if eq .chezmoi.os "windows" }}
+	helper = manager
+{{- else if eq .chezmoi.os "darwin" }}
+	helper = osxkeychain
+{{- else }}
 	helper = cache --timeout 86400
+{{- end }}
 [core]
-	excludesfile = /Users/lrussell/.gitignore_global
+	excludesfile = ~/.gitignore_global
 	editor = nvim
 [init]
 	defaultBranch = dev
@@ -12,7 +18,7 @@
 	rebase = true
 [push]
 	default = simple
-  autoSetupRemote = True
+	autoSetupRemote = true
 [filter "lfs"]
 	process = git-lfs filter-process
 	required = true
@@ -20,4 +26,3 @@
 	smudge = git-lfs smudge -- %f
 [url "https://"]
 	insteadOf = git://
-

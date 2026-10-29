@@ -1,36 +1,38 @@
 # dotfiles
-My settings for fish, tmux, neovim, etc.
+My settings for fish, tmux, neovim, emacs, PowerShell, etc.
+
+- **Dotfiles** are managed by [chezmoi](https://chezmoi.io). Everything under
+  `home/` maps onto `~` (`dot_config/fish/config.fish` → `~/.config/fish/config.fish`).
+  Plain files are deployed as symlinks back into this repo, so editing either copy
+  is live. `*.tmpl` files are rendered per OS (e.g. `~/.gitconfig`).
+  `home/.chezmoiignore` decides which files each OS gets.
+- **Packages and OS settings** on Linux and macOS are managed by Ansible
+  (`main.yml`). The playbook runs chezmoi too, so one command sets up everything.
 
 ## Installation
-1. Run `install-ansible.sh` to make sure ansible is available.
-2. On Linux, enable passwordless sudo:
+
+### Linux / macOS
+1. Clone to `~/Repos/dotfiles`.
+2. Run `install-ansible.sh` to make sure ansible is available.
+3. On Linux, enable passwordless sudo:
   1. `sudo visudo`
   2. Comment the `%wheel       ALL=(ALL)     ALL` line.
   3. Uncomment the `%wheel      ALL=(ALL)      NOPASSWD: ALL` line.
   4. Reboot `systemctl reboot` or from Windows, `wsl --shutdown`
-3. Run the playbook `ansible-playbook -K main.yml`
+4. Run the playbook `ansible-playbook -K main.yml`
 
-## Windows Symlinks
+### Windows
+1. Turn on Developer Mode (Settings → System → For developers) so symlinks work.
+2. Clone to `~\Repos\dotfiles` and run `.\install.ps1` from PowerShell 7.
 
-```pwsh
-New-Item -ItemType Junction `
-    -Path "~\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\" `
-    -Target "C:\Users\Luke\Repos\dotfiles\wt_LocalState\" `
-    -Force
-New-Item -ItemType SymbolicLink `
-    -Path $PROFILE `
-    -Target "$HOME\Repos\dotfiles\Microsoft.PowerShell_profile.ps1" `
-    -Force
-New-Item -ItemType SymbolicLink `
-    -Path ~\.emacs.d\pre-early-init.el `
-    -Target ~\Repos\dotfiles\pre-early-init.el
-New-Item -ItemType SymbolicLink `
-    -Path ~\.emacs.d\post-early-init.el `
-    -Target ~\Repos\dotfiles\post-early-init.el
-New-Item -ItemType SymbolicLink `
-    -Path ~\.emacs.d\pre-init.el `
-    -Target ~\Repos\dotfiles\pre-init.el
-New-Item -ItemType SymbolicLink `
-    -Path ~\.emacs.d\post-init.el `
-    -Target ~\Repos\dotfiles\post-init.el
+## Day to day
+
+```sh
+chezmoi status            # what differs between the repo and ~
+chezmoi diff              # show the differences
+chezmoi apply             # deploy (needed for new files and template changes)
+chezmoi add ~/.config/foo # start tracking a new config
 ```
+
+Windows Terminal settings are in `Windows/TerminalLocalState` and are linked as a
+whole directory. `Windows/*.reg` and `keyboard_manager.json` are applied by hand.
