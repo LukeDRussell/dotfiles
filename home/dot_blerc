@@ -4,6 +4,9 @@
 # A lone Esc is Esc straight away, not the start of a key sequence
 bleopt decode_isolated_esc=esc
 
+# No "[ble: exit N]" line after a failed command; oh-my-posh shows ERROR
+bleopt exec_errexit_mark=
+
 # vim mode settings only exist once ble.sh loads its vi keymap, so set them then
 function blerc/vim-load-hook {
   # Don't wait after Esc for a longer key sequence
