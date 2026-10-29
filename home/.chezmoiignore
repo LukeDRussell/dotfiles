@@ -6,6 +6,7 @@ README.md
 .bash_profile
 .blerc
 .config/nvim
+.config/tealdeer
 .config/tmux
 {{- else }}
 AppData
