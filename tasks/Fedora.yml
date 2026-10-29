@@ -17,3 +17,16 @@
     state: latest
     update_only: true
     update_cache: true
+
+- name: Ensure ~/.local/bin exists
+  ansible.builtin.file:
+    path: ~/.local/bin
+    state: directory
+    mode: "0755"
+
+# Not packaged for Fedora; use the upstream release binary.
+- name: Install oh-my-posh
+  ansible.builtin.get_url:
+    url: "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
+    dest: ~/.local/bin/oh-my-posh
+    mode: "0755"

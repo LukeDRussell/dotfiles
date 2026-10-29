@@ -34,7 +34,6 @@
     cmd: fish -c "fisher install {{ item }}"
   loop:
     - nickeb96/puffer-fish
-    - IlanCosman/tide@v6
   when: (item | lower) not in (fisher_list.stdout | lower)
   changed_when: true
 

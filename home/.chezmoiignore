@@ -3,6 +3,7 @@ README.md
 
 {{- if eq .chezmoi.os "windows" }}
 .bashrc
+.zshrc
 .config/fish
 .config/nvim
 .config/tmux
