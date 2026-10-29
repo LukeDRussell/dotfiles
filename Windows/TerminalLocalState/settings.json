@@ -50,6 +50,25 @@
         "list":
         [
             {
+                "antialiasingMode": "cleartype",
+                "commandline": "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -nologo",
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "historySize": 10000,
+                "name": "pwsh",
+                "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "colorScheme": "Modus Operandi",
+                "commandline": "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -nologo",
+                "elevate": true,
+                "guid": "{a2463d96-e4df-4339-82e5-d59a7c30e6b4}",
+                "hidden": false,
+                "icon": "ms-appx:///ProfileIcons/pwsh.png",
+                "name": "pwsh (admin)",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
                 "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
                 "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
                 "hidden": true,
@@ -68,23 +87,11 @@
                 "source": "Windows.Terminal.Azure"
             },
             {
-                "antialiasingMode": "cleartype",
-                "commandline": "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -nologo",
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "guid": "{49aca192-7f0a-5f1b-94a2-1dbce10b020e}",
                 "hidden": false,
-                "historySize": 10000,
-                "name": "pwsh",
-                "source": "Windows.Terminal.PowershellCore"
-            },
-            {
-                "colorScheme": "Modus Operandi",
-                "commandline": "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -nologo",
-                "elevate": true,
-                "guid": "{a2463d96-e4df-4339-82e5-d59a7c30e6b4}",
-                "hidden": false,
-                "icon": "ms-appx:///ProfileIcons/pwsh.png",
-                "name": "pwsh (admin)",
-                "startingDirectory": "%USERPROFILE%"
+                "name": "Fedora-WSL",
+                "source": "Microsoft.WSL",
+                "tabTitle": "Fedora-WSL"
             },
             {
                 "commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -ucrt64",
@@ -105,13 +112,6 @@
                 "hidden": true,
                 "name": "Powershell 7",
                 "source": "Windows.Terminal.PowershellCore"
-            },
-            {
-                "guid": "{49aca192-7f0a-5f1b-94a2-1dbce10b020e}",
-                "hidden": false,
-                "name": "Fedora-WSL",
-                "source": "Microsoft.WSL",
-                "tabTitle": "Fedora-WSL"
             },
             {
                 "guid": "{c903f81f-08e1-5c37-88e8-33f3f0395e56}",
