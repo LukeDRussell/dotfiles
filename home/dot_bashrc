@@ -6,6 +6,7 @@ if [ -f /etc/bashrc ]; then
 fi
 
 # User specific environment
+# shellcheck disable=SC2076  # literal match is intended (Fedora default)
 if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
 	PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 fi
@@ -32,6 +33,14 @@ if [[ $- == *i* ]]; then
 		bind 'set keyseq-timeout 10'
 	fi
 fi
+
+# History: large, timestamped, without duplicates or commands starting with a
+# space; appended to (not overwritten) when several shells are open
+HISTSIZE=100000
+HISTFILESIZE=100000
+HISTCONTROL=ignoreboth:erasedups
+HISTTIMEFORMAT='%F %T  '
+shopt -s histappend cmdhist
 
 export EDITOR=nvim
 export SUDO_EDITOR=$EDITOR
@@ -87,52 +96,16 @@ if command -v zoxide >/dev/null 2>&1; then
 	eval "$(zoxide init bash)"
 fi
 
-# get current branch in git repo
-function parse_git_branch() {
-	BRANCH=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
-	if [ ! "${BRANCH}" == "" ]
-	then
-		STAT=`parse_git_dirty`
-		echo "[${BRANCH}${STAT}]"
+# fzf: Ctrl-R fuzzy history, Ctrl-T insert a file path, Alt-C cd into a folder.
+# ble.sh needs its own integration of the same key bindings.
+if [[ $- == *i* ]] && command -v fzf >/dev/null 2>&1; then
+	if [[ ${BLE_VERSION-} ]]; then
+		ble-import -d integration/fzf-completion
+		ble-import -d integration/fzf-key-bindings
 	else
-		echo ""
+		eval "$(fzf --bash)"
 	fi
-}
-
-# get current status of git repo
-function parse_git_dirty {
-	status=`git status 2>&1 | tee`
-	dirty=`echo -n "${status}" 2> /dev/null | grep "modified:" &> /dev/null; echo "$?"`
-	untracked=`echo -n "${status}" 2> /dev/null | grep "Untracked files" &> /dev/null; echo "$?"`
-	ahead=`echo -n "${status}" 2> /dev/null | grep "Your branch is ahead of" &> /dev/null; echo "$?"`
-	newfile=`echo -n "${status}" 2> /dev/null | grep "new file:" &> /dev/null; echo "$?"`
-	renamed=`echo -n "${status}" 2> /dev/null | grep "renamed:" &> /dev/null; echo "$?"`
-	deleted=`echo -n "${status}" 2> /dev/null | grep "deleted:" &> /dev/null; echo "$?"`
-	bits=''
-	if [ "${renamed}" == "0" ]; then
-		bits=">${bits}"
-	fi
-	if [ "${ahead}" == "0" ]; then
-		bits="*${bits}"
-	fi
-	if [ "${newfile}" == "0" ]; then
-		bits="+${bits}"
-	fi
-	if [ "${untracked}" == "0" ]; then
-		bits="?${bits}"
-	fi
-	if [ "${deleted}" == "0" ]; then
-		bits="x${bits}"
-	fi
-	if [ "${dirty}" == "0" ]; then
-		bits="!${bits}"
-	fi
-	if [ ! "${bits}" == "" ]; then
-		echo " ${bits}"
-	else
-		echo ""
-	fi
-}
+fi
 
 # Machine-local additions (work settings, installer PATH lines etc.) go in
 # ~/.bashrc.d/; loaded last so they can override anything above
@@ -152,6 +125,7 @@ if command -v oh-my-posh >/dev/null 2>&1; then
 	# oh-my-posh can't draw its right-hand block (status, git, time) in bash, but
 	# ble.sh can: render it with oh-my-posh's own status variables.
 	if [[ ${BLE_VERSION-} ]]; then
+		# shellcheck disable=SC2154  # _omp_* are set by oh-my-posh before each prompt
 		function _omp_get_right {
 			local right
 			right=$(
@@ -168,10 +142,28 @@ if command -v oh-my-posh >/dev/null 2>&1; then
 			)
 			printf '%s' "${right@P}"
 		}
+		# shellcheck disable=SC2016  # run at each prompt, not now
 		bleopt prompt_rps1='$(_omp_get_right)'
 	fi
 else
-	export PS1="\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[m\] \[\e[36m\]\`parse_git_branch\`\[\e[m\] \[\e[37m\]\\$\[\e[m\] "
+	# Fallback: user@host:dir, plus the git branch if git's prompt helper exists
+	for git_prompt in /usr/share/git-core/contrib/completion/git-prompt.sh \
+		/opt/homebrew/etc/bash_completion.d/git-prompt.sh \
+		/usr/local/etc/bash_completion.d/git-prompt.sh; do
+		if [[ -f $git_prompt ]]; then
+			. "$git_prompt"
+			break
+		fi
+	done
+	unset git_prompt
+	if declare -F __git_ps1 >/dev/null; then
+		# Read by __git_ps1
+		# shellcheck disable=SC2034
+		GIT_PS1_SHOWDIRTYSTATE=1 GIT_PS1_SHOWUNTRACKEDFILES=1
+		PS1='\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[36m\]$(__git_ps1 " [%s]")\[\e[m\] \$ '
+	else
+		PS1='\[\e[35m\]\u\[\e[m\]@\[\e[35m\]\h\[\e[m\]:\[\e[32m\]\w\[\e[m\] \$ '
+	fi
 fi
 
 # ble.sh: attach last, after the prompt and everything else is set up
