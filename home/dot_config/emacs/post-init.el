@@ -41,6 +41,15 @@
     (kill-new path-with-line-number)
     (message (concat path-with-line-number " copied to clipboard"))))
 
+(defun my/reload-post-init ()
+  "Save and reload post-init.el from the Emacs config directory."
+  (interactive)
+  (let ((file (expand-file-name "post-init.el" minimal-emacs-user-directory)))
+    (when-let* ((buf (find-buffer-visiting file)))
+      (with-current-buffer buf (when (buffer-modified-p) (save-buffer))))
+    (load-file file)
+    (message "Reloaded %s" file)))
+
 (defun my/setup-fonts (&optional frame)
   (with-selected-frame (or frame (selected-frame))
     (set-face-attribute 'default nil :height 120)
@@ -312,13 +321,13 @@
   (evil-mode 1)
   (evil-set-leader 'normal (kbd "SPC"))
   (which-key-add-key-based-replacements
-    "<leader> b" "buffers"
-    "<leader> e" "emacs"
-    "<leader> h" "help"
-    "<leader> o" "open"
-    "<leader> q" "quit"
-    "<leader> w" "window"
-    "<leader> u" "ui")
+    "SPC b" "+buffers"
+    "SPC e" "+emacs"
+    "SPC h" "+help"
+    "SPC o" "+open"
+    "SPC q" "+quit"
+    "SPC w" "+window"
+    "SPC u" "+ui")
     )
   (evil-define-key nil 'global
     (kbd "<leader> bi") '("ibuffer" . ibuffer)
@@ -332,6 +341,7 @@
     (kbd "<leader> ec") '("open user config" . (lambda () (interactive) (find-file user-init-file)))
     (kbd "<leader> eo") '("emacs config options" . (lambda () (interactive) (helpful-variable 'system-configuration-options)))
     (kbd "<leader> ep") '("packages" . list-packages)
+    (kbd "<leader> er") '("reload post-init.el" . my/reload-post-init)
     (kbd "<leader> eu") '("show packages that can be upgraded" . package-menu-filter-upgradable)
 
     (kbd "<leader> ha") '("apropos" . apropos)
@@ -633,14 +643,14 @@
   (org-outline-path-complete-in-steps t)
   (org-startup-indented t)
   (org-hide-emphasis-markers t)
-  (org-blank-beefore)
+  (org-blank-before-new-entry '((heading . nil) (plain-list-item . nil)))
   (org-id-link-to-org-use-id t)
   (org-startup-with-inline-images t)
   (org-pretty-entities t)
-  (org-startup-folded fold)
+  (org-startup-folded 'fold)
   (org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
   (org-todo-keywords
-   '((sequence "TODO(t!)" "SOMEDAY(s!)" "WIP(i!)" "WAITING(w@)" "|" "DONE(d!)" "MOVED(m@)" "CANCELLED(c@)")))
+   '((sequence "TODO(t!)" "WIP(i!)" "WAITING(w@)" "SOMEDAY(s!)" "|" "MOVED(m@)" "DONE(d!)" "CANCELLED(c@)")))
   )
 
 (use-package org-appear
@@ -680,9 +690,9 @@
   (org-reverse-datetree-level-formats
    '("Journal"
      "%Y"                                                                               ; year
-     (lambda (time) (format-time-string "%Y-%m %B" (org-reverse-datetree-monday time))) ; month
-     "%Y W%V"                                                                           ; week
-     "%Y-%m-%d %A"                                                                      ; date
+     (lambda (time) (format-time-string "%m %B" (org-reverse-datetree-monday time)))    ; month
+     "W%V"                                                                              ; week
+     "%d %A"                                                                            ; date
      ))
   )
 
