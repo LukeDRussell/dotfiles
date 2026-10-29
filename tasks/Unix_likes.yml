@@ -11,7 +11,8 @@
   changed_when: chezmoi_apply.stdout | length > 0
 
 - name: Change default shell
+  when: ansible_facts['system'] == "Linux"  # macOS /bin/bash is 3.2, too old
   become: true
   ansible.builtin.user:
     name: "{{ ansible_facts['user_id'] }}"
-    shell: /usr/bin/fish
+    shell: /bin/bash
