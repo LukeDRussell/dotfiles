@@ -1,10 +1,10 @@
 # dotfiles
-My settings for fish, tmux, neovim, emacs, PowerShell, etc.
+My settings for emacs, pwsh, tmux, fish, etc.
 
 - **Dotfiles** are managed by [chezmoi](https://chezmoi.io). Everything under
   `home/` maps onto `~` (`dot_config/fish/config.fish` → `~/.config/fish/config.fish`).
   Plain files are deployed as symlinks back into this repo, so editing either copy
-  is live. `*.tmpl` files are rendered per OS (e.g. `~/.gitconfig`).
+  is live. `*.tmpl` files are rendered per OS.
   `home/.chezmoiignore` decides which files each OS gets.
 - **Packages and OS settings** on Linux and macOS are managed by Ansible
   (`main.yml`). The playbook runs chezmoi too, so one command sets up everything.
