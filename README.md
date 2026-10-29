@@ -65,6 +65,47 @@ Host example
     HostName 192.0.2.10
 ```
 
+Windows Terminal's SSH profiles (the "SSH" folder in the new-tab menu) run
+`ssh <name>`, so each name must resolve on the machine: through DNS, or a
+`config.d/hosts` entry pointing at the full name (e.g. a Tailscale `.ts.net`
+name, which works away from home).
+
+### Key login to a Windows OpenSSH server
+
+Windows OpenSSH Server reads keys for accounts in the Administrators group from
+`C:\ProgramData\ssh\administrators_authorized_keys`, not `~\.ssh\authorized_keys`,
+and ignores that file unless only Administrators and SYSTEM can access it. Run
+this in an elevated PowerShell on the server (adds the key in both places, so it
+works for admin and non-admin accounts; safe to re-run):
+
+```powershell
+$key = '<contents of ~/.ssh/pers_key.pub from the client>'
+
+$admin = 'C:\ProgramData\ssh\administrators_authorized_keys'
+if (-not ((Test-Path $admin) -and (Select-String -Path $admin -SimpleMatch $key -Quiet))) { Add-Content -Path $admin -Value $key }
+icacls.exe $admin /inheritance:r /grant '*S-1-5-32-544:F' /grant '*S-1-5-18:F'
+
+New-Item -ItemType Directory -Force "$HOME\.ssh" | Out-Null
+$user = "$HOME\.ssh\authorized_keys"
+if (-not ((Test-Path $user) -and (Select-String -Path $user -SimpleMatch $key -Quiet))) { Add-Content -Path $user -Value $key }
+
+Restart-Service sshd
+```
+
+- `*S-1-5-32-544` and `*S-1-5-18` are Administrators and SYSTEM, in any Windows
+  language. Use `Add-Content` (no byte-order mark); sshd can't read a key file
+  with one.
+- Check from the client with `ssh -o PasswordAuthentication=no <host> hostname`.
+  If it fails, `ssh -v` shows whether the key was offered, and the server logs
+  the reason under Event Viewer → Applications and Services Logs → OpenSSH →
+  Operational.
+- Reinstalling OpenSSH Server creates new host keys, so clients then warn that
+  the host identification has changed. Check the new fingerprint on the server
+  (`ssh-keygen -l -f C:\ProgramData\ssh\ssh_host_ed25519_key.pub`), then remove
+  the old entries on each client with `ssh-keygen -R <name>` for every name you
+  use for that host. The reinstall also resets `sshd_config` and leaves no key
+  files, so repeat the steps above.
+
 ## Emacs
 
 `home/dot_config/emacs/init.el` and `early-init.el` are vendored from
