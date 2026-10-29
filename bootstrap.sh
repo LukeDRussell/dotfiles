@@ -42,9 +42,17 @@ if ! command -v ansible-playbook >/dev/null 2>&1; then
 	fi
 fi
 
-# Hand the password to Ansible through a pipe, so it never touches the disk
-if [[ -n $pw ]]; then
-	exec ansible-playbook --become-password-file <(printf '%s\n' "$pw") main.yml "$@"
-else
+if [[ -z $pw ]]; then
 	exec ansible-playbook main.yml "$@"
 fi
+
+# Ansible needs a real file for the password (a pipe doesn't work). Make it
+# readable only by you, in memory (/dev/shm) where there is one, and delete it
+# when the playbook finishes.
+tmpdir=/dev/shm
+[[ -d $tmpdir && -w $tmpdir ]] || tmpdir=${TMPDIR:-/tmp}
+pwfile=$(umask 077 && mktemp "$tmpdir/bootstrap.XXXXXX")
+trap 'rm -f "$pwfile"' EXIT
+printf '%s\n' "$pw" >"$pwfile"
+unset pw
+ansible-playbook --become-password-file "$pwfile" main.yml "$@"
