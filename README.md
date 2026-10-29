@@ -45,3 +45,18 @@ chezmoi add ~/.config/foo # start tracking a new config
 
 Windows Terminal settings are in `Windows/TerminalLocalState` and are linked as a
 whole directory. `Windows/*.reg` and `keyboard_manager.json` are applied by hand.
+
+## Emacs
+
+`home/dot_config/emacs/init.el` and `early-init.el` are vendored from
+[minimal-emacs.d](https://github.com/jamescherti/minimal-emacs.d) v1.5.2
+(commit `7a15d5b`, GPL-3.0-or-later, licence in `LICENSE-minimal-emacs.d`), so
+they only change when I change them. My own settings are in `pre-*.el` and
+`post-*.el`.
+
+To see what upstream has changed since, clone it somewhere and diff:
+
+```sh
+git clone https://github.com/jamescherti/minimal-emacs.d /tmp/minimal-emacs.d
+git -C /tmp/minimal-emacs.d diff 7a15d5b -- init.el early-init.el
+```
