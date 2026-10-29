@@ -14,7 +14,6 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("10e330880269244ae45ae9e02fe6f55766da9e15036e7c7f07d7ce228195deb5" "967c23e9ba179b80560774419f081df22e7674aac23c5c550b817e4a1ce7d058" default))
- '(package-gnupghome-dir "/c/Users/luke/.emacs.d/var/elpa/gnupg")
  '(package-selected-packages
    '(auto-dark compile-angel consult corfu dired-sidebar doom-modeline eca eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize
                indent-bars magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless
@@ -473,7 +472,7 @@
          ("M-g e" . consult-compile-error)
          ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
          ("M-g g" . consult-goto-line)             ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
          ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
          ("M-g m" . consult-mark)
          ("M-g k" . consult-global-mark)
