@@ -31,6 +31,8 @@ if [[ $- == *i* ]]; then
 	bind 'set show-mode-in-prompt on'
 	bind 'set vi-ins-mode-string \1\e[6 q\2'
 	bind 'set vi-cmd-mode-string \1\e[2 q\2'
+	# Don't wait 500ms after Esc for a longer key sequence
+	bind 'set keyseq-timeout 10'
 fi
 
 alias play='ansible-playbook -e @~/.secrets.yml'
