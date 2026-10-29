@@ -1,4 +1,5 @@
 README.md
+.config/emacs/LICENSE-minimal-emacs.d
 
 {{- if eq .chezmoi.os "windows" }}
 .bashrc
