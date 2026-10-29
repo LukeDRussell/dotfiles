@@ -19,5 +19,13 @@ function blerc/vim-load-hook {
   ble-bind -m vi_omap --cursor 2
   ble-bind -m vi_xmap --cursor 2
   ble-bind -m vi_cmap --cursor 0   # terminal default on the : command line
+
+  # Up/Down search history for lines starting with what's typed (as in .bashrc)
+  ble-bind -m vi_imap -f up history-search-backward
+  ble-bind -m vi_imap -f down history-search-forward
+  ble-bind -m vi_nmap -f up history-search-backward
+  ble-bind -m vi_nmap -f down history-search-forward
+  # Space expands !! and !$ on screen before you press Enter
+  ble-bind -m vi_imap -f SP magic-space
 }
 blehook/eval-after-load keymap_vi blerc/vim-load-hook
