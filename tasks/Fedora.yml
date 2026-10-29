@@ -27,6 +27,8 @@
 # Not packaged for Fedora; use the upstream release binary.
 - name: Install oh-my-posh
   ansible.builtin.get_url:
-    url: "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
+    url: "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-{{ omp_arch }}"
     dest: ~/.local/bin/oh-my-posh
     mode: "0755"
+  vars:
+    omp_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
