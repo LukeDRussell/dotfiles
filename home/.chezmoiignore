@@ -8,7 +8,13 @@ README.md
 .config/nvim
 .config/tealdeer
 .config/tmux
+{{- /* The pwsh profile goes in Documents\PowerShell, and also under OneDrive
+       when OneDrive backs up Documents (then PowerShell looks there) */}}
+{{- if not (stat (joinPath .chezmoi.homeDir "OneDrive" "Documents")) }}
+OneDrive
+{{- end }}
 {{- else }}
 AppData
+Documents
 OneDrive
 {{- end }}
