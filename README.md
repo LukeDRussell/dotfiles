@@ -24,9 +24,11 @@ Later runs can use `./bootstrap.sh` again, or `ansible-playbook -K main.yml`.
 1. Turn on Developer Mode (Settings → System → For developers) so symlinks work.
 2. Install git (`winget install --id Git.Git -e`), open a new terminal, and clone
    to `~\Repos\dotfiles`.
-3. Run `powershell -ExecutionPolicy Bypass -File .\install.ps1`. It installs the
-   apps in `Windows\winget-packages.json` (PowerShell 7 among them), then chezmoi,
-   then applies the dotfiles. `-SkipApps` skips the apps.
+3. Run `powershell -ExecutionPolicy Bypass -File .\install.ps1`. It installs only
+   what the PowerShell setup needs (PowerShell 7, Git, chezmoi, zoxide, lsd, fzf,
+   Neovim and the PSFzf module), then applies the dotfiles.
+4. Optionally, `powershell -ExecutionPolicy Bypass -File .\install-apps.ps1`
+   installs every app in `Windows\winget-packages.json`.
 
 To refresh the app list after installing something new, run
 `winget export -o new.json --source winget` and copy the new entries across.

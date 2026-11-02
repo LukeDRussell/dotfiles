@@ -15,8 +15,10 @@ and the day-to-day commands; this file is the working conventions.
   Linux/macOS, then runs chezmoi. Prefer the distro package (dnf, Homebrew) over
   downloading release binaries; check `dnf info` before assuming something isn't
   packaged.
-- **Windows** bootstraps with `install.ps1` (winget for chezmoi, then
-  `chezmoi apply`). Windows Terminal's `LocalState` is a directory symlink to
+- **Windows** bootstraps with `install.ps1`: winget installs only what the pwsh
+  setup needs (its `$required` list), then `chezmoi apply`. Everything else is
+  in `Windows/winget-packages.json`, installed by `install-apps.ps1`. A new
+  tool the profile relies on goes in `$required` too. Windows Terminal's `LocalState` is a directory symlink to
   `Windows/TerminalLocalState`.
 - **Emacs:** `init.el` and `early-init.el` are vendored from minimal-emacs.d
   (version and commit in the README). Only change them deliberately; Luke's own

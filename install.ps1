@@ -1,13 +1,11 @@
 #Requires -Version 5.1
-# Bootstrap dotfiles on Windows: install apps with winget, then point chezmoi at
-# this repo and apply. Safe to re-run. Works in Windows PowerShell 5.1, so it
-# runs on a fresh machine before PowerShell 7 is installed. Needs Developer Mode
-# (or admin) so chezmoi can create symlinks.
+# Bootstrap dotfiles on Windows: install just what the PowerShell setup needs,
+# then point chezmoi at this repo and apply. Safe to re-run. Works in Windows
+# PowerShell 5.1, so it runs on a fresh machine before PowerShell 7 is
+# installed. Needs Developer Mode (or admin) so chezmoi can create symlinks.
+# All other apps: install-apps.ps1.
 [CmdletBinding(SupportsShouldProcess)]
-param(
-    # Don't install the apps listed in Windows/winget-packages.json
-    [switch]$SkipApps
-)
+param()
 $ErrorActionPreference = 'Stop'
 
 # Pick up PATH changes from installers without opening a new shell
@@ -16,25 +14,33 @@ function Update-Path {
                 [Environment]::GetEnvironmentVariable('PATH', 'User')
 }
 
-$apps = Join-Path $PSScriptRoot 'Windows\winget-packages.json'
-if (-not $SkipApps -and $PSCmdlet.ShouldProcess($apps, 'winget import')) {
-    # Apps that are already installed are left alone (no upgrades)
-    winget import --import-file $apps --no-upgrade --ignore-unavailable `
-        --accept-package-agreements --accept-source-agreements
-    if ($LASTEXITCODE -ne 0) { Write-Warning "winget import reported problems (exit code $LASTEXITCODE); carrying on." }
-    Update-Path
+# What the PowerShell profile and prompt rely on
+$required = @(
+    'Microsoft.PowerShell'   # PowerShell 7, which the profile is written for
+    'Git.Git'                # prompt's branch, and this repo
+    'twpayne.chezmoi'        # deploys the dotfiles
+    'ajeetdsouza.zoxide'     # z
+    'lsd-rs.lsd'             # ll, lla, tree, ...
+    'junegunn.fzf'           # Ctrl-R, Ctrl-T, Alt-C
+    'Neovim.Neovim'          # EDITOR and git's editor
+)
+foreach ($id in $required) {
+    if ($PSCmdlet.ShouldProcess($id, 'winget install')) {
+        # Already-installed packages are left alone (no upgrades)
+        winget install --id $id --exact --source winget --no-upgrade `
+            --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
+    }
+}
+Update-Path
+foreach ($cmd in 'pwsh', 'git', 'chezmoi', 'zoxide', 'lsd', 'fzf', 'nvim') {
+    if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) { Write-Warning "$cmd isn't on PATH yet; open a new terminal if the profile misses it." }
 }
 
 # PSFzf (fzf key bindings for the profile) comes from the PowerShell Gallery,
 # and must be installed by PowerShell 7 so it lands in 7's module folder
 $pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
-if (-not $SkipApps -and $pwsh -and $PSCmdlet.ShouldProcess('PSFzf', 'Install-Module')) {
+if ($pwsh -and $PSCmdlet.ShouldProcess('PSFzf', 'Install-Module')) {
     & $pwsh.Source -NoProfile -Command 'if (-not (Get-Module -ListAvailable PSFzf)) { Install-Module PSFzf -Scope CurrentUser -Repository PSGallery -Force }'
-}
-
-if (-not (Get-Command chezmoi -ErrorAction SilentlyContinue)) {
-    winget install --id twpayne.chezmoi --exact --source winget --accept-package-agreements
-    Update-Path
 }
 
 # Older setups linked Windows Terminal's LocalState with a junction. Remove only
