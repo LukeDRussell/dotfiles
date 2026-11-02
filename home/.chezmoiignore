@@ -8,11 +8,6 @@ README.md
 .config/nvim
 .config/tealdeer
 .config/tmux
-{{- /* The pwsh profile goes in Documents\PowerShell, and also under OneDrive
-       when OneDrive backs up Documents (then PowerShell looks there) */}}
-{{- if not (stat (joinPath .chezmoi.homeDir "OneDrive" "Documents")) }}
-OneDrive
-{{- end }}
 {{- /* Ludusavi's config holds this PC's game library paths */}}
 {{- if ne (lower .chezmoi.hostname) "luke-desktop" }}
 AppData/Roaming/ludusavi
@@ -20,5 +15,4 @@ AppData/Roaming/ludusavi
 {{- else }}
 AppData
 Documents
-OneDrive
 {{- end }}
