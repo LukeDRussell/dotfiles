@@ -45,6 +45,15 @@ if ($item.LinkType -eq 'Junction' -and $PSCmdlet.ShouldProcess($wtState, 'Remove
     [IO.Directory]::Delete($wtState, $false)
 }
 
+# Windows recreates these known folders if they're deleted, so hide them instead
+foreach ($name in 'Favorites', 'Links', 'Contacts', 'Searches') {
+    $dir = Get-Item -LiteralPath (Join-Path $HOME $name) -Force -ErrorAction SilentlyContinue
+    if ($dir -and -not ($dir.Attributes -band [IO.FileAttributes]::Hidden) -and
+        $PSCmdlet.ShouldProcess($dir.FullName, 'Hide folder')) {
+        $dir.Attributes = $dir.Attributes -bor [IO.FileAttributes]::Hidden
+    }
+}
+
 chezmoi init --source $PSScriptRoot
 if ($PSCmdlet.ShouldProcess($HOME, 'chezmoi apply')) {
     chezmoi apply --verbose
