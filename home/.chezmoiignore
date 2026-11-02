@@ -13,6 +13,10 @@ README.md
 {{- if not (stat (joinPath .chezmoi.homeDir "OneDrive" "Documents")) }}
 OneDrive
 {{- end }}
+{{- /* Ludusavi's config holds this PC's game library paths */}}
+{{- if ne (lower .chezmoi.hostname) "luke-desktop" }}
+AppData/Roaming/ludusavi
+{{- end }}
 {{- else }}
 AppData
 Documents

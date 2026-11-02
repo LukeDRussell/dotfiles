@@ -19,7 +19,8 @@ and the day-to-day commands; this file is the working conventions.
   setup needs (its `$required` list), then `chezmoi apply`. Everything else is
   in `Windows/winget-packages.json`, installed by `install-apps.ps1`. A new
   tool the profile relies on goes in `$required` too. Windows Terminal's `LocalState` is a directory symlink to
-  `Windows/TerminalLocalState`.
+  `Windows/TerminalLocalState`. `install-games.ps1` sets up Ludusavi game save
+  backups to OneDrive; its config is deployed to Luke-Desktop only.
 - **Emacs:** `init.el` and `early-init.el` are vendored from minimal-emacs.d
   (version and commit in the README). Only change them deliberately; Luke's own
   settings go in `pre-*.el` and `post-*.el`. Same `~/.config/emacs` on every OS.

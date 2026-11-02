@@ -29,6 +29,10 @@ Later runs can use `./bootstrap.sh` again, or `ansible-playbook -K main.yml`.
    Neovim and the PSFzf module), then applies the dotfiles.
 4. Optionally, `powershell -ExecutionPolicy Bypass -File .\install-apps.ps1`
    installs every app in `Windows\winget-packages.json`.
+5. On a gaming PC, `powershell -ExecutionPolicy Bypass -File .\install-games.ps1`
+   installs [Ludusavi](https://github.com/mtkennerly/ludusavi), links its config
+   (Luke-Desktop only, as it lists that PC's game libraries) and schedules a game
+   save backup to `OneDrive\Game Saves` at sign-in and daily at 21:00.
 
 To refresh the app list after installing something new, run
 `winget export -o new.json --source winget` and copy the new entries across.

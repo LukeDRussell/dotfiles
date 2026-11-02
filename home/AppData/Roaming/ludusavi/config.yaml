@@ -1,0 +1,82 @@
+---
+runtime:
+  threads: ~
+  networkSecurity: safe
+release:
+  check: true
+manifest:
+  enable: true
+language: en-US
+theme: light
+roots:
+  - store: steam
+    path: "C:/Program Files (x86)/Steam"
+  - store: epic
+    path: "C:/Program Files (x86)/Epic Games"
+  - store: epic
+    path: "C:/Program Files/Epic Games"
+  - store: gogGalaxy
+    path: "C:/Program Files (x86)/GOG Galaxy/Games"
+  - store: microsoft
+    path: "C:/Program Files/WindowsApps"
+  - store: heroic
+    path: "C:/Users/luke/AppData/Roaming/heroic"
+  - store: other
+    path: "C:/Games"
+redirects: []
+backup:
+  path: "C:/Users/luke/OneDrive/Game Saves"
+  ignoredGames: []
+  filter:
+    excludeStoreScreenshots: false
+    cloud:
+      exclude: false
+      epic: false
+      gog: false
+      origin: false
+      steam: false
+      uplay: false
+    ignoredPaths: []
+    ignoredRegistry: []
+  toggledPaths: {}
+  toggledRegistry: {}
+  sort:
+    key: status
+    reversed: false
+  retention:
+    full: 2
+    differential: 5
+  format:
+    chosen: zip
+    zip:
+      compression: deflate
+    compression:
+      deflate:
+        level: 6
+      bzip2:
+        level: 6
+      zstd:
+        level: 10
+  onlyConstructive: false
+restore:
+  path: "C:/Users/luke/OneDrive/Game Saves"
+  ignoredGames: []
+  toggledPaths: {}
+  toggledRegistry: {}
+  sort:
+    key: status
+    reversed: false
+  reverseRedirects: false
+scan:
+  showDeselectedGames: true
+  showUnchangedGames: true
+  showUnscannedGames: true
+cloud:
+  remote: ~
+  path: ludusavi-backup
+  synchronize: true
+apps:
+  rclone:
+    path: ""
+    arguments: "--fast-list --ignore-checksum"
+customGames: []
