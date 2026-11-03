@@ -152,6 +152,7 @@
 (use-package modus-themes
   :defer t
   :custom
+  (modus-themes-mixed-fonts t) ;; So org-tables line up using monospaced (fixed pitch) font
   (modus-themes-headings
    '((1 . (1.5))
      (2 . (1.3))
