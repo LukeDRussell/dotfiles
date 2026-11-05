@@ -10,37 +10,16 @@
           "PackageIdentifier": "AgileBits.1Password"
         },
         {
-          "PackageIdentifier": "AgileBits.1Password.CLI"
-        },
-        {
-          "PackageIdentifier": "ajeetdsouza.zoxide"
-        },
-        {
           "PackageIdentifier": "Anthropic.Claude"
         },
         {
           "PackageIdentifier": "AprilNEA.OpenLogi"
         },
         {
-          "PackageIdentifier": "astral-sh.uv"
-        },
-        {
           "PackageIdentifier": "Bruno.Bruno"
         },
         {
           "PackageIdentifier": "Bullzip.PDFPrinter"
-        },
-        {
-          "PackageIdentifier": "dbrgn.tealdeer"
-        },
-        {
-          "PackageIdentifier": "Eugeny.Tabby"
-        },
-        {
-          "PackageIdentifier": "Git.Git"
-        },
-        {
-          "PackageIdentifier": "GitHub.cli"
         },
         {
           "PackageIdentifier": "GNU.Emacs"
@@ -55,25 +34,10 @@
           "PackageIdentifier": "Greenshot.Greenshot"
         },
         {
-          "PackageIdentifier": "Insecure.Nmap"
-        },
-        {
           "PackageIdentifier": "JohnMacFarlane.Pandoc"
         },
         {
-          "PackageIdentifier": "jqlang.jq"
-        },
-        {
-          "PackageIdentifier": "junegunn.fzf"
-        },
-        {
           "PackageIdentifier": "KiCad.KiCad"
-        },
-        {
-          "PackageIdentifier": "lsd-rs.lsd"
-        },
-        {
-          "PackageIdentifier": "Microsoft.PowerShell"
         },
         {
           "PackageIdentifier": "Microsoft.PowerToys"
@@ -100,13 +64,7 @@
           "PackageIdentifier": "MSYS2.MSYS2"
         },
         {
-          "PackageIdentifier": "Neovim.Neovim"
-        },
-        {
           "PackageIdentifier": "OpenWhisperSystems.Signal"
-        },
-        {
-          "PackageIdentifier": "Podman.CLI"
         },
         {
           "PackageIdentifier": "SimonKnuth.Scanner"
@@ -118,9 +76,6 @@
           "PackageIdentifier": "Tailscale.Tailscale"
         },
         {
-          "PackageIdentifier": "twpayne.chezmoi"
-        },
-        {
           "PackageIdentifier": "Vial.Vial"
         },
         {
@@ -130,16 +85,7 @@
           "PackageIdentifier": "voidtools.Everything"
         },
         {
-          "PackageIdentifier": "VSCodium.VSCodium"
-        },
-        {
-          "PackageIdentifier": "wez.wezterm"
-        },
-        {
           "PackageIdentifier": "WiresharkFoundation.Wireshark"
-        },
-        {
-          "PackageIdentifier": "Zellij.Zellij"
         }
       ],
       "SourceDetails": {
@@ -147,6 +93,19 @@
         "Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
         "Name": "winget",
         "Type": "Microsoft.PreIndexed.Package"
+      }
+    },
+    {
+      "Packages": [
+        {
+          "PackageIdentifier": "9PFHDD62MXS1"
+        }
+      ],
+      "SourceDetails": {
+        "Argument": "https://storeedgefd.dsx.mp.microsoft.com/v9.0",
+        "Identifier": "StoreEdgeFD",
+        "Name": "msstore",
+        "Type": "Microsoft.Rest"
       }
     }
   ],

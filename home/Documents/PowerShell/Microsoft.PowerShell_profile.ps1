@@ -184,6 +184,179 @@ function Convert-ToLF {
 }
 Set-Alias crlf2lf Convert-ToLF
 
+# Add or remove a winget package in one of the dotfiles' lists in Windows\:
+#   wgadd orf.gping                  Apps   winget-packages.json  install-apps.ps1
+#   wgadd mtkennerly.ludusavi games  Games  winget-games.json     install-games.ps1
+#   wgadd junegunn.fzf shell         Shell  winget-shell.json     install.ps1
+#   wgadd 9PFHDD62MXS1               a Microsoft Store ID goes in the msstore source
+#   wgdel orf.gping [games|shell]    (Tab completes IDs from the list)
+#   wgls [apps|games|shell]          (every list if none given)
+#   wgin [apps|games|shell]          install a list (Shell if none given)
+# wgadd checks the ID exists (in the winget source, or the Store for Store IDs)
+# and uses its exact casing. wgadd and wgdel only edit the list; they don't
+# install or uninstall anything.
+$global:WingetListFiles = [ordered]@{ Apps = 'winget-packages.json'; Games = 'winget-games.json'; Shell = 'winget-shell.json' }
+# As `winget export` writes them; the lists keep this order
+$global:WingetSources = [ordered]@{
+    winget  = [ordered]@{ Argument = 'https://cdn.winget.microsoft.com/cache'; Identifier = 'Microsoft.Winget.Source_8wekyb3d8bbwe'
+                          Name = 'winget'; Type = 'Microsoft.PreIndexed.Package' }
+    msstore = [ordered]@{ Argument = 'https://storeedgefd.dsx.mp.microsoft.com/v9.0'; Identifier = 'StoreEdgeFD'
+                          Name = 'msstore'; Type = 'Microsoft.Rest' }
+}
+
+# The list's file and parsed JSON, and every package in it with its source
+function Get-WingetList([string]$List) {
+    $path = Join-Path (Split-Path (chezmoi source-path)) "Windows\$($global:WingetListFiles[$List])"
+    $json = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
+    $packages = foreach ($s in $json.Sources) {
+        foreach ($p in $s.Packages) { [pscustomobject]@{ Source = $s.SourceDetails.Name; Id = $p.PackageIdentifier } }
+    }
+    [pscustomobject]@{ Name = $List; Path = $path; Json = $json; Packages = @($packages) }
+}
+
+# Give a source exactly these packages (sorted), adding the source if it's new
+# and dropping it if it's left empty (except winget), then write the file
+function Save-WingetList($WingetList, [string]$Source, [string[]]$Ids) {
+    $json = $WingetList.Json
+    $entry = $json.Sources | Where-Object { $_.SourceDetails.Name -eq $Source } | Select-Object -First 1
+    if (-not $entry) {
+        $entry = [pscustomobject]@{ Packages = @(); SourceDetails = [pscustomobject]$global:WingetSources[$Source] }
+        $json.Sources = @($json.Sources) + $entry
+    }
+    $entry.Packages = @($Ids | Sort-Object | ForEach-Object { [pscustomobject]@{ PackageIdentifier = $_ } })
+    $order = @($global:WingetSources.Keys)
+    $json.Sources = @($json.Sources | Where-Object { $_.Packages.Count -or $_.SourceDetails.Name -eq 'winget' } |
+        Sort-Object { $i = $order.IndexOf($_.SourceDetails.Name); if ($i -lt 0) { 99 } else { $i } })
+    # LF and no BOM, as .gitattributes expects
+    [IO.File]::WriteAllText($WingetList.Path, (($json | ConvertTo-Json -Depth 10) -replace "`r`n", "`n") + "`n",
+        [Text.UTF8Encoding]::new($false))
+}
+
+function Add-WingetPackage {
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        # A winget ID (Publisher.App) or a 12-character Store ID (9PFHDD62MXS1)
+        [Parameter(Mandatory, Position = 0)]
+        [ValidatePattern('^([^.\s]+(\.[^.\s]+)+|[0-9A-Za-z]{12})$')]
+        [string]$Id,
+        [Parameter(Position = 1)]
+        [ValidateSet('Apps', 'Games', 'Shell')]
+        [string]$List = 'Apps'
+    )
+    $List = (Get-Culture).TextInfo.ToTitleCase($List.ToLower())   # games -> Games
+
+    if ($Id -notmatch '\.') {
+        # Store IDs are upper case, and the Store's lookup ignores case
+        $source = 'msstore'
+        $Id = $Id.ToUpper()
+        $found = winget show --id $Id --exact --source msstore --accept-source-agreements --disable-interactivity 2>$null |
+            Select-String 'Found (.+) \[' | Select-Object -First 1
+        if (-not $found) { Write-Error "No package '$Id' in the Microsoft Store."; return }
+        $label = "$($found.Matches[0].Groups[1].Value) ($Id)"
+    }
+    else {
+        # --exact is case-sensitive, so on a miss look for the ID (any case) in
+        # winget search's table to get its real casing
+        $source = 'winget'
+        winget show --id $Id --exact --source winget --disable-interactivity *> $null
+        if ($LASTEXITCODE -ne 0) {
+            $found = winget search --id $Id --source winget --disable-interactivity 2>$null |
+                Select-String "(?<=\s)$([regex]::Escape($Id))(?=\s)" | Select-Object -First 1
+            if (-not $found) { Write-Error "No package '$Id' in the winget source."; return }
+            $Id = $found.Matches[0].Value
+        }
+        $label = $Id
+    }
+
+    foreach ($other in $global:WingetListFiles.Keys | Where-Object { $_ -ne $List }) {
+        if ((Get-WingetList $other).Packages.Id -contains $Id) {
+            Write-Warning "$label is already in the $other list too."
+        }
+    }
+
+    $wl = Get-WingetList $List
+    if ($wl.Packages.Id -contains $Id) {
+        Write-Host "$label is already in the $List list."
+        return
+    }
+    if ($PSCmdlet.ShouldProcess($wl.Path, "Add $label ($source)")) {
+        Save-WingetList $wl $source (@(($wl.Packages | Where-Object Source -eq $source).Id) + $Id)
+        Write-Host "Added $label to the $List list ($(Split-Path -Leaf $wl.Path), $source)."
+    }
+}
+Set-Alias wgadd Add-WingetPackage
+
+function Remove-WingetPackage {
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [ArgumentCompleter({
+            param($cmd, $param, $word, $ast, $bound)
+            $list = if ($bound.List) { (Get-Culture).TextInfo.ToTitleCase($bound.List.ToLower()) } else { 'Apps' }
+            (Get-WingetList $list).Packages.Id | Where-Object { $_ -like "$word*" }
+        })]
+        [string]$Id,
+        [Parameter(Position = 1)]
+        [ValidateSet('Apps', 'Games', 'Shell')]
+        [string]$List = 'Apps'
+    )
+    $List = (Get-Culture).TextInfo.ToTitleCase($List.ToLower())   # games -> Games
+
+    $wl = Get-WingetList $List
+    $package = $wl.Packages | Where-Object Id -eq $Id | Select-Object -First 1   # -eq ignores case
+    if (-not $package) {
+        $elsewhere = $global:WingetListFiles.Keys | Where-Object {
+            $_ -ne $List -and (Get-WingetList $_).Packages.Id -contains $Id
+        }
+        $hint = if ($elsewhere) { " It's in the $($elsewhere -join ' and ') list." } else { '' }
+        Write-Error "$Id isn't in the $List list.$hint"
+        return
+    }
+    if ($PSCmdlet.ShouldProcess($wl.Path, "Remove $($package.Id) ($($package.Source))")) {
+        Save-WingetList $wl $package.Source @(($wl.Packages | Where-Object { $_.Source -eq $package.Source -and $_.Id -ne $package.Id }).Id)
+        Write-Host "Removed $($package.Id) from the $List list ($(Split-Path -Leaf $wl.Path), $($package.Source))."
+    }
+}
+Set-Alias wgdel Remove-WingetPackage
+
+# Not Get-*: Microsoft.WinGet.Client already has a Get-WinGetPackage
+function List-WingetPackage {
+    param(
+        [Parameter(Position = 0)]
+        [ValidateSet('Apps', 'Games', 'Shell')]
+        [string[]]$List = @($global:WingetListFiles.Keys)
+    )
+    foreach ($name in $List) {
+        $name = (Get-Culture).TextInfo.ToTitleCase($name.ToLower())   # games -> Games
+        foreach ($p in (Get-WingetList $name).Packages) {
+            [pscustomobject]@{ List = $name; Source = $p.Source; Id = $p.Id }
+        }
+    }
+}
+Set-Alias wgls List-WingetPackage
+
+# Not Install-WingetPackage: Microsoft.WinGet.Client has Install-WinGetPackage.
+# Only the winget part of install.ps1 / install-games.ps1: no chezmoi, PSFzf or
+# Ludusavi setup. Already-installed packages are left alone (no upgrades).
+function Install-WingetList {
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        [Parameter(Position = 0)]
+        [ValidateSet('Apps', 'Games', 'Shell')]
+        [string[]]$List = 'Shell'
+    )
+    foreach ($name in $List) {
+        $name = (Get-Culture).TextInfo.ToTitleCase($name.ToLower())   # games -> Games
+        $path = (Get-WingetList $name).Path
+        if ($PSCmdlet.ShouldProcess($path, 'winget import')) {
+            winget import --import-file $path --no-upgrade --ignore-unavailable `
+                --accept-package-agreements --accept-source-agreements --disable-interactivity
+            if ($LASTEXITCODE -ne 0) { Write-Warning "winget import of the $name list reported problems (exit code $LASTEXITCODE)." }
+        }
+    }
+}
+Set-Alias wgin Install-WingetList
+
 # zoxide: generated by the installed zoxide, so it always matches its version
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })

@@ -1,13 +1,16 @@
 #Requires -Version 5.1
-# Game save backups with Ludusavi: install it, link its config (Luke-Desktop
-# only, see home/.chezmoiignore), and schedule `ludusavi backup --force` at
-# sign-in and daily. Backups go to OneDrive\Game Saves. Safe to re-run.
+# Games: install everything in Windows/winget-games.json (add to it with
+# `wgadd <id> games`), including Ludusavi for game save backups. Then link
+# Ludusavi's config (Luke-Desktop only, see home/.chezmoiignore), and schedule
+# `ludusavi backup --force` at sign-in and daily. Backups go to
+# OneDrive\Game Saves. Safe to re-run.
 [CmdletBinding(SupportsShouldProcess)]
 param()
 $ErrorActionPreference = 'Stop'
 
-if ($PSCmdlet.ShouldProcess('mtkennerly.ludusavi', 'winget install')) {
-    winget install --id mtkennerly.ludusavi --exact --source winget --no-upgrade `
+$games = Join-Path $PSScriptRoot 'Windows\winget-games.json'
+if ($PSCmdlet.ShouldProcess($games, 'winget import')) {
+    winget import --import-file $games --no-upgrade --ignore-unavailable `
         --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
 }
 

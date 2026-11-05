@@ -14,22 +14,15 @@ function Update-Path {
                 [Environment]::GetEnvironmentVariable('PATH', 'User')
 }
 
-# What the PowerShell profile and prompt rely on
-$required = @(
-    'Microsoft.PowerShell'   # PowerShell 7, which the profile is written for
-    'Git.Git'                # prompt's branch, and this repo
-    'twpayne.chezmoi'        # deploys the dotfiles
-    'ajeetdsouza.zoxide'     # z
-    'lsd-rs.lsd'             # ll, lla, tree, ...
-    'junegunn.fzf'           # Ctrl-R, Ctrl-T, Alt-C
-    'Neovim.Neovim'          # EDITOR and git's editor
-)
-foreach ($id in $required) {
-    if ($PSCmdlet.ShouldProcess($id, 'winget install')) {
-        # Already-installed packages are left alone (no upgrades)
-        winget install --id $id --exact --source winget --no-upgrade `
-            --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
-    }
+# What the PowerShell profile and prompt rely on, in Windows/winget-shell.json
+# (add to it with `wgadd <id> shell`): PowerShell 7, which the profile is
+# written for; Git (prompt's branch, and this repo); chezmoi (deploys the
+# dotfiles); zoxide (z); lsd (ll, lla, tree, ...); fzf (Ctrl-R, Ctrl-T, Alt-C);
+# Neovim (EDITOR and git's editor). Already-installed packages are left alone.
+$shell = Join-Path $PSScriptRoot 'Windows\winget-shell.json'
+if ($PSCmdlet.ShouldProcess($shell, 'winget import')) {
+    winget import --import-file $shell --no-upgrade --ignore-unavailable `
+        --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
 }
 Update-Path
 foreach ($cmd in 'pwsh', 'git', 'chezmoi', 'zoxide', 'lsd', 'fzf', 'nvim') {

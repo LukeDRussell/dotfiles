@@ -25,17 +25,26 @@ Later runs can use `./bootstrap.sh` again, or `ansible-playbook -K main.yml`.
 2. Install git (`winget install --id Git.Git -e`), open a new terminal, and clone
    to `~\Repos\dotfiles`.
 3. Run `powershell -ExecutionPolicy Bypass -File .\install.ps1`. It installs only
-   what the PowerShell setup needs (PowerShell 7, Git, chezmoi, zoxide, lsd, fzf,
-   Neovim and the PSFzf module), then applies the dotfiles.
+   what the PowerShell setup needs (`Windows\winget-shell.json`: PowerShell 7,
+   Git, chezmoi, zoxide, lsd, fzf, Neovim; and the PSFzf module), then applies
+   the dotfiles.
 4. Optionally, `powershell -ExecutionPolicy Bypass -File .\install-apps.ps1`
    installs every app in `Windows\winget-packages.json`.
 5. On a gaming PC, `powershell -ExecutionPolicy Bypass -File .\install-games.ps1`
-   installs [Ludusavi](https://github.com/mtkennerly/ludusavi), links its config
+   installs everything in `Windows\winget-games.json`, including
+   [Ludusavi](https://github.com/mtkennerly/ludusavi). It links Ludusavi's config
    (Luke-Desktop only, as it lists that PC's game libraries) and schedules a game
    save backup to `OneDrive\Game Saves` at sign-in and daily at 21:00.
 
-To refresh the app list after installing something new, run
-`winget export -o new.json --source winget` and copy the new entries across.
+To add a package to a list, use `wgadd <id> [apps|games|shell]` from the
+PowerShell profile (default `apps`), e.g. `wgadd orf.gping`. It checks the ID
+exists in winget and keeps the list sorted; it doesn't install anything. A
+Microsoft Store ID (e.g. `wgadd 9PFHDD62MXS1` for Apple Music) goes in the
+list's `msstore` source.
+`wgdel <id> [apps|games|shell]` takes one out again (Tab completes the IDs), and
+`wgls [apps|games|shell]` shows what's in the lists (all of them by default).
+`wgin [apps|games|shell]` installs a list (default `shell`), skipping anything
+already installed; it's only the winget step of the install scripts.
 Runtimes and libraries (Visual C++, .NET, Windows App Runtime, VCLibs, UI.Xaml)
 and apps that ship with Windows are left out on purpose.
 
