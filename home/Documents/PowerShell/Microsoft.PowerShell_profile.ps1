@@ -189,9 +189,13 @@ Set-Alias crlf2lf Convert-ToLF
 #   wgadd mtkennerly.ludusavi games  Games  winget-games.json     install-games.ps1
 #   wgadd junegunn.fzf shell         Shell  winget-shell.json     install.ps1
 #   wgadd 9PFHDD62MXS1               a Microsoft Store ID goes in the msstore source
+#   wgadd Microsoft.PowerToys -Version 0.101.2362.0 -Scope machine
+#                                    pin a version and/or install machine-wide;
+#                                    also sets them on a package already listed
 #   wgdel orf.gping [games|shell]    (Tab completes IDs from the list)
 #   wgls [apps|games|shell]          (every list if none given)
 #   wgin [apps|games|shell]          install a list (Shell if none given)
+#   wgin apps -Force                 also reinstall packages at the wrong version/scope
 # wgadd checks the ID exists (in the winget source, or the Store for Store IDs)
 # and uses its exact casing. wgadd and wgdel only edit the list; they don't
 # install or uninstall anything.
@@ -204,26 +208,32 @@ $global:WingetSources = [ordered]@{
                           Name = 'msstore'; Type = 'Microsoft.Rest' }
 }
 
-# The list's file and parsed JSON, and every package in it with its source
+# The list's file and parsed JSON, and every package in it with its source.
+# Entry is the package's own JSON object, so fields such as Version and Scope
+# are kept when the list is saved.
 function Get-WingetList([string]$List) {
     $path = Join-Path (Split-Path (chezmoi source-path)) "Windows\$($global:WingetListFiles[$List])"
     $json = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
     $packages = foreach ($s in $json.Sources) {
-        foreach ($p in $s.Packages) { [pscustomobject]@{ Source = $s.SourceDetails.Name; Id = $p.PackageIdentifier } }
+        foreach ($p in $s.Packages) {
+            [pscustomobject]@{ Source = $s.SourceDetails.Name; Id = $p.PackageIdentifier
+                               Version = $p.Version; Scope = $p.Scope; Entry = $p }
+        }
     }
     [pscustomobject]@{ Name = $List; Path = $path; Json = $json; Packages = @($packages) }
 }
 
-# Give a source exactly these packages (sorted), adding the source if it's new
-# and dropping it if it's left empty (except winget), then write the file
-function Save-WingetList($WingetList, [string]$Source, [string[]]$Ids) {
+# Give a source exactly these package entries (sorted by ID), adding the source
+# if it's new and dropping it if it's left empty (except winget), then write
+# the file
+function Save-WingetList($WingetList, [string]$Source, [object[]]$Entries) {
     $json = $WingetList.Json
     $entry = $json.Sources | Where-Object { $_.SourceDetails.Name -eq $Source } | Select-Object -First 1
     if (-not $entry) {
         $entry = [pscustomobject]@{ Packages = @(); SourceDetails = [pscustomobject]$global:WingetSources[$Source] }
         $json.Sources = @($json.Sources) + $entry
     }
-    $entry.Packages = @($Ids | Sort-Object | ForEach-Object { [pscustomobject]@{ PackageIdentifier = $_ } })
+    $entry.Packages = @($Entries | Where-Object { $_ } | Sort-Object PackageIdentifier)
     $order = @($global:WingetSources.Keys)
     $json.Sources = @($json.Sources | Where-Object { $_.Packages.Count -or $_.SourceDetails.Name -eq 'winget' } |
         Sort-Object { $i = $order.IndexOf($_.SourceDetails.Name); if ($i -lt 0) { 99 } else { $i } })
@@ -241,9 +251,16 @@ function Add-WingetPackage {
         [string]$Id,
         [Parameter(Position = 1)]
         [ValidateSet('Apps', 'Games', 'Shell')]
-        [string]$List = 'Apps'
+        [string]$List = 'Apps',
+        # Install this version and pin it there (winget pin add), via
+        # Import-WingetList.ps1. Also sets it on a package already in the list.
+        [string]$Version,
+        # Install for the current user or machine-wide (needs admin)
+        [ValidateSet('user', 'machine')]
+        [string]$Scope
     )
     $List = (Get-Culture).TextInfo.ToTitleCase($List.ToLower())   # games -> Games
+    if ($Scope) { $Scope = $Scope.ToLower() }
 
     if ($Id -notmatch '\.') {
         # Store IDs are upper case, and the Store's lookup ignores case
@@ -268,6 +285,21 @@ function Add-WingetPackage {
         $label = $Id
     }
 
+    if ($Version) {
+        if ($source -eq 'msstore') { Write-Error "Store packages can't be pinned to a version."; return }
+        winget show --id $Id --exact --version $Version --source winget --disable-interactivity *> $null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "$Id has no version '$Version' in the winget source. See: winget show --id $Id --versions"
+            return
+        }
+    }
+    # Version first, then Scope, for "... at 1.2.3, machine-wide"
+    $details = @(
+        if ($Version) { "at $Version" }
+        if ($Scope) { if ($Scope -eq 'machine') { 'machine-wide' } else { 'per user' } }
+    ) -join ', '
+    $settings = if ($details) { " ($details)" } else { '' }
+
     foreach ($other in $global:WingetListFiles.Keys | Where-Object { $_ -ne $List }) {
         if ((Get-WingetList $other).Packages.Id -contains $Id) {
             Write-Warning "$label is already in the $other list too."
@@ -275,13 +307,24 @@ function Add-WingetPackage {
     }
 
     $wl = Get-WingetList $List
-    if ($wl.Packages.Id -contains $Id) {
-        Write-Host "$label is already in the $List list."
+    $entries = @(($wl.Packages | Where-Object Source -eq $source).Entry)
+    $existing = $entries | Where-Object PackageIdentifier -eq $Id | Select-Object -First 1
+    if ($existing) {
+        if (-not $details) { Write-Host "$label is already in the $List list."; return }
+        if ($PSCmdlet.ShouldProcess($wl.Path, "Set $label$settings")) {
+            if ($Version) { $existing | Add-Member -Force NoteProperty Version $Version }
+            if ($Scope) { $existing | Add-Member -Force NoteProperty Scope $Scope }
+            Save-WingetList $wl $source $entries
+            Write-Host "Set $label$settings in the $List list ($(Split-Path -Leaf $wl.Path))."
+        }
         return
     }
-    if ($PSCmdlet.ShouldProcess($wl.Path, "Add $label ($source)")) {
-        Save-WingetList $wl $source (@(($wl.Packages | Where-Object Source -eq $source).Id) + $Id)
-        Write-Host "Added $label to the $List list ($(Split-Path -Leaf $wl.Path), $source)."
+    if ($PSCmdlet.ShouldProcess($wl.Path, "Add $label$settings ($source)")) {
+        $new = [ordered]@{ PackageIdentifier = $Id }
+        if ($Version) { $new.Version = $Version }
+        if ($Scope) { $new.Scope = $Scope }
+        Save-WingetList $wl $source ($entries + [pscustomobject]$new)
+        Write-Host "Added $label$settings to the $List list ($(Split-Path -Leaf $wl.Path), $source)."
     }
 }
 Set-Alias wgadd Add-WingetPackage
@@ -313,7 +356,7 @@ function Remove-WingetPackage {
         return
     }
     if ($PSCmdlet.ShouldProcess($wl.Path, "Remove $($package.Id) ($($package.Source))")) {
-        Save-WingetList $wl $package.Source @(($wl.Packages | Where-Object { $_.Source -eq $package.Source -and $_.Id -ne $package.Id }).Id)
+        Save-WingetList $wl $package.Source @(($wl.Packages | Where-Object { $_.Source -eq $package.Source -and $_.Id -ne $package.Id }).Entry)
         Write-Host "Removed $($package.Id) from the $List list ($(Split-Path -Leaf $wl.Path), $($package.Source))."
     }
 }
@@ -329,30 +372,34 @@ function List-WingetPackage {
     foreach ($name in $List) {
         $name = (Get-Culture).TextInfo.ToTitleCase($name.ToLower())   # games -> Games
         foreach ($p in (Get-WingetList $name).Packages) {
-            [pscustomobject]@{ List = $name; Source = $p.Source; Id = $p.Id }
+            [pscustomobject]@{ PSTypeName = 'WingetListPackage'
+                               List = $name; Source = $p.Source; Id = $p.Id; Version = $p.Version; Scope = $p.Scope }
         }
     }
 }
 Set-Alias wgls List-WingetPackage
+# Five columns would make PowerShell show a list; show these four as a table
+# (Source is still there: wgls | Format-Table List, Source, Id)
+Update-TypeData -TypeName WingetListPackage -DefaultDisplayPropertySet List, Id, Version, Scope -Force
 
 # Not Install-WingetPackage: Microsoft.WinGet.Client has Install-WinGetPackage.
 # Only the winget part of install.ps1 / install-games.ps1: no chezmoi, PSFzf or
-# Ludusavi setup. Already-installed packages are left alone (no upgrades).
+# Ludusavi setup. Already-installed packages are left alone (no upgrades);
+# packages with a Version are pinned there. See Windows\Import-WingetList.ps1.
 function Install-WingetList {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Position = 0)]
         [ValidateSet('Apps', 'Games', 'Shell')]
-        [string[]]$List = 'Shell'
+        [string[]]$List = 'Shell',
+        # Reinstall packages that are installed at another version or scope
+        # than the list says
+        [switch]$Force
     )
     foreach ($name in $List) {
         $name = (Get-Culture).TextInfo.ToTitleCase($name.ToLower())   # games -> Games
         $path = (Get-WingetList $name).Path
-        if ($PSCmdlet.ShouldProcess($path, 'winget import')) {
-            winget import --import-file $path --no-upgrade --ignore-unavailable `
-                --accept-package-agreements --accept-source-agreements --disable-interactivity
-            if ($LASTEXITCODE -ne 0) { Write-Warning "winget import of the $name list reported problems (exit code $LASTEXITCODE)." }
-        }
+        & (Join-Path (Split-Path $path) 'Import-WingetList.ps1') -Path $path -Force:$Force -WhatIf:$WhatIfPreference
     }
 }
 Set-Alias wgin Install-WingetList

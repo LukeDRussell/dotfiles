@@ -40,7 +40,9 @@
           "PackageIdentifier": "KiCad.KiCad"
         },
         {
-          "PackageIdentifier": "Microsoft.PowerToys"
+          "PackageIdentifier": "Microsoft.PowerToys",
+          "Version": "0.101.2362.0",
+          "Scope": "machine"
         },
         {
           "PackageIdentifier": "Microsoft.Teams"

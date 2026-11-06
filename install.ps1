@@ -18,12 +18,9 @@ function Update-Path {
 # (add to it with `wgadd <id> shell`): PowerShell 7, which the profile is
 # written for; Git (prompt's branch, and this repo); chezmoi (deploys the
 # dotfiles); zoxide (z); lsd (ll, lla, tree, ...); fzf (Ctrl-R, Ctrl-T, Alt-C);
-# Neovim (EDITOR and git's editor). Already-installed packages are left alone.
-$shell = Join-Path $PSScriptRoot 'Windows\winget-shell.json'
-if ($PSCmdlet.ShouldProcess($shell, 'winget import')) {
-    winget import --import-file $shell --no-upgrade --ignore-unavailable `
-        --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
-}
+# Neovim (EDITOR and git's editor). Already-installed packages are left alone;
+# ones with a Version are pinned there.
+& (Join-Path $PSScriptRoot 'Windows\Import-WingetList.ps1') -Path (Join-Path $PSScriptRoot 'Windows\winget-shell.json') -WhatIf:$WhatIfPreference
 Update-Path
 foreach ($cmd in 'pwsh', 'git', 'chezmoi', 'zoxide', 'lsd', 'fzf', 'nvim') {
     if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) { Write-Warning "$cmd isn't on PATH yet; open a new terminal if the profile misses it." }

@@ -8,11 +8,7 @@
 param()
 $ErrorActionPreference = 'Stop'
 
-$games = Join-Path $PSScriptRoot 'Windows\winget-games.json'
-if ($PSCmdlet.ShouldProcess($games, 'winget import')) {
-    winget import --import-file $games --no-upgrade --ignore-unavailable `
-        --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
-}
+& (Join-Path $PSScriptRoot 'Windows\Import-WingetList.ps1') -Path (Join-Path $PSScriptRoot 'Windows\winget-games.json') -WhatIf:$WhatIfPreference
 
 # chezmoi replaces the config with a link into this repo; keep any existing copy
 $config = "$env:APPDATA\ludusavi\config.yaml"

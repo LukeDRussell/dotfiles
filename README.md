@@ -40,7 +40,14 @@ To add a package to a list, use `wgadd <id> [apps|games|shell]` from the
 PowerShell profile (default `apps`), e.g. `wgadd orf.gping`. It checks the ID
 exists in winget and keeps the list sorted; it doesn't install anything. A
 Microsoft Store ID (e.g. `wgadd 9PFHDD62MXS1` for Apple Music) goes in the
-list's `msstore` source.
+list's `msstore` source. `-Version 1.2.3` pins a package to that version and
+`-Scope machine` (or `user`) sets where it installs, e.g.
+`wgadd Microsoft.PowerToys -Version 0.101.2362.0 -Scope machine`; on a package
+already in the list it just sets them. Both only apply when the package is
+first installed, and the version is pinned with `winget pin add` on each
+install, so `winget upgrade --all` leaves it there. If a package is already
+installed at another version or scope, the installs warn; `wgin -Force`
+uninstalls it and installs the list's version and scope.
 `wgdel <id> [apps|games|shell]` takes one out again (Tab completes the IDs), and
 `wgls [apps|games|shell]` shows what's in the lists (all of them by default).
 `wgin [apps|games|shell]` installs a list (default `shell`), skipping anything

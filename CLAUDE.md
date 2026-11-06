@@ -19,7 +19,9 @@ and the day-to-day commands; this file is the working conventions.
   setup needs (`Windows/winget-shell.json`), then `chezmoi apply`. Everything
   else is in `Windows/winget-packages.json`, installed by `install-apps.ps1`;
   games are in `Windows/winget-games.json`. A new tool the profile relies on
-  goes in the shell list too. Add to the lists with the profile's `wgadd`. Windows Terminal's `LocalState` is a directory symlink to
+  goes in the shell list too. Add to the lists with the profile's `wgadd`.
+  All the installs go through `Windows/Import-WingetList.ps1` (winget import,
+  then `winget pin add` for any package with a `Version`). Windows Terminal's `LocalState` is a directory symlink to
   `Windows/TerminalLocalState`. `install-games.ps1` sets up Ludusavi game save
   backups to OneDrive; its config is deployed to Luke-Desktop only.
 - **Emacs:** `init.el` and `early-init.el` are vendored from minimal-emacs.d
