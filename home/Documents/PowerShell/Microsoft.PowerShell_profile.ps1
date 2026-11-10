@@ -58,6 +58,18 @@ if (Test-Path -LiteralPath $localBin -PathType Container) {
 Import-Module PSReadLine
 # The prompt is two lines; tell PSReadLine so redraws line up
 Set-PSReadLineOption -ExtraPromptLineCount 1
+# The defaults use ANSI white/bright white, invisible on a light background
+# (Modus Operandi). Use the terminal's own foreground, and bright black for
+# predictions, so they read on both the light and dark schemes.
+Set-PSReadLineOption -Colors @{
+    Default               = "`e[39m"
+    Number                = "`e[39m"
+    Member                = "`e[39m"
+    Type                  = "`e[39m"
+    ContinuationPrompt    = "`e[39m"
+    InlinePrediction      = "`e[90m"
+    ListPredictionTooltip = "`e[90m"
+}
 $OnViModeChange = [scriptblock]{
     if ($args[0] -eq 'Command') {
         # Steady block in normal mode, as in bash
