@@ -15,7 +15,7 @@
  '(custom-safe-themes
    '("10e330880269244ae45ae9e02fe6f55766da9e15036e7c7f07d7ce228195deb5" "967c23e9ba179b80560774419f081df22e7674aac23c5c550b817e4a1ce7d058" default))
  '(package-selected-packages
-   '(auto-dark compile-angel consult corfu dired-sidebar doom-modeline eca eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize
+   '(auto-dark consult corfu dired-sidebar doom-modeline eca eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize
                indent-bars magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless
                org-appear org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
  '(package-vc-selected-packages
@@ -64,36 +64,107 @@
   )
 
 
-;; === Load Compile Angel first, so everything else goes faster ================
+;; === Packages: never install or update at startup ============================
+;;
+;; `use-package' forms with :ensure or :vc normally install missing packages as
+;; they're evaluated. Instead, a missing package's whole form is skipped and the
+;; package is noted in `my/package-missing'. Install from Emacs when ready:
+;;   SPC e p i  `my/package-install-missing'
+;;   SPC e p s  `my/package-sync': install missing, upgrade all, compile
+;;   SPC e p c  `my/package-compile'
 
-;; Ensure adding the following compile-angel code at the very beginning
-;; of your `~/.emacs.d/post-init.el` file, before all other packages.
-(use-package compile-angel
-  :demand t
-  :custom
-  ;; Set `compile-angel-verbose` to nil to suppress output from compile-angel.
-  ;; Drawback: The minibuffer will not display compile-angel's actions.
-  (compile-angel-verbose nil)
+(defvar my/package-missing nil
+  "Packages skipped at startup because they aren't installed.
+Each entry is (NAME . VC-ARG); VC-ARG is the normalized :vc argument, or nil
+for a package from the package archives.")
 
-  :config
-  ;; The following directive prevents compile-angel from compiling your init
-  ;; files. If you choose to remove this push to `compile-angel-excluded-files'
-  ;; and compile your pre/post-init files, ensure you understand the
-  ;; implications and thoroughly test your code. For example, if you're using
-  ;; `use-package', you'll need to explicitly add `(require 'use-package)` at
-  ;; the top of your init file.
-  (push "/init.el" compile-angel-excluded-files)
-  (push "/early-init.el" compile-angel-excluded-files)
-  (push "/pre-init.el" compile-angel-excluded-files)
-  (push "/post-init.el" compile-angel-excluded-files)
-  (push "/pre-early-init.el" compile-angel-excluded-files)
-  (push "/post-early-init.el" compile-angel-excluded-files)
+(defun my/package-available-p (name ensure vc)
+  "Return non-nil if the `use-package' form for NAME can run.
+ENSURE and VC are the form's normalized :ensure and :vc values. If the
+package isn't installed, note it in `my/package-missing' and return nil."
+  (let ((package (cond (vc name)
+                       ((memq t ensure) name)
+                       (t (seq-find #'symbolp (delq nil ensure))))))
+    (if (or (null package) (package-installed-p package))
+        t
+      (unless (assq package my/package-missing)
+        (push (cons package vc) my/package-missing))
+      nil)))
 
-  ;; A local mode that compiles .el files whenever the user saves them.
-  (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
+;; Wrap every `use-package' form (that has no :if of its own) in a check, and
+;; never install from :ensure. (:vc only installs inside the :if check.)
+(setq use-package-ensure-function #'ignore)
+(add-to-list 'use-package-defaults
+             '(:if (lambda (name args)
+                     `(my/package-available-p ',name ',(plist-get args :ensure)
+                                              ',(plist-get args :vc)))
+                   (lambda (_name args) (not (plist-member args :if))))
+             t)
 
-  ;; A global mode that compiles .el files before they are loaded.
-  (compile-angel-on-load-mode))
+(defun my/package--report-missing ()
+  (when my/package-missing
+    (display-warning
+     'packages
+     (format "Not installed, so not loaded: %s.\nInstall with SPC e p i (M-x my/package-install-missing), or SPC e p s to also upgrade."
+             (mapconcat #'symbol-name (reverse (mapcar #'car my/package-missing)) ", "))
+     :warning)))
+(add-hook 'emacs-startup-hook #'my/package--report-missing)
+
+(defun my/package--install-missing-1 ()
+  "Install `my/package-missing' without refreshing the archives first.
+Return the names of the packages installed."
+  (let (installed)
+    (dolist (entry (reverse my/package-missing))
+      (let ((name (car entry)) (vc (cdr entry)))
+        (with-demoted-errors "Failed to install: %S"
+          (if vc
+              (use-package-vc-install vc)
+            (package-install name))
+          (when (package-installed-p name)
+            (push name installed)
+            (setq my/package-missing (delq entry my/package-missing))))))
+    (nreverse installed)))
+
+(defun my/package--offer-reload (installed)
+  "Offer to reload post-init.el so the INSTALLED packages' forms run."
+  (when (and installed
+             (y-or-n-p (format "Installed %s. Reload post-init.el to load %s? "
+                               (mapconcat #'symbol-name installed ", ")
+                               (if (cdr installed) "them" "it"))))
+    (my/reload-post-init)))
+
+(defun my/package-install-missing ()
+  "Install the packages skipped at startup, then offer to load them."
+  (interactive)
+  (if (not my/package-missing)
+      (message "No missing packages")
+    (package-refresh-contents)
+    (let ((installed (my/package--install-missing-1)))
+      (when my/package-missing
+        (display-warning 'packages
+                         (format "Failed to install: %s; see *Messages*"
+                                 (mapconcat #'symbol-name (mapcar #'car my/package-missing) ", "))))
+      (my/package--offer-reload installed))))
+
+(defun my/package-compile ()
+  "Byte-compile all installed packages, then native-compile them in the background."
+  (interactive)
+  (package-recompile-all)
+  (when (native-comp-available-p)
+    (native-compile-async package-user-dir 'recursively))
+  (message "Byte-compiled all packages; native compilation continues in the background"))
+
+(defun my/package-sync ()
+  "Install missing packages, upgrade all packages, and compile them."
+  (interactive)
+  (package-upgrade-all nil)             ; Refreshes the archives first.
+  (let ((installed (my/package--install-missing-1)))
+    (my/package-compile)
+    ;; VC upgrades pull asynchronously and compile each package themselves.
+    (package-vc-upgrade-all)
+    (my/package--offer-reload installed)
+    (message "Synced packages%s. Upgrades take full effect after a restart, once VC upgrades finish"
+             (if my/package-missing " (some failed to install; see *Messages*)" ""))))
 
 
 ;; === use-package =============================================================
@@ -323,6 +394,7 @@
   (which-key-add-key-based-replacements
     "SPC b" "buffers"
     "SPC e" "emacs"
+    "SPC e p" "packages"
     "SPC h" "help"
     "SPC o" "open"
     "SPC q" "quit"
@@ -340,9 +412,13 @@
 
     (kbd "<leader> ec") '("open user config" . (lambda () (interactive) (find-file user-init-file)))
     (kbd "<leader> eo") '("emacs config options" . (lambda () (interactive) (helpful-variable 'system-configuration-options)))
-    (kbd "<leader> ep") '("packages" . list-packages)
+    (kbd "<leader> epc") '("compile all packages" . my/package-compile)
+    (kbd "<leader> epi") '("install missing packages" . my/package-install-missing)
+    (kbd "<leader> epl") '("list packages" . list-packages)
+    (kbd "<leader> eps") '("sync: install, upgrade, compile" . my/package-sync)
+    (kbd "<leader> epu") '("show packages that can be upgraded" .
+                           (lambda () (interactive) (list-packages t) (package-menu-filter-upgradable)))
     (kbd "<leader> er") '("reload post-init.el" . my/reload-post-init)
-    (kbd "<leader> eu") '("show packages that can be upgraded" . package-menu-filter-upgradable)
 
     (kbd "<leader> ha") '("apropos" . apropos)
     (kbd "<leader> h@") '("at point" . eldoc-box-help-at-point)
@@ -713,3 +789,6 @@
 
 (use-package eca
   :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest))
+
+(use-package agent-shell
+  :defer t)
