@@ -17,7 +17,7 @@
  '(package-selected-packages
    '(auto-dark consult corfu dired-sidebar eca eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize
                indent-bars magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless
-               org-appear org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
+               org-appear org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto valign vertico visual-fill-column yaml-pro))
  '(package-vc-selected-packages
    '((org-modern-indent :url "https://github.com/jdtsmith/org-modern-indent.git"))))
 
@@ -227,10 +227,10 @@ Return the names of the packages installed."
   :custom
   (modus-themes-mixed-fonts t) ;; So org-tables line up using monospaced (fixed pitch) font
   (modus-themes-headings
-   '((1 . (1.5))
-     (2 . (1.3))
-     (3 . (1.15))
-     (4 . (1.1))
+   '((1 . (1.2))
+     (2 . (1.15))
+     (3 . (1.1))
+     (4 . (1.05))
      (t . (1.0))))
   (modus-themes-common-palette-overrides
    '((bg-line-number-active unspecified)
@@ -245,6 +245,7 @@ Return the names of the packages installed."
      (fg-heading-7 fg-main)
      (fg-heading-8 fg-main)
      (prose-done fg-dim)
+     (fringe unspecified)
      )
    )
   )
@@ -404,9 +405,12 @@ a coloured background, so they stand out."
   ;; text of ultrawide frames.
   :config
   (global-visual-fill-column-mode)
+  (global-visual-wrap-prefix-mode)
   :custom
   (visual-fill-column-center-text t)
-  (fill-column 150))
+  (fill-column 150)
+  (visual-fill-column-enable-sensible-window-split)
+  )
 
 (use-package nerd-icons
   :defer t
@@ -739,7 +743,8 @@ a coloured background, so they stand out."
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
   )
 
-(use-package tabspaces)
+(use-package tabspaces
+  :defer t)
 
 ;; === IDE ======================================================================
 
@@ -781,36 +786,6 @@ a coloured background, so they stand out."
 (use-package yaml-pro
   :hook (yaml-mode-hook . yaml-pro-mode)
   :defer t)
-
-;; Curly quotes in Org and Markdown prose: typed ' and " become ‘’ and “”, and
-;; ' after a letter an apostrophe. Quotes typed in code stay straight.
-(use-package electric
-  :ensure nil
-  :preface
-  (defun my/curly-quotes ()
-    "Turn on curly quotes in this buffer, except in code."
-    (setq-local electric-quote-replace-double t     ; " is curled too
-                electric-quote-context-sensitive t) ; ' at the start of a word opens a quote
-    (add-hook 'electric-quote-inhibit-functions #'my/quote-in-code-p nil t)
-    (electric-quote-local-mode 1))
-  (defun my/quote-in-code-p ()
-    "Non-nil if point is in code, where typed quotes should stay straight."
-    (cond
-     ((derived-mode-p 'org-mode)
-      (memq (org-element-type (org-element-context))
-            '(src-block example-block export-block fixed-width keyword
-              property-drawer node-property code verbatim inline-src-block)))
-     ((derived-mode-p 'markdown-mode)
-      (or (markdown-code-block-at-point-p)
-          (markdown-inline-code-at-point-p)))))
-  :hook
-  ((org-mode-hook markdown-mode-hook) . my/curly-quotes))
-
-;; Markdown
-(use-package markdown-mode
-  :defer t
-  :init (setq markdown-command "multimarkdown")
-  )
 
 ;; Python
 (use-package python
@@ -877,6 +852,7 @@ a coloured background, so they stand out."
   (org-blank-before-new-entry '((heading . nil) (plain-list-item . nil)))
   (org-id-link-to-org-use-id t)
   (org-startup-with-inline-images t)
+  (org-startup-align-all-tables t)      ; Re-align every table when a file is opened.
   (org-pretty-entities t)
   (org-startup-folded 'fold)
   (org-babel-load-languages '((lua . t) (python . t) (shell . t) (emacs-lisp . t)))	
@@ -930,6 +906,79 @@ a coloured background, so they stand out."
 (use-package htmlize
   :defer t)
 
+;; Curly quotes in Org and Markdown prose: typed ' and " become ‘’ and “”, and
+;; ' after a letter an apostrophe. Quotes typed in code stay straight.
+(use-package electric
+  :ensure nil
+  :preface
+  (defun my/curly-quotes ()
+    "Turn on curly quotes in this buffer, except in code."
+    (setq-local electric-quote-replace-double t     ; " is curled too
+                electric-quote-context-sensitive t) ; ' at the start of a word opens a quote
+    (add-hook 'electric-quote-inhibit-functions #'my/quote-in-code-p nil t)
+    (electric-quote-local-mode 1))
+  (defun my/quote-in-code-p ()
+    "Non-nil if point is in code, where typed quotes should stay straight."
+    (cond
+     ((derived-mode-p 'org-mode)
+      (memq (org-element-type (org-element-context))
+            '(src-block example-block export-block fixed-width keyword
+              property-drawer node-property code verbatim inline-src-block)))
+     ((derived-mode-p 'markdown-mode)
+      (or (markdown-code-block-at-point-p)
+          (markdown-inline-code-at-point-p)))))
+  :hook
+  ((org-mode-hook markdown-mode-hook) . my/curly-quotes))
+
+
+;; === Markdown =========================================================
+
+(use-package markdown-mode
+  :defer t
+  :hook
+  ;; Wrap at word boundaries (no hard line breaks), like Org.
+  (markdown-mode-hook . visual-line-mode)
+  ;; Indent the wrapped lines of list items and quotes under their text.
+  (markdown-mode-hook . visual-wrap-prefix-mode)
+  ;; Prose in the variable-pitch font; `modus-themes-mixed-fonts' keeps code
+  ;; and tables monospace. Heading sizes come from `modus-themes-headings'.
+  (markdown-mode-hook . variable-pitch-mode)
+  ;; Show the hidden markup while in evil insert state.
+  (markdown-mode-hook . (lambda ()
+                          (add-hook 'evil-insert-state-entry-hook
+                                    #'my/markdown-show-markup nil t)
+                          (add-hook 'evil-insert-state-exit-hook
+                                    #'my/markdown-hide-markup nil t)))
+  :config
+  ;; Uses markdown-mode's own toggle, since heading #s and bullets are drawn
+  ;; with display properties, not just made invisible. It refontifies lazily,
+  ;; only what's on screen. Re-hide only if insert state was what showed it,
+  ;; so hiding turned off with C-c C-x C-m stays off.
+  (defvar-local my/markdown--shown-for-insert nil)
+  (defun my/markdown-show-markup ()
+    (when markdown-hide-markup
+      (setq my/markdown--shown-for-insert t)
+      (markdown-toggle-markup-hiding -1)))
+  (defun my/markdown-hide-markup ()
+    (when my/markdown--shown-for-insert
+      (setq my/markdown--shown-for-insert nil)
+      (markdown-toggle-markup-hiding 1)))
+  :custom
+  (markdown-command "pandoc")
+  ;; Hide **, _, ` and link URLs. Toggle with C-c C-x C-m.
+  (markdown-hide-markup t)
+  (markdown-list-item-bullets '("•" "◦" "▸" "▹"))
+  (markdown-fontify-code-blocks-natively t)
+  )
+
+(use-package valign
+  ;; Line up table columns by pixel width, so they stay aligned with
+  ;; variable-pitch text, hidden markup or wide characters.
+  :hook
+  (markdown-mode-hook . valign-mode)
+  (org-mode-hook . valign-mode))
+
+
 ;; === Terminal =========================================================
 
 (use-package ghostel
@@ -940,10 +989,11 @@ a coloured background, so they stand out."
   :after (ghostel evil)
   :hook (ghostel-mode . evil-ghostel-mode))
 
+
 ;; === AI ===============================================================
 
-(use-package eca
-  :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest))
+;; (use-package eca
+;;   :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest))
 
-(use-package agent-shell
-  :defer t)
+;; (use-package agent-shell
+;;   :defer t)
