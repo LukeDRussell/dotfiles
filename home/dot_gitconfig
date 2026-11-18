@@ -4,6 +4,7 @@
 [core]
 	excludesfile = ~/.gitignore_global
 	editor = nvim
+	autocrlf = input
 [init]
 	defaultBranch = main
 [pull]

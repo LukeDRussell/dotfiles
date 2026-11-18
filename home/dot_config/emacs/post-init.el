@@ -206,6 +206,8 @@ Return the names of the packages installed."
   (if (eq system-type 'windows-nt)
       (setopt shell-file-name "C:/Program Files/PowerShell/7/pwsh.exe")
     )
+  ;; New files start with LF line endings on every OS. Existing files keep theirs.
+  (setq-default buffer-file-coding-system 'utf-8-unix)
   (my/setup-fonts)
   :custom
   (user-full-name "Luke D Russell")

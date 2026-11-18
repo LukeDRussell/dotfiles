@@ -55,7 +55,9 @@ and the day-to-day commands; this file is the working conventions.
   something major (on the scale of adopting chezmoi).
 - The remote is called `Github`, not `origin`.
 - Never force-push or rewrite pushed history; fix with a follow-up commit.
-- `.gitattributes` normalises to LF (`*.ps1` is CRLF); expect line-ending warnings.
+- `.gitattributes` normalises to LF everywhere except `*.bat` (CRLF, since
+  cmd.exe mishandles labels and `goto` with LF). Emacs starts new files as LF
+  (`post-init.el`), and `core.autocrlf` is `input`.
 
 ## Checking a change
 There are no automated tests. A GitHub Actions workflow
