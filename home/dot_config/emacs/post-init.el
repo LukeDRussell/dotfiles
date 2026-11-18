@@ -652,6 +652,30 @@ Return the names of the packages installed."
   :hook (yaml-mode-hook . yaml-pro-mode)
   :defer t)
 
+;; Curly quotes in Org and Markdown prose: typed ' and " become ‘’ and “”, and
+;; ' after a letter an apostrophe. Quotes typed in code stay straight.
+(use-package electric
+  :ensure nil
+  :preface
+  (defun my/curly-quotes ()
+    "Turn on curly quotes in this buffer, except in code."
+    (setq-local electric-quote-replace-double t     ; " is curled too
+                electric-quote-context-sensitive t) ; ' at the start of a word opens a quote
+    (add-hook 'electric-quote-inhibit-functions #'my/quote-in-code-p nil t)
+    (electric-quote-local-mode 1))
+  (defun my/quote-in-code-p ()
+    "Non-nil if point is in code, where typed quotes should stay straight."
+    (cond
+     ((derived-mode-p 'org-mode)
+      (memq (org-element-type (org-element-context))
+            '(src-block example-block export-block fixed-width keyword
+              property-drawer node-property code verbatim inline-src-block)))
+     ((derived-mode-p 'markdown-mode)
+      (or (markdown-code-block-at-point-p)
+          (markdown-inline-code-at-point-p)))))
+  :hook
+  ((org-mode-hook markdown-mode-hook) . my/curly-quotes))
+
 ;; Markdown
 (use-package markdown-mode
   :defer t
