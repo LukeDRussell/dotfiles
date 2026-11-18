@@ -15,7 +15,7 @@
  '(custom-safe-themes
    '("10e330880269244ae45ae9e02fe6f55766da9e15036e7c7f07d7ce228195deb5" "967c23e9ba179b80560774419f081df22e7674aac23c5c550b817e4a1ce7d058" default))
  '(package-selected-packages
-   '(auto-dark consult corfu dired-sidebar doom-modeline eca eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize
+   '(auto-dark consult corfu dired-sidebar eca eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize
                indent-bars magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless
                org-appear org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
  '(package-vc-selected-packages
@@ -276,25 +276,128 @@ Return the names of the packages installed."
                              dashboard-insert-items dashboard-insert-newline))
   )
 
-(use-package doom-modeline
-  :config (doom-modeline-mode)
-  :after evil
-  :custom
-  (doom-modeline-buffer-file-name truncate-upto-project)
-  (doom-modeline-modal-icon nil)
-  (doom-modeline-buffer-encoding nil)
-  ;; Don't duplicate Mode in messages, it's already in the modeline.
-  (evil-insert-state-message nil)
-  (evil-visual-state-message nil)
-  ;; Customize the Mode labels to how they look in vim
-  (evil-normal-state-tag " NORMAL ")
-  (evil-insert-state-tag " INSERT ")
-  (evil-visual-state-tag " VISUAL ")
-  :custom-face
-  (doom-modeline-evil-insert-state
-   ((t (:background "olive drab" :foreground "white smoke"))))
-  (doom-modeline-evil-visual-state
-   ((t (:background "medium slate blue" :foreground "white smoke")))))
+;; Mode line: built in, in place of doom-modeline. On the left: macro
+;; recording and other packages' status (Org clock) when there is any, the
+;; project, file, saved state and git branch. On the right: narrowing,
+;; selection size, line and column, then the major mode with its icon,
+;; Python virtualenv, eglot's icon and evil's state.
+(use-package emacs
+  :ensure nil
+  :preface
+  (defvar-local my/mode-line--project nil
+    "Cached project of this buffer's file, or `none'.")
+  (defun my/mode-line-project ()
+    "This buffer's project, or nil. Looked up once per buffer, as doing it
+on every redraw is slow."
+    (when buffer-file-name
+      (unless my/mode-line--project
+        (setq my/mode-line--project
+              (or (project-current nil (file-name-directory buffer-file-name))
+                  'none)))
+      (unless (eq my/mode-line--project 'none)
+        my/mode-line--project)))
+  (defun my/mode-line-project-name ()
+    "Project name; hovering shows the project's folder."
+    (when-let* ((project (my/mode-line-project)))
+      (concat (propertize (project-name project)
+                          'help-echo (abbreviate-file-name (project-root project)))
+              "  ")))
+  (defun my/mode-line-file ()
+    "File name; hovering shows the full path."
+    (concat (propertize (buffer-name)
+                        'face 'mode-line-buffer-id
+                        'help-echo (if buffer-file-name
+                                       (abbreviate-file-name buffer-file-name)
+                                     (buffer-name)))
+            "  "))
+  (defun my/mode-line-state ()
+    "Saved state icon. Always one icon, so what follows doesn't shift: a
+dim save icon when there's nothing to flag."
+    (concat (cond (buffer-read-only (nerd-icons-mdicon "nf-md-lock" :face 'warning))
+                  ((and buffer-file-name (buffer-modified-p))
+                   (nerd-icons-mdicon "nf-md-content_save_edit" :face 'warning))
+                  (t (nerd-icons-mdicon "nf-md-content_save" :face 'shadow)))
+            "  "))
+  (defun my/mode-line-vc ()
+    "Git branch with an icon, without vc's \"Git-\" prefix."
+    (when vc-mode
+      (concat (nerd-icons-octicon "nf-oct-git_branch") " "
+              (replace-regexp-in-string "\\` *[[:alpha:]]+[-:@!?]" "" vc-mode)
+              "  ")))
+  (defun my/mode-line-macro ()
+    "\"● Macro\" while recording a keyboard macro, by Emacs or evil."
+    (when defining-kbd-macro
+      (concat (propertize "● Macro" 'face '(error bold)) "  ")))
+  (defun my/mode-line-narrow ()
+    "\"Narrow\" while the buffer is narrowed, as it's easy to forget."
+    (when (buffer-narrowed-p)
+      (concat (propertize "Narrow" 'face 'warning
+                          'help-echo "Narrowed: C-x n w to widen")
+              "  ")))
+  (defun my/mode-line-selection ()
+    "Size of the selection: lines if it spans several, else characters."
+    (when (and (mode-line-window-selected-p) (use-region-p))
+      (let* ((beg (region-beginning))
+             (end (region-end))
+             (lines (count-lines beg end)))
+        (concat (if (> lines 1)
+                    (format "%d lines" lines)
+                  (format "%d chars" (- end beg)))
+                "  "))))
+  (defun my/mode-line-venv ()
+    "Python virtualenv found by pet, like (.venv); hovering shows its path."
+    (when (bound-and-true-p python-shell-virtualenv-root)
+      (let ((root (directory-file-name python-shell-virtualenv-root)))
+        (concat " "
+                (propertize (format "(%s)" (file-name-nondirectory root))
+                            'help-echo (abbreviate-file-name root))))))
+  (defun my/mode-line-eglot ()
+    "Eglot's icon while it manages the buffer, with any error, pending
+requests or progress after it. Clicking the icon opens eglot's menu."
+    (when (bound-and-true-p eglot--managed-mode)
+      (let ((parts (seq-remove #'string-empty-p
+                               (mapcar #'format-mode-line eglot-mode-line-format))))
+        (concat " " (string-join parts " ") " "))))
+  (defun my/mode-line-evil-state ()
+    "Evil's state in capitals, like NORMAL or INSERT. Insert and visual get
+a coloured background, so they stand out."
+    (when (bound-and-true-p evil-local-mode)
+      (concat " "
+              (propertize (format " %s " (upcase (symbol-name evil-state)))
+                          'face (pcase evil-state
+                                  ('insert '(:background "olive drab" :foreground "white smoke" :weight bold))
+                                  ('visual '(:background "medium slate blue" :foreground "white smoke" :weight bold))
+                                  (_ 'bold))))))
+  :hook
+  ;; Look the project up again if the buffer is saved under a new name.
+  (after-set-visited-file-name-hook . (lambda () (kill-local-variable 'my/mode-line--project)))
+  :config
+  (setq-default mode-line-format
+                `("%e" mode-line-front-space
+                  (:eval (my/mode-line-macro))
+                  ;; What other packages post, such as the Org clock.
+                  (:eval (let ((info (string-trim (format-mode-line mode-line-misc-info))))
+                           (unless (string-empty-p info) (concat info "  "))))
+                  (:eval (my/mode-line-project-name))
+                  (:eval (my/mode-line-file))
+                  (:eval (my/mode-line-state))
+                  (:eval (my/mode-line-vc))
+                  mode-line-format-right-align
+                  (:eval (my/mode-line-narrow))
+                  (:eval (my/mode-line-selection))
+                  "L%l C%C  "
+                  (:eval (concat (nerd-icons-icon-for-buffer) " "))
+                  ;; The major mode alone, with the clicks of the built-in
+                  ;; `mode-line-modes' but none of the minor mode tags.
+                  (:propertize mode-name
+                               local-map ,mode-line-major-mode-keymap
+                               mouse-face mode-line-highlight
+                               help-echo "Major mode\nmouse-1: Display major mode menu\nmouse-2: Show help for major mode\nmouse-3: Toggle minor modes")
+                  (:eval (my/mode-line-venv))
+                  (:eval (my/mode-line-eglot))
+                  mode-line-process
+                  (:eval (my/mode-line-evil-state))
+                  mode-line-end-spaces)))
 
 (use-package visual-fill-column
   ;; Centres text when the window is really wide. I don't like turning my head left to read the
@@ -390,7 +493,17 @@ Return the names of the packages installed."
   (evil-set-undo-system 'undo-redo)
   (evil-split-window-below t)
   (evil-vsplit-window-right t)
+  ;; My own mode line segment shows the state (`my/mode-line-evil-state'),
+  ;; so no evil tag there and no state message in the echo area.
+  (evil-mode-line-format nil)
   :config
+  ;; Plain variables, not options, so `:custom' doesn't stick: set here.
+  (setq evil-insert-state-message nil
+        evil-visual-state-message nil
+        evil-replace-state-message nil
+        evil-operator-state-message nil
+        evil-motion-state-message nil
+        evil-emacs-state-message nil)
   (evil-mode 1)
   (evil-set-leader 'normal (kbd "SPC"))
   (which-key-add-key-based-replacements
@@ -634,7 +747,22 @@ Return the names of the packages installed."
   :ensure nil
   :hook
   (python-base-mode-hook . eglot-ensure)
-  :custom (eglot-ignored-server-capabilities '(:inlayHintProvider))
+  :config
+  ;; Shown by my own mode line segment instead (see `my/mode-line-eglot').
+  (setq mode-line-misc-info
+        (seq-remove (lambda (entry) (eq (car-safe entry) 'eglot--managed-mode))
+                    mode-line-misc-info))
+  :custom
+  (eglot-ignored-server-capabilities '(:inlayHintProvider))
+  ;; In the mode line: an icon for eglot's menu in place of "eglot", and no
+  ;; project name, which the mode line already shows. Errors, pending
+  ;; requests and progress still appear next to the icon.
+  (eglot-menu-string (nerd-icons-octicon "nf-oct-rocket"))
+  (eglot-mode-line-format '(eglot-mode-line-menu
+                            eglot-mode-line-error
+                            eglot-mode-line-pending-requests
+                            eglot-mode-line-progress
+                            eglot-mode-line-action-suggestion))
   )
 
 (use-package prog-mode
@@ -698,8 +826,9 @@ Return the names of the packages installed."
 
 (use-package pet
   :defer t
+  ;; No `:after tomlparse': that held back this hook until tomlparse loaded,
+  ;; which nothing but pet does, so pet-mode never turned on.
   :hook (python-base-mode-hook . pet-mode)
-  :after tomlparse
   )
 
 (use-package eldoc-box
