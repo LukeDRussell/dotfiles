@@ -522,7 +522,6 @@ a coloured background, so they stand out."
     "SPC e p" "packages"
     "SPC h" "help"
     "SPC o" "open"
-    "SPC q" "quit"
     "SPC w" "window"
     "SPC u" "ui")
     )
@@ -543,7 +542,9 @@ a coloured background, so they stand out."
     (kbd "<leader> eps") '("sync: install, upgrade, compile" . my/package-sync)
     (kbd "<leader> epu") '("show packages that can be upgraded" .
                            (lambda () (interactive) (list-packages t) (package-menu-filter-upgradable)))
+    (kbd "<leader> eq") '("quit" . save-buffers-kill-emacs)
     (kbd "<leader> er") '("reload post-init.el" . my/reload-post-init)
+    (kbd "<leader> eR") '("restart" . restart-emacs)
 
     (kbd "<leader> ha") '("apropos" . apropos)
     (kbd "<leader> h@") '("at point" . eldoc-box-help-at-point)
@@ -575,9 +576,6 @@ a coloured background, so they stand out."
     (kbd "<leader> om") '("magit" . magit)
     (kbd "<leader> od") '("dired" . dired-sidebar-toggle-sidebar)
     (kbd "<leader> oD") '("Dashboard". dashboard-open)
-
-    (kbd "<leader> qr") '("restart" . restart-emacs)
-    (kbd "<leader> qq") '("quit" . save-buffers-kill-emacs)
 
     (kbd "<leader> um") '("menu bar" . toggle-menu-bar-mode-from-frame)
     (kbd "<leader> uM") '("org modern" . org-modern-mode)
