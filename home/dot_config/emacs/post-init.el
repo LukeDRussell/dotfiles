@@ -259,6 +259,12 @@ Return the names of the packages installed."
 
 ;; === Visuals ==================================================================
 
+(defun my/dashboard-open-project (dir)
+  "Open project DIR from the dashboard straight into find-file.
+Only here: `C-x p p' still asks which command to run."
+  (let ((project-switch-commands #'project-find-file))
+    (project-switch-project dir)))
+
 (use-package dashboard
   :init (dashboard-setup-startup-hook)
   :custom
@@ -270,6 +276,7 @@ Return the names of the packages installed."
   (dashboard-set-heading-icons t)
   (dashboard-set-file-icons t)
   (dashboard-projects-backend 'project-el)
+  (dashboard-projects-switch-function #'my/dashboard-open-project)
   (dashboard-display-icons-p t)
   (dashboard-items '((recents . 10) (projects . 10) (bookmarks . 10)))
   (dashboard-startupify-list
