@@ -17,7 +17,7 @@
  '(package-selected-packages
    '(auto-dark consult corfu dired-sidebar eca eldoc-box evil evil-collection evil-ghostel ghostel helpful htmlize
                indent-bars magit marginalia markdown-mode nerd-icons-completion nerd-icons-corfu nerd-icons-dired nerd-icons-ibuffer orderless
-               org-appear org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto valign vertico visual-fill-column yaml-pro))
+               org-appear org-modern org-modern-indent org-reverse-datetree pet tabspaces tomlparse treesit-auto vertico visual-fill-column yaml-pro))
  '(package-vc-selected-packages
    '((org-modern-indent :url "https://github.com/jdtsmith/org-modern-indent.git"))))
 
@@ -405,7 +405,6 @@ a coloured background, so they stand out."
   ;; text of ultrawide frames.
   :config
   (global-visual-fill-column-mode)
-  (global-visual-wrap-prefix-mode)
   :custom
   (visual-fill-column-center-text t)
   (fill-column 150)
@@ -939,6 +938,8 @@ a coloured background, so they stand out."
   ;; Wrap at word boundaries (no hard line breaks), like Org.
   (markdown-mode-hook . visual-line-mode)
   ;; Indent the wrapped lines of list items and quotes under their text.
+  ;; Markdown only, not global: in Org it takes an empty table row (only |
+  ;; and spaces) for a prefix and stretches it across the window.
   (markdown-mode-hook . visual-wrap-prefix-mode)
   ;; Prose in the variable-pitch font; `modus-themes-mixed-fonts' keeps code
   ;; and tables monospace. Heading sizes come from `modus-themes-headings'.
@@ -970,13 +971,6 @@ a coloured background, so they stand out."
   (markdown-list-item-bullets '("•" "◦" "▸" "▹"))
   (markdown-fontify-code-blocks-natively t)
   )
-
-(use-package valign
-  ;; Line up table columns by pixel width, so they stay aligned with
-  ;; variable-pitch text, hidden markup or wide characters.
-  :hook
-  (markdown-mode-hook . valign-mode)
-  (org-mode-hook . valign-mode))
 
 
 ;; === Terminal =========================================================
