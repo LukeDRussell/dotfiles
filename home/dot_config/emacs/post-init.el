@@ -461,10 +461,49 @@ a coloured background, so they stand out."
 
 ;; === Help =====================================================================
 
+(defconst my/which-key-mod-order '("" "S-" "C-" "M-" "C-S-")
+  "Order of modifiers within a key group; others follow, sorted by name.")
+
+(defun my/which-key--char-key (desc)
+  "Split DESC like \"C-S-b\" or \"M-B\" into (BASE . MODS), or nil if BASE isn't one char.
+An uppercase BASE counts as S-, so \"B\" and \"S-b\" both give (\"b\" . \"S-\").
+Any prefix (the \"C-x \" in \"C-x C-n\") is dropped first."
+  (let ((desc (which-key--extract-key desc))
+        (case-fold-search nil)
+        mods)
+    (save-match-data
+      (while (string-match "\\`\\([ACHMSs]\\)-\\(.+\\)" desc)
+        (push (match-string 1 desc) mods)
+        (setq desc (match-string 2 desc))))
+    (when (= (length desc) 1)
+      (unless (equal desc (downcase desc)) (push "S" mods))
+      (cons (downcase desc)
+            (mapconcat (lambda (m) (if (member m mods) (concat m "-") ""))
+                       '("A" "C" "H" "M" "S" "s") "")))))
+
+(defun my/which-key--mod< (a b)
+  "Compare modifier strings A and B by `my/which-key-mod-order'."
+  (let ((ra (or (seq-position my/which-key-mod-order a) 99))
+        (rb (or (seq-position my/which-key-mod-order b) 99)))
+    (if (= ra rb) (string< a b) (< ra rb))))
+
+(defun my/which-key-order-by-char (acons bcons)
+  "Group keys by base character: b, B, C-b, M-b, C-S-b; otherwise alpha order."
+  (let ((a (my/which-key--char-key (car acons)))
+        (b (my/which-key--char-key (car bcons))))
+    (cond
+     ((and a b) (if (equal (car a) (car b))
+                    (my/which-key--mod< (cdr a) (cdr b))
+                  (string< (car a) (car b))))
+     (a (which-key-key-order-alpha (list (car a)) bcons))
+     (b (which-key-key-order-alpha acons (list (car b))))
+     (t (which-key-key-order-alpha acons bcons)))))
+
 (use-package which-key
   :config
   (which-key-mode)
   :custom
+  (which-key-sort-order #'my/which-key-order-by-char)
   (which-key-max-display-columns 5)
   (which-key-add-column-padding 10)
   )
