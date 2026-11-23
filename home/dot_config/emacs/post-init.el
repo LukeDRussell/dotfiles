@@ -475,9 +475,11 @@ Any prefix (the \"C-x \" in \"C-x C-n\") is dropped first."
       (while (string-match "\\`\\([ACHMSs]\\)-\\(.+\\)" desc)
         (push (match-string 1 desc) mods)
         (setq desc (match-string 2 desc))))
-    (when (= (length desc) 1)
-      (unless (equal desc (downcase desc)) (push "S" mods))
-      (cons (downcase desc)
+    (when (or (= (length desc) 1) (equal desc "SPC"))
+      (unless (equal desc "SPC")
+        (unless (equal desc (downcase desc)) (push "S" mods))
+        (setq desc (downcase desc)))
+      (cons desc
             (mapconcat (lambda (m) (if (member m mods) (concat m "-") ""))
                        '("A" "C" "H" "M" "S" "s") "")))))
 
@@ -487,21 +489,136 @@ Any prefix (the \"C-x \" in \"C-x C-n\") is dropped first."
         (rb (or (seq-position my/which-key-mod-order b) 99)))
     (if (= ra rb) (string< a b) (< ra rb))))
 
+(defun my/which-key--char-rank (c)
+  "Rank base key C: SPC, then digits, then letters, then punctuation."
+  (cond ((equal c "SPC") 0)
+        ((string-match-p "\\`[[:digit:]]\\'" c) 1)
+        ((string-match-p "\\`[[:alpha:]]\\'" c) 2)
+        (t 3)))
+
+(defun my/which-key--char< (a b)
+  "Compare base characters A and B by `my/which-key--char-rank', then by name."
+  (let ((ra (my/which-key--char-rank a))
+        (rb (my/which-key--char-rank b)))
+    (if (= ra rb) (string< a b) (< ra rb))))
+
 (defun my/which-key-order-by-char (acons bcons)
-  "Group keys by base character: b, B, C-b, M-b, C-S-b; otherwise alpha order."
+  "Group keys by base character: b, B, C-b, M-b, C-S-b.
+Groups go SPC, digits, letters, punctuation; other keys (TAB, <f1>, ...)
+follow in alpha order."
   (let ((a (my/which-key--char-key (car acons)))
         (b (my/which-key--char-key (car bcons))))
     (cond
      ((and a b) (if (equal (car a) (car b))
                     (my/which-key--mod< (cdr a) (cdr b))
-                  (string< (car a) (car b))))
-     (a (which-key-key-order-alpha (list (car a)) bcons))
-     (b (which-key-key-order-alpha acons (list (car b))))
+                  (my/which-key--char< (car a) (car b))))
+     ((or a b) (and a t))
      (t (which-key-key-order-alpha acons bcons)))))
+
+(defvar my/which-key--map-names (make-hash-table :test #'eq :weakness 'key)
+  "Cache of keymap -> label for `my/which-key-name-prefix' (`none' if nameless).")
+
+(defun my/which-key--map-name (map)
+  "Name of the variable holding keymap MAP, tidied, or nil if none does.
+\"narrow-map\" gives \"narrow\", \"project-prefix-map\" gives \"project\"."
+  (let ((name (gethash map my/which-key--map-names)))
+    (unless name
+      (let (best)
+        (mapatoms
+         (lambda (s)
+           (when (and (boundp s) (eq (symbol-value s) map)
+                      (string-match-p "\\`[^-].*[^-]-\\(key\\)?map\\'" (symbol-name s))
+                      (not (string-search "--" (symbol-name s)))
+                      (or (null best)
+                          (< (length (symbol-name s)) (length (symbol-name best)))))
+             (setq best s))))
+        (setq name (cond (best (my/which-key--tidy-map-name (symbol-name best)))
+                         ((my/which-key--guess-map-name map))
+                         (t 'none)))
+        (puthash map name my/which-key--map-names)))
+    (unless (eq name 'none) name)))
+
+(defun my/which-key--guess-map-name (map)
+  "Guess a name for keymap MAP from the commands in it, or nil.
+Drops a package name they all share, then uses the words they all start
+with (\"insert-header\"), or else the first word over half of them share."
+  (let (cmds)
+    (map-keymap (lambda (_ev def)
+                  (when (and (symbolp def) (commandp def))
+                    (push (split-string (symbol-name def) "-") cmds)))
+                map)
+    (when cmds
+      (when (and (cdr cmds) (cl-every (lambda (c) (and (cdr c) (equal (car c) (caar cmds)))) cmds))
+        (setq cmds (mapcar #'cdr cmds)))
+      (let ((common (car cmds)))
+        (dolist (c (cdr cmds))
+          (let ((i 0))
+            (while (and (nth i common) (equal (nth i common) (nth i c)))
+              (cl-incf i))
+            (setq common (seq-take common i))))
+        (if (and common (cdr cmds))
+            (string-join common "-")
+          (let ((counts (make-hash-table :test #'equal)) best (n 0))
+            (dolist (c cmds) (cl-incf (gethash (car c) counts 0)))
+            (maphash (lambda (w k) (when (> k n) (setq best w n k))) counts)
+            (when (and (cdr cmds) (> (* 2 n) (length cmds))) best)))))))
+
+(defun my/which-key--tidy-map-name (name)
+  "Drop keymap suffixes and \"-mode\" from NAME: \"kmacro-keymap\" gives \"kmacro\"."
+  (replace-regexp-in-string
+   "-mode\\b" ""
+   (replace-regexp-in-string
+    "-\\(command-map\\|prefix-map\\|mode-map\\|keymap\\|map\\|prefix\\)\\'" "" name)))
+
+(defun my/which-key-name-prefix (key-binding)
+  "Give the menu in KEY-BINDING a readable name.
+Which-key shows \"prefix\" for a keymap bound directly; use the name of the
+variable holding it.  A keymap bound by name, like `kmacro-keymap', is tidied."
+  (let ((desc (cdr key-binding)))
+    (if (equal desc "prefix")
+        (let* ((map (ignore-errors (key-binding (kbd (car key-binding)))))
+               (name (and (keymapp map) (my/which-key--map-name map))))
+          (if name (cons (car key-binding) name) key-binding))
+      (cons (car key-binding) (my/which-key--tidy-map-name desc)))))
+
+(defface my/which-key-modifier-face
+  '((t :inherit (which-key-note-face which-key-key-face) :weight normal))
+  "Face for the modifiers (C-, M-, ...) of keys in the which-key popup.")
+
+(defun my/which-key-dim-modifiers (key)
+  "Show the leading modifiers of KEY, like the \"C-M-\" in \"C-M-0\", dimmed."
+  (let ((case-fold-search nil))
+    (when (and (stringp key) (string-match "\\`\\(?:[ACHMSs]-\\)+" key))
+      (setq key (copy-sequence key))
+      (put-text-property 0 (match-end 0) 'face 'my/which-key-modifier-face key))
+    key))
 
 (use-package which-key
   :config
   (which-key-mode)
+  (advice-add 'which-key--propertize-key :filter-return #'my/which-key-dim-modifiers)
+  ;; Name the C-x menus; the keymaps' own names are often cryptic.
+  (which-key-add-key-based-replacements
+    "C-x 4" "other-window"
+    "C-x 5" "other-frame"
+    "C-x 6" "two-column"
+    "C-x 8" "insert-char"
+    "C-x a" "abbrev"
+    "C-x n" "narrow"
+    "C-x p" "project"
+    "C-x r" "register/rectangle"
+    "C-x t" "tab"
+    "C-x v" "version-control"
+    "C-x w" "window"
+    "C-x x" "buffer"
+    "C-x RET" "coding-system"
+    "C-h 4" "other-window")
+  ;; Any other menu: use the name of the variable holding its keymap, or
+  ;; failing that, a name guessed from the commands in it.
+  (add-to-list 'which-key-replacement-alist
+               '((nil . "\\`prefix\\'\\|-\\(key\\)?map\\'\\|-prefix\\'")
+                 . my/which-key-name-prefix)
+               t)
   :custom
   (which-key-sort-order #'my/which-key-order-by-char)
   (which-key-max-display-columns 5)
